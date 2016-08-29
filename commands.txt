@@ -1,0 +1,116 @@
+!addcmd admins Done LUL LUL 4Head
+!ding#all#say#dong
+!danknation#all#say#~- pajaDank ~-
+!pizza#all#say#OpieOP pizza
+!weneedmoreautisticbots#all#say#weneedmoreautisticbots 4Head
+!plebbot#all#say#It's A Bird... It's A Plane... It's A Plebbot EleGiggle
+!peng#all#say#weneedmoreautisticbots has been running for 134 years 243 days 9 hours 14 minutes 5 seconds 110 milliseconds 0 microseconds and 954 nanoseconds pajaDank
+!golden#all#say#golden Kappa Test
+!billy#all#say#http://i.imgur.com/dSsFPTd.png gachiGASM
+!keepo#all#say#http://i.imgur.com/SisrrZF.jpg Keepo
+!kappa#all#say#http://i.imgur.com/93WvHrc.jpg Kappa
+!gnome#all#say#http://i.imgur.com/89HlXNX.png pajaDank
+!azuredrake#all#say#http://i.imgur.com/pKaymba.png LUL
+!tree#all#say#http://i.imgur.com/6Suh5lk.jpg happy little tree KappaRoss
+!How many years does Neptune take to complete its orbit?#all#say#165 years LUL
+!sun#all#say#The Sun is the star at the center of the Solar System. It is a nearly perfect sphere of hot plasma, with internal convective motion that generates a magnetic field via a dynamo process.
+!cas#all#say#Právě je @time@.
+!randompleb#all#say#https://i.gyazo.com/1b3c79e802bc12e3143865504f4c5062.png pajaH
+!toppleb#all#say#!toppoints http://imgur.com/a/dg4av KKaper
+!LUL#all#say#@me@, LUL
+!rip#all#say#rip bindik LUL
+!fab#all#say#OpieOP
+!trihard#all#say#lilguy066 STOLE MY POINTS TriHard
+!hit#all#say#@me@ has slapped @id1@ 's face and it hurt.
+!hitm#all#say#@me@ has slapped @id1@ 's face while @id2@ watched and masturbated gachiGASM
+!party#all#say#@me@ is organizing a gay party gachiGASM and is inviting @all@ gachiGASM
+!buy#all#say#@me@ bought @id1@ but on his way home a TriHard mugged him and stole it
+!slotmachine pull#swordakimbo#say#LUL @me@ LUL
+!smp#swordakimbo#say#LUL @me@ LUL
+!somethingelse#fourtf#say#If you pay $5 you can have your own personalized command too PogChamp
+!sketch#all#say#Just a quick sketch http://i.imgur.com/0d75Nqq.png KKaper
+!asay#admin#say#@all@
+!rps#admin#repeat#@all@
+!fag#all#say#DansGame
+!syntax#all#say##nice#syntax# LUL
+!moon#all#say#The Moon is Earth's only permanent natural satellite. It is one of the largest natural satellites in the Solar System, and the largest among planetary satellites relative to the size of the planet that it orbits (its primary). It is the second-densest satellite among those whose densities are known (after Jupiter's satellite Io).
+!howmanybots#all#say#SwordAkimbo: how many bots do we need to stop this clownfiesta? KKaper
+!thatmany#all#say#Infinity + 1 Keepo
+!simultaneity#all#say#In physics, the relativity of simultaneity is the concept that distant simultaneity – whether two spatially separated events occur at the same time – is not absolute, but depends on the observer's reference frame.
+!relativity#all#say#Albert Einstein's special theory of relativity is based on two postulates: The laws of physics are invariant (i.e. identical) in all inertial systems (non-accelerating frames of reference). The speed of light in a vacuum is the same for all observers, regardless of the motion of the light source.
+!nogger#all#say#TriHard
+!higgs#all#say#The Higgs boson is an elementary particle in the Standard Model of particle physics. It is the quantum excitation of the Higgs field, a fundamental field of crucial importance to particle physics theory first suspected to exist in the 1960s. Unlike other known fields such as the electromagnetic field, it takes a non-zero constant value almost everywhere.
+!boson#all#say#https://upload.wikimedia.org/wikipedia/commons/7/79/Candidate_Higgs_Events_in_ATLAS_and_CMS.png PogChamp
+!earth#all#say#Earth (otherwise known as the world, in Greek: Γαῖα Gaia, or in Latin: Terra) is the third planet from the Sun, the densest planet in the Solar System, the largest of the Solar System's four terrestrial planets, and the only astronomical object known to harbor life.
+!mercury#all#say#Mercury is the smallest and innermost planet in the Solar System. Its orbital period (about 88 Earth days) is less than any other planet in the Solar System. Seen from Earth, it appears to move around its orbit in about 116 days. It has no known natural satellites. It is named after the Roman deity Mercury, the messenger to the gods.
+!venus#all#say#Venus is the second planet from the Sun, orbiting it every 224.7 Earth days. It has the longest rotation period (243 days) of any planet in the Solar System and rotates in the opposite direction to most other planets. It has no natural satellite. It is named after the Roman goddess of love and beauty.
+!mars#all#say#Mars is the fourth planet from the Sun and the second-smallest planet in the Solar System, after Mercury. Named after the Roman god of war, it is often referred to as the "Red Planet" because the iron oxide prevalent on its surface gives it a reddish appearance.
+!jupiter#all#say#Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a giant planet with a mass one-thousandth that of the Sun, but two and a half times that of all the other planets in the Solar System combined. Jupiter is a gas giant, along with Saturn, with the other two giant planets, Uranus and Neptune, being ice giants.
+!saturn#all#say#Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius about nine times that of Earth. Although only one-eighth the average density of Earth, with its larger volume Saturn is just over 95 times more massive.
+!uranus#all#say#Uranus is the seventh planet from the Sun. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System. Uranus is similar in composition to Neptune, and both have different bulk chemical composition from that of the larger gas giants Jupiter and Saturn.
+!neptune#all#say#Neptune is the eighth and farthest known planet from the Sun in the Solar System. In the Solar System, it is the fourth-largest planet by diameter, the third-most-massive planet and the densest giant planet. Neptune is 17 times the mass of Earth and is slightly more massive than its near-twin Uranus which is 15 times the mass of Earth and slightly larger than Neptune
+!pluto#all#say#PartyTime (minor-planet designation: 134340 PartyTime ) is a dwarf planet in the Kuiper belt, a ring of bodies beyond Neptune. It was the first Kuiper belt object to be discovered. It is the largest and second-most-massive known dwarf planet in the Solar System and the ninth-largest and tenth-most-massive known object directly orbiting the Sun.
+!charon#all#say#Charon, also called (134340) Pluto I, is the largest of the five known moons of the dwarf planet Pluto. It was discovered in 1978 at the United States Naval Observatory in Washington, D.C., using photographic plates taken at the United States Naval Observatory Flagstaff Station (NOFS).
+!ceres#all#say#Ceres is the largest object in the asteroid belt that lies between the orbits of Mars and Jupiter. Its diameter is approximately 945 kilometers, making it the largest of the minor planets within the orbit of Neptune. The 33rd-largest known body in the Solar System, it is the only one identified orbiting entirely within the orbit of Neptune that is a dwarf planet.
+!deimos#all#say#Deimos (systematic designation: Mars II) is the smaller and outer of the two natural satellites of the planet Mars, the other being Phobos. Deimos has a mean radius of 6.2 km and takes 30.3 hours to orbit Mars.  In Greek mythology, Deimos was the twin brother of Phobos and personified terror. Deimos is 23,460 km from Mars, much further than Mars's other moon, Phobos.
+!phobos#all#say#Phobos (systematic designation: Mars I) is the innermost and larger of the two natural satellites of Mars, the other being Deimos. Both moons were discovered in 1877 by American astronomer, Asaph Hall. Phobos is a small, irregularly shaped object with a mean radius of 11 km, and is seven times more massive than the outer moon, Deimos.
+!deathstar#all#say#The Death Star is a fictional moon-sized space station and superweapon appearing in the Star Wars universe.
+!<3#all#say#<3 between @me@ and @all@ is @irnd@% @ifrnd@<30#FeelsBadMan#@ifrnd@>70#FeelsGoodMan#@ifrnd@=69#gachiGASM#
+!isgay#all#say#@all@ is @irnd@% gay KappaPride
+!isweeb#all#say#@all@ is @irnd@% weeb DansGame
+!f#all#say#Press f to pay respects. f
+!F#all#say#Press F to pay respects. F
+!isfag#all#say#@all@ is @irnd@% fag DansGame
+!3>#all#say#3> between @id1@ and @id2@ is @irnd@% <3
+!1mil#all#say#http://imgur.com/a/dg4av Hemirt VisLaud
+!titan#all#say#Titan is the largest moon of Saturn. It is the only natural satellite known to have a dense atmosphere, and the only object other than Earth where clear evidence of stable bodies of surface liquid has been found.
+!europa#all#say#Europa (Jupiter II), is the sixth-closest moon of Jupiter, and the smallest of its four Galilean satellites, and the sixth-largest moon in the Solar System. Europa was discovered in 1610 by Galileo Galilei and was named after Europa, mother of King Minos of Crete, who became one of Zeus' lovers.
+!ganymede#all#say#Ganymede (Jupiter III) is the largest moon of Jupiter and in the Solar System, and the only moon known to have a magnetic field. It is the seventh satellite outward from Jupiter and third of the Galilean moons. Ganymede orbits Jupiter in roughly seven days and is in a 1:2:4 orbital resonance with the moons Europa and Io.
+!callisto#all#say#Callisto (Jupiter IV) is the second-largest moon of Jupiter. It is the third-largest moon in the Solar System and the largest object in the Solar System not to be properly differentiated. Callisto was discovered in 1610 by Galileo Galilei. At 4821 km in diameter, Callisto has about 99% the diameter of the planet Mercury but only about a third of its mass.
+!io#all#say#Io is the innermost of the four Galilean moons of the planet Jupiter. It is the fourth-largest moon, has the highest density of all the moons, and is the driest known object in the Solar System. It was discovered in 1610 and was named after the mythological character Io, a priestess of Hera who became one of Zeus's lovers.
+!pallas#all#say#Pallas, minor-planet designation 2 Pallas, is the second asteroid to have been discovered (after Ceres), and it is one of the largest asteroids in the Solar System. With an estimated 7% of the mass of the asteroid belt, it is the third-most-massive asteroid, being 10–30% less massive than Vesta. It is 512 kilometers in diameter, somewhat smaller than Vesta.
+!vesta#all#say#Vesta, minor-planet designation 4 Vesta, is one of the largest objects in the asteroid belt, with a mean diameter of 525 kilometres. It was discovered by the German astronomer Heinrich Wilhelm Olbers on 29 March 1807 and is named after Vesta, the virgin goddess of home and hearth from Roman mythology.
+!hygiea#all#say#10 Hygiea is the fourth-largest asteroid in the Solar System by volume and mass, and it is located in the asteroid belt. With somewhat oblong diameters of 350–500 kilometres and a mass estimated to be 2.9% of the total mass of the belt, it is the largest of the class of dark C-type asteroids with a carbonaceous surface.
+!mimas#all#say#Mimas is a moon of Saturn which was discovered in 1789 by William Herschel. It is named after Mimas, a son of Gaia in Greek mythology, and is also designated Saturn I. With a diameter of 396 kilometres it is the smallest astronomical body that is known to be rounded in shape because of self-gravitation.
+!enceladus#all#say#Enceladus is the sixth-largest moon of Saturn. It is approximately 500 kilometers in diameter, about a tenth of that of Saturn's largest moon, Titan. Enceladus is mostly covered by fresh, clean ice, reflecting almost all the sunlight that strikes it, making its surface temperature at noon reach only −198 °C.
+!tethys#all#say#Tethys (or Saturn III) is a mid-sized moon of Saturn about 1,060 km (660 mi) across. It was discovered by G. D. Cassini in 1684 and is named after the titan Tethys of Greek mythology. Tethys has a low density of 0.98 g/cm3, the lowest of all the major moons in the Solar System, indicating that it is made of water ice with just a small fraction of rock.
+!dione#all#say#Dione (/daɪˈoʊni/; Greek: Διώνη) is a moon of Saturn. It was discovered by Italian astronomer Giovanni Domenico Cassini in 1684. It is named after the Titaness Dione of Greek mythology. It is also designated Saturn IV.
+!rhea#all#say#Rhea is the second-largest moon of Saturn and the ninth-largest moon in the Solar System. It is the second smallest body in the Solar System, after the asteroid and dwarf planet Ceres, for which precise measurements have confirmed a shape consistent with hydrostatic equilibrium. It was discovered in 1672 by Giovanni Domenico Cassini.
+!hyperion#all#say#Hyperion (/haɪˈpɪəriən/; Greek: Ὑπερίων), also known as Saturn VII (7), is a moon of Saturn discovered by William Cranch Bond, George Phillips Bond and William Lassell in 1848. It is distinguished by its irregular shape, its chaotic rotation, and its unexplained sponge-like appearance. It was the first non-round moon to be discovered.
+!iapetus#all#say#Iapetus is the third-largest natural satellite of Saturn, eleventh-largest in the Solar System, and the largest body in the Solar System known not to be in hydrostatic equilibrium. Iapetus is best known for its dramatic 'two-tone' coloration. Iapetus has other unusual features, such as a massive equatorial ridge running three-quarters of the way around the moon.
+!phoebe#all#say#Phoebe is an irregular satellite of Saturn with a mean diameter of 213 km. It was discovered by William Henry Pickering on 17 March 1899 from photographic plates that had been taken starting on 16 August 1898 at the Boyden Observatory near Arequipa, Peru, by DeLisle Stewart. It was the first satellite to be discovered photographically.
+!miranda#all#say#Miranda or Uranus V is the smallest and innermost of Uranus's five round satellites. Like the other large moons of Uranus, Miranda orbits close to its planet's equatorial plane. Because Uranus orbits the Sun on its side, Miranda's orbit is perpendicular to the ecliptic and shares Uranus's extreme seasonal cycle.
+!ariel#all#say#Ariel is the fourth-largest of the 27 known moons of Uranus. Ariel orbits and rotates in the equatorial plane of Uranus, which is almost perpendicular to the orbit of Uranus, and so has an extreme seasonal cycle. It was discovered in October 1851 by William Lassell, and named for a character in two different pieces of literature.
+!umbriel#all#say#Umbriel is a moon of Uranus discovered on October 24, 1851, by William Lassell. It was discovered at the same time as Ariel and named after a character in Alexander Pope's poem The Rape of the Lock. Umbriel consists mainly of ice with a substantial fraction of rock, and may be differentiated into a rocky core and an icy mantle.
+!titania#all#say#Titania is the largest of the moons of Uranus and the eighth largest moon in the Solar System at a diameter of 1,578 kilometres (981 mi). Discovered by William Herschel in 1787, Titania is named after the queen of the fairies in Shakespeare's A Midsummer Night's Dream. Its orbit lies inside Uranus's magnetosphere.
+!oberon#all#say#Oberon, also designated Uranus IV, is the outermost major moon of the planet Uranus. It is the second-largest and second most massive of the Uranian moons, and the ninth most massive moon in the Solar System. Discovered by William Herschel in 1787. Its orbit lies partially outside Uranus's magnetosphere.
+!proteus#all#say#Proteus, also known as Neptune VIII, is the second largest Neptunian moon, and Neptune's largest inner satellite. Discovered by Voyager 2 spacecraft in 1989, it is named after Proteus, the shape-changing sea god of Greek mythology. Proteus orbits Neptune in a nearly equatorial orbit at the distance of about 4.75 equatorial radii of the planet.
+!triton#all#say#Triton is the largest natural satellite of the planet Neptune. It was discovered on October 10, 1846, by English astronomer William Lassell. It is the only large moon in the Solar System with a retrograde orbit, an orbit in the opposite direction to its planet's rotation. At 2,700 kilometres in diameter, it is the seventh-largest moon in the Solar System.
+!nereid#all#say#Nereid is the third-largest moon of Neptune. It has a highly eccentric orbit. It was the second moon of Neptune to be discovered, by Gerard Kuiper in 1949. The unusual orbit suggests that it may be either a captured asteroid or Kuiper belt object, or that it was an inner moon in the past and was perturbed during the capture of Neptune's largest moon Triton
+!centaur#all#say#Centaurs are minor planets with a semi-major axis between those of the outer planets. They have unstable orbits that cross or have crossed the orbits of one or more of the giant planets, and have dynamic lifetimes of a few million years. Centaurs typically behave with characteristics of both asteroids and comets.
+!damocloid#all#say#Damocloids are minor planets such as 5335 Damocles and 1996 PW that have Halley-family or long-period highly eccentric orbits typical of periodic comets such as Halley's Comet, but without showing a cometary coma or tail. David Jewitt defines a damocloid as an object with a Tisserand's parameter relative to Jupiter TJ ≤ 2.
+!centaurs#all#say#Centaurs are minor planets with a semi-major axis between those of the outer planets. They have unstable orbits that cross or have crossed the orbits of one or more of the giant planets, and have dynamic lifetimes of a few million years. Centaurs typically behave with characteristics of both asteroids and comets.
+!damocloids#all#say#Damocloids are minor planets such as 5335 Damocles and 1996 PW that have Halley-family or long-period highly eccentric orbits typical of periodic comets such as Halley's Comet, but without showing a cometary coma or tail. David Jewitt defines a damocloid as an object with a Tisserand's parameter relative to Jupiter TJ ≤ 2.
+!orcus#all#say#90482 Orcus is a Kuiper belt object with a large moon, Vanth. It was discovered on February 17, 2004 by Michael Brown of Caltech, Chad Trujillo of the Gemini Observatory, and David Rabinowitz of Yale University. Precovery images as early as November 8, 1951 were later identified. It is probably a dwarf planet.
+!vanth#all#say#Vanth, officially (90482) Orcus I Vanth, is the single known natural satellite of the plutino and likely dwarf planet Orcus. It was discovered by Mike Brown and T.-A. Suer using discovery images taken by the Hubble Space Telescope on November 13, 2005. The discovery was announced on 22 February 2007 in IAUC 8812.
+!haumea#all#say#Haumea, minor-planet designation 136108 Haumea, is a dwarf planet located beyond Neptune's orbit. It was discovered in 2004 by a team headed by Mike Brown of Caltech at the Palomar Observatory in the United States and independently in 2005, by a team headed by José Luis Ortiz Moreno at the Sierra Nevada Observatory in Spain.
+!namaka#all#say#Namaka is the smaller, inner moon of the dwarf planet Haumea. It is named after Nāmaka, the goddess of the sea in Hawaiian mythology and one of the daughters of Haumea.
+!hiiaka#all#say#Hiʻiaka is the larger, outer moon of the dwarf planet Haumea. Hiʻiaka was the first satellite discovered around Haumea. It is named after one of the daughters of Haumea, Hiʻiaka, the patron goddess of the Big Island of Hawaii, though at first it had gone by the nickname "Rudolph" by its discovery team.
+!quaoar#all#say#50000 Quaoar ("Kwawar") is a Kuiper belt object roughly half the size of Pluto, with a diameter of 1110±5 km. It is large enough and massive enough that it is probably a dwarf planet. Its orbit in the Kuiper belt is not in resonance with Neptune, which means it is a classical Kuiper belt object. Quaoar has one known moon, Weywot.
+!weywot#all#say#Weywot, officially (50000) Quaoar I Weywot, is the only known moon of the trans-Neptunian object Quaoar. Its discovery by Michael E. Brown was reported in IAUC 8812 on 22 February 2007, based on imagery taken on 14 February 2006.
+!salacia#all#say#120347 Salacia is a large planetoid in the Kuiper belt. It was discovered on 22 September 2004 by Henry G. Roe, Michael E. Brown and Kristina M. Barkume at the Palomar Observatory. It is almost certainly a dwarf planet. Salacia's diameter is estimated to be about 850 kilometres due to a low albedo.
+!varuna#all#say#20000 Varuna is a large classical Kuiper belt object. It is probably a dwarf planet. It rotates rapidly and hence its shape is probably very elongated. Varuna is named after a Hindu deity. Varuna was one of the most important deities of the ancient Indians, and he presided over the waters of the heaven and of the ocean and was the guardian of immortality.
+!makemake#all#say#Makemake (136472 Makemake) is a dwarf planet and perhaps the largest Kuiper belt object (KBO) in the classical population, with a diameter approximately two thirds that of Pluto. Makemake has one known satellite. Makemake’s extremely low average temperature, about −243.2 °C, means its surface is covered with methane, ethane, and possibly nitrogen ices.
+!eris#all#say#Eris (minor-planet designation 136199 Eris) is the most massive and second-largest dwarf planet known in the Solar System. It is also the ninth-most-massive known body directly orbiting the Sun, and the largest known body in the Solar System not visited by a spacecraft.
+!dysnomia#all#say#Dysnomia officially (136199) Eris I Dysnomia is the only known moon of the dwarf planet Eris. It was discovered in 2005 by Mike Brown and the laser guide star adaptive optics team at the W. M. Keck Observatory, and carried the provisional designation of S/2005 (2003 UB313) 1 until officially named Dysnomia after the daughter of the Greek goddess Eris.
+!sedna#all#say#90377 Sedna is a large minor planet in the outer reaches of the Solar System that was, as of 2015, at a distance of about 86 AU from the Sun, about three times as far as Neptune. Spectroscopy has revealed that Sedna's surface composition is similar to that of some other trans-Neptunian objects.
+!prikazy#all#say#http://pastebin.com/i5sdwMxN here you go KKaper
+!pfr#all#say#php stands for programming for retards DansGame they even got the letters wrong EleGiggle
+!isroleplayer#all#say#@id1@ is @irnd@% roleplayer BrokeBack
+!isautist#all#say#@id1@ is @irnd@% autistic MingLee
+!istrue#all#say#@all@ is @irnd@% true Keepo
+!zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
+!lul#all#say#@me@, LUL
+!c++#all#say#I run on c++ FeelsGoodMan
+!C++#all#say#I run on C++ FeelsGoodMan
+!FabulousPotato69#all#say#OpieOP
