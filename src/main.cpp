@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <locale>
 #include <condition_variable>
+#include <list>
 
 struct Command
 {
@@ -27,6 +28,58 @@ std::string timenow()
 	ss << std::put_time(std::localtime(&result), "%c");
 	return ss.str();
 }
+
+//provided by old_forsen
+template <typename T>
+class EventQueue {
+    std::list<T> _queue;
+    std::condition_variable cv;
+    std::mutex m;
+    std::unique_lock<std::mutex> lk;
+ 
+public:
+    void push(T t) {
+        std::unique_lock<std::mutex> lk(m);
+        _queue.push_back(move(t));
+        lk.unlock();
+        cv.notify_all();
+    }
+ 
+    T pop() {
+        std::unique_lock<std::mutex> lk(m);
+        T value = std::move(_queue.front());
+        _queue.pop_front();
+        lk.unlock();
+        return value;
+    }
+ 
+    void wait() {
+        std::unique_lock<std::mutex> lk(m);
+        cv.wait(lk);
+    }
+ 
+    template<typename Lambda>
+    void wait(Lambda f) {
+        std::unique_lock<std::mutex> lk(m);
+        cv.wait(lk);
+        lk.unlock();
+        f();
+    }
+ 
+    bool empty() {
+        std::unique_lock<std::mutex> lk(m);
+        bool e = _queue.empty();
+        lk.unlock();
+        return e;
+    }
+ 
+    size_t size() {
+        std::unique_lock<std::mutex> lk(m);
+        size_t s = _queue.size();
+        lk.unlock();
+        return s;
+    }
+};
 
 class IrcConnection
 {
@@ -76,11 +129,12 @@ public:
 			this->msg.join();
 		//std::cout << "ended waiting\n";
 	}
+	EventQueue<std::vector<std::string>> eventQueue;
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
 	void msgCount();
-	
+	void processEventQueue();
 	std::fstream commandsFile;
 	std::fstream adminsFile;
 	std::set<std::string> admins;
@@ -275,6 +329,8 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	
 	this->work = std::thread(&IrcConnection::run, this);
 	this->msg = std::thread(&IrcConnection::msgCount, this);
+	auto exx = std::thread(&IrcConnection::processEventQueue, this);
+	exx.detach();
 	//this->pingThread = std::thread(&IrcConnection::pingAll, this);
 }
 
@@ -599,6 +655,16 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 	}
 }
 
+void IrcConnection::processEventQueue()
+{
+	while(!(this->quit()))
+	{
+		this->eventQueue.wait();
+		std::vector<std::string> vek = this->eventQueue.pop();
+		handleCommands(this, vek[0], vek[1], vek[2]);
+	}
+}
+
 void IrcConnection::listenAndHandle(const std::string& chn)
 {
 	try
@@ -633,8 +699,7 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 
 						if(msg[0] == '!')
 						{
-							auto exx = std::thread(handleCommands, this, user, channel, msg);
-							exx.detach();
+							this->eventQueue.push(std::vector<std::string>{user, channel, msg});
 						}
 					}
 					else if(oneline.find("PING") != std::string::npos)
