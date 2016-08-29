@@ -2,7 +2,7 @@
 !ding#all#say#dong
 !danknation#all#say#~- pajaDank ~-
 !pizza#all#say#OpieOP pizza
-!weneedmoreautisticbots#all#say#weneedmoreautisticbots 4Head
+!weneedmoreautisticbots#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
 !plebbot#all#say#It's A Bird... It's A Plane... It's A Plebbot EleGiggle
 !peng#all#say#weneedmoreautisticbots has been running for 134 years 243 days 9 hours 14 minutes 5 seconds 110 milliseconds 0 microseconds and 954 nanoseconds pajaDank
 !golden#all#say#golden Kappa Test
@@ -32,7 +32,7 @@
 !asay#admin#say#@all@
 !rps#admin#repeat#@all@
 !fag#all#say#DansGame
-!syntax#all#say##nice#syntax# LUL
+!syntax#all#say##nice#syntax#for@adding@commands@ LUL
 !moon#all#say#The Moon is Earth's only permanent natural satellite. It is one of the largest natural satellites in the Solar System, and the largest among planetary satellites relative to the size of the planet that it orbits (its primary). It is the second-densest satellite among those whose densities are known (after Jupiter's satellite Io).
 !howmanybots#all#say#SwordAkimbo: how many bots do we need to stop this clownfiesta? KKaper
 !thatmany#all#say#Infinity + 1 Keepo
@@ -114,3 +114,4 @@
 !c++#all#say#I run on c++ FeelsGoodMan
 !C++#all#say#I run on C++ FeelsGoodMan
 !FabulousPotato69#all#say#OpieOP
+!code#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head

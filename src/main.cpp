@@ -44,6 +44,10 @@ public:
         lk.unlock();
         cv.notify_all();
     }
+	
+	void notify() {
+        cv.notify_all();
+    }
  
     T pop() {
         std::unique_lock<std::mutex> lk(m);
@@ -276,7 +280,13 @@ void IrcConnection::joinChannel(const std::string& chn)
 	this->channelTimes.insert(std::pair<std::string, std::chrono::high_resolution_clock::time_point>(chn, std::chrono::high_resolution_clock::now()));
 	this->channelMsgs.insert(std::pair<std::string, unsigned>(chn, 0));
 	this->channelBools.insert(std::pair<std::string, bool>(chn, false));
-	std::cout << "joined" << chn << std::endl;	
+	std::cout << "joined" << chn << std::endl;
+	
+	asio::error_code ec;
+	asio::socket_base::keep_alive option(true);
+	sock->set_option(option, ec);
+	std::cout << "keepalive set ec: " << ec << " option.value() " << option.value();
+	
 	this->listenThreads.push_back(std::thread(&IrcConnection::listenAndHandle, this, chn));
 	std::cout << "started thread: " << chn << std::endl;
 	
@@ -317,6 +327,7 @@ void IrcConnection::stop()
 		this->channelTimes.clear();	
 	}
 	this->quit_cv.notify_all();
+	this->eventQueue.notify();
 }
 
 void IrcConnection::start(const std::string& pass, const std::string& nick)
