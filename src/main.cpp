@@ -36,22 +36,22 @@ public:
 	asio::io_service m_io_service;
 	std::map<std::string, std::shared_ptr<asio::ip::tcp::socket>> channelSockets;
 	void stop();
-	void start(std::string pass, std::string nick);
+	void start(const std::string& pass, const std::string& nick);
 	std::thread work;
 	std::thread msg;
 	std::map<std::string, std::chrono::high_resolution_clock::time_point> channelTimes;
-	void joinChannel(std::string);
-	void leaveChannel(std::string);
-	bool sendMsg(std::string channel, std::string message);
-	bool isAdmin(std::string user);
-	void addAdmin(std::string admin);
-	void addCmd(std::string cmd, std::string msg);
+	void joinChannel(const std::string&);
+	void leaveChannel(const std::string&);
+	bool sendMsg(const std::string& channel, const std::string& message);
+	bool isAdmin(const std::string& user);
+	void addAdmin(const std::string& admin);
+	void addCmd(const std::string& cmd, std::string msg);
 	std::map<std::string, Command> commands;
 	int dice()
 	{
 		return this->dist(this->mt);
 	}
-	void listenAndHandle(std::string channel);
+	void listenAndHandle(const std::string& channel);
 	std::map<std::string, bool> channelBools;
 	std::map<std::string, unsigned> channelMsgs;
 	std::mutex irc_m;
@@ -154,14 +154,14 @@ IrcConnection::~IrcConnection()
 	this->commandsFile.close();
 }
 
-bool IrcConnection::isAdmin(std::string user)
+bool IrcConnection::isAdmin(const std::string& user)
 {
 	if(this->admins.count(user) == 1)
 		return true;
 	else return false;
 }
 
-void IrcConnection::addAdmin(std::string admin)
+void IrcConnection::addAdmin(const std::string& admin)
 {
 	if(this->admins.count(admin) == 0)
 	{
@@ -171,7 +171,7 @@ void IrcConnection::addAdmin(std::string admin)
 	}
 }
 
-void IrcConnection::addCmd(std::string cmd, std::string message)
+void IrcConnection::addCmd(const std::string& cmd, std::string message)
 {
 	if(this->commands.count(cmd) == 0)
 	{
@@ -200,7 +200,7 @@ void IrcConnection::addCmd(std::string cmd, std::string message)
 	}
 }
 
-void IrcConnection::joinChannel(std::string chn)
+void IrcConnection::joinChannel(const std::string& chn)
 {
 	std::shared_ptr<asio::ip::tcp::socket> sock(new asio::ip::tcp::socket(this->m_io_service));
 	this->channelSockets.insert(std::pair<std::string, std::shared_ptr<asio::ip::tcp::socket>>(chn, sock));
@@ -225,7 +225,7 @@ void IrcConnection::joinChannel(std::string chn)
 	
 }
 
-void IrcConnection::leaveChannel(std::string chn)
+void IrcConnection::leaveChannel(const std::string& chn)
 {
 	std::string part = "PART #" + chn + " \r\n";
 	this->channelSockets[chn]->send(asio::buffer(part));
@@ -262,7 +262,7 @@ void IrcConnection::stop()
 	this->quit_cv.notify_all();
 }
 
-void IrcConnection::start(std::string pass, std::string nick)
+void IrcConnection::start(const std::string& pass, const std::string& nick)
 {
 	std::lock_guard<std::mutex> lck(irc_m);
 	this->quit_m = false;
@@ -307,7 +307,7 @@ void IrcConnection::msgCount()
 	std::cout << "end msg\n";
 }
 
-bool IrcConnection::sendMsg(std::string channel, std::string msg)
+bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 {
 	if(this->channelMsgs[channel] < 19 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - this->channelTimes[channel]).count() > 1500)
 	{
@@ -329,7 +329,7 @@ bool IrcConnection::sendMsg(std::string channel, std::string msg)
 	}
 }
 
-void handleCommands(IrcConnection* myIrc, std::string user, std::string channel, std::string msg)
+void handleCommands(IrcConnection* myIrc, const std::string& user, const std::string& channel, std::string msg)
 {
 	//std::cout << "HANDLING COMMAND\n";
 	if(msg.compare(0, strlen("!quit"), "!quit") == 0 && user == "hemirt")
@@ -599,7 +599,7 @@ void handleCommands(IrcConnection* myIrc, std::string user, std::string channel,
 	}
 }
 
-void IrcConnection::listenAndHandle(std::string chn)
+void IrcConnection::listenAndHandle(const std::string& chn)
 {
 	try
 		{
