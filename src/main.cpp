@@ -12,7 +12,7 @@
 #include <locale>
 #include <condition_variable>
 
-struct command
+struct Command
 {
 	std::string who;
 	std::string action;
@@ -46,7 +46,7 @@ public:
 	bool isAdmin(std::string user);
 	void addAdmin(std::string admin);
 	void addCmd(std::string cmd, std::string msg);
-	std::map<std::string, command> commands;
+	std::map<std::string, Command> commands;
 	int dice()
 	{
 		return this->dist(this->mt);
@@ -138,8 +138,8 @@ IrcConnection::IrcConnection()
 			vek.push_back(line);
 			if(vek.size() == 4)
 			{
-				command cmd = {vek[1], vek[2], vek[3]};
-				this->commands.insert(std::pair<std::string, command>(vek[0], cmd));
+				Command cmd = {vek[1], vek[2], vek[3]};
+				this->commands.insert(std::pair<std::string, Command>(vek[0], cmd));
 			}
 		}
 		this->commandsFile.close();
@@ -175,7 +175,7 @@ void IrcConnection::addCmd(std::string cmd, std::string message)
 {
 	if(this->commands.count(cmd) == 0)
 	{
-		command cmds;
+		Command cmds;
 		
 		std::string delimiter = "#";
 		std::vector<std::string> vek;
@@ -191,7 +191,7 @@ void IrcConnection::addCmd(std::string cmd, std::string message)
 		if(vek.size() == 3)
 		{
 			cmds = {vek[0], vek[1], vek[2]};
-			this->commands.insert(std::pair<std::string, command>(cmd, cmds));
+			this->commands.insert(std::pair<std::string, Command>(cmd, cmds));
 			this->commandsFile.seekp(0, std::ios::end);
 			this->commandsFile << cmd << "#" << cmds.who << "#" << cmds.action << "#" << cmds.data << std::endl;
 		}
@@ -344,9 +344,6 @@ void handleCommands(IrcConnection* myIrc, std::string user, std::string channel,
 		myIrc->joinChannel(channel);
 		return;
 	}
-	
-	
-	
 	
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && user == "hemirt")
 	{
