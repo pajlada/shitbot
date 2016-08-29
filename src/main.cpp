@@ -658,7 +658,7 @@ int main(int argc, char *argv[])
 {
 	IrcConnection myIrc;
 	myIrc.start(argv[1], argv[2]);
-
+	std::cout << "el";
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
@@ -666,4 +666,3 @@ int main(int argc, char *argv[])
 	myIrc.waitEnd();
 	return 0;
 }
-
