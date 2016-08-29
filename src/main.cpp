@@ -92,6 +92,7 @@ public:
 	void start(const std::string& pass, const std::string& nick);
 	std::thread work;
 	std::thread msg;
+	std::thread events;
 	std::map<std::string, std::chrono::high_resolution_clock::time_point> channelTimes;
 	void joinChannel(const std::string&);
 	void leaveChannel(const std::string&);
@@ -127,6 +128,8 @@ public:
 			this->work.join();
 		if(this->msg.joinable())
 			this->msg.join();
+		if(this->events.joinable())
+			this->events.join();
 		//std::cout << "ended waiting\n";
 	}
 	EventQueue<std::vector<std::string>> eventQueue;
@@ -329,8 +332,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	
 	this->work = std::thread(&IrcConnection::run, this);
 	this->msg = std::thread(&IrcConnection::msgCount, this);
-	auto exx = std::thread(&IrcConnection::processEventQueue, this);
-	exx.detach();
+	this->events = std::thread(&IrcConnection::processEventQueue, this);
 	//this->pingThread = std::thread(&IrcConnection::pingAll, this);
 }
 
@@ -534,15 +536,15 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 			while((pos = msgback.find("@ifrnd@")) != std::string::npos)
 			{
 				msgback.erase(pos, 7);
-				std::cout << "msgback: " << "\"" << msgback << "\"" << std::endl;
-				std::cout << "pos: " << msgback.at(pos) << std::endl;
+				//std::cout << "msgback: " << "\"" << msgback << "\"" << std::endl;
+				//std::cout << "pos: " << msgback.at(pos) << std::endl;
 				if(msgback.at(pos) == '<')
 				{
 					msgback.erase(pos, 1);
 					size_t hash = msgback.find('#', pos);
 					std::string number = msgback.substr(pos, hash-pos);
 					int num = std::atoi(number.c_str());
-					std::cout << "substr: " << msgback.substr(pos, hash-pos) << std::endl;
+					//std::cout << "substr: " << msgback.substr(pos, hash-pos) << std::endl;
 					msgback.erase(pos, hash-pos);
 					if(rnd < num)
 					{
@@ -660,8 +662,11 @@ void IrcConnection::processEventQueue()
 	while(!(this->quit()))
 	{
 		this->eventQueue.wait();
-		std::vector<std::string> vek = this->eventQueue.pop();
-		handleCommands(this, vek[0], vek[1], vek[2]);
+		while(!(this->eventQueue.empty()))
+		{
+			std::vector<std::string> vek = this->eventQueue.pop();
+			handleCommands(this, vek[0], vek[1], vek[2]);
+		}
 	}
 }
 
