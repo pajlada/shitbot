@@ -104,7 +104,7 @@
 !eris#all#say#Eris (minor-planet designation 136199 Eris) is the most massive and second-largest dwarf planet known in the Solar System. It is also the ninth-most-massive known body directly orbiting the Sun, and the largest known body in the Solar System not visited by a spacecraft.
 !dysnomia#all#say#Dysnomia officially (136199) Eris I Dysnomia is the only known moon of the dwarf planet Eris. It was discovered in 2005 by Mike Brown and the laser guide star adaptive optics team at the W. M. Keck Observatory, and carried the provisional designation of S/2005 (2003 UB313) 1 until officially named Dysnomia after the daughter of the Greek goddess Eris.
 !sedna#all#say#90377 Sedna is a large minor planet in the outer reaches of the Solar System that was, as of 2015, at a distance of about 86 AU from the Sun, about three times as far as Neptune. Spectroscopy has revealed that Sedna's surface composition is similar to that of some other trans-Neptunian objects.
-!prikazy#all#say#http://pastebin.com/i5sdwMxN here you go KKaper
+!prikazy#all#say#https://github.com/hemirt/shitbot/blob/master/commands.txt here you go KKaper
 !pfr#all#say#php stands for programming for retards DansGame they even got the letters wrong EleGiggle
 !isroleplayer#all#say#@id1@ is @irnd@% roleplayer BrokeBack
 !isautist#all#say#@id1@ is @irnd@% autistic MingLee
