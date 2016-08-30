@@ -85,6 +85,6 @@ void Items::stop()
 	_quit = true;
 	lk.unlock();
 	_cv.notify_all();
-	_th.join();
+	_thread.join();
 	return;
 }
