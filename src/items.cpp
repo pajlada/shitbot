@@ -6,6 +6,7 @@
 #include <mutex>
 #include "sqlite3.h"
 #include <algorithm>
+#include <atomic>
 
 Items::Items()
 {
