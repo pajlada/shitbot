@@ -543,11 +543,11 @@ void IrcConnection::handleCommands(const std::string& user, const std::string& c
 	int i = 0;
 	while(!found && i < 3)
 	{
-		std::cout << "ding: " << i << std::endl;
+		//std::cout << "ding: " << i << std::endl;
 		it = ret.second;
 		while(it != ret.first)
 		{
-			std::cout << "dong: " << i << std::endl;
+			//std::cout << "dong: " << i << std::endl;
 			//std::cout << "it " << it->first << it->second.who << std::endl;
 			if(it->second.who == users[i])
 			{
@@ -557,7 +557,7 @@ void IrcConnection::handleCommands(const std::string& user, const std::string& c
 					continue; //found admin cmd, but user isnt an admin
 				}
 				found = true; //found command
-				std::cout << "found\n";
+				//std::cout << "found\n";
 				break;
 			}
 			--it;
@@ -743,6 +743,7 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 			{
 				std::vector<char> buf(4096);
 				this->channelSockets[chn]->read_some(asio::buffer(buf));
+				std::cout << "read: " << chn << std::endl;
 				std::string line(buf.begin(), buf.end());
 				
 				std::string delimiter = "\r\n";
