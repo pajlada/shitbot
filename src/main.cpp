@@ -453,7 +453,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 		std::vector<std::string> vek;
 		while(msg.find(".") != std::string::npos)
 		{
-			msg.replace(msg.find("."), 1, " ");
+			msg.replace(msg.find("."), 1, "·");
 		}
 		size_t pos = 0;
 		int i = 0;
@@ -499,12 +499,12 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 
 	while(msg.find(".") != std::string::npos)
 	{
-		msg.replace(msg.find("."), 1, " ");
+		msg.replace(msg.find("."), 1, "·");
 	}
 	msg.erase(0, 1);
-	while(msg.find("!") != std::string::npos && user != "hemirt")
+	while(msg.find("!") != std::string::npos)
 	{
-		msg.replace(msg.find("!"), 1, " ");
+		msg.replace(msg.find("!"), 1, "\u00A1");
 	}
 	std::string msgcopy = msg;
 	std::string delimiter = " ";
@@ -519,6 +519,14 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 	
 	
 	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = myIrc->commands.equal_range("!" + vekmsg.at(0));
+	
+	if(vekmsg.at(0) == "asay" && user == "hemirt")
+	{
+		while(msg.find("\u00A1") != std::string::npos)
+		{
+			msg.replace(msg.find("\u00A1"), strlen("\u00A1"), "!");
+		}
+	}
 	
 	if(ret.first == ret.second) 
 	{

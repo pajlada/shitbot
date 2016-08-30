@@ -118,3 +118,4 @@
 !-lul#all#say#FOURTF: okay !LUL is getting too autistic
 !ding#admin#say#gong
 !ding#pajlada#say#DING DONG
+!is#all#say#@id1@ is @irnd@% @id2@
