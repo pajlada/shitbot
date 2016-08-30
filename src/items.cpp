@@ -74,7 +74,6 @@ void Items::incrementLoop()
 
 bool Items::run()
 {
-	std::lock_guard<std::mutex> lk(_mutex);
 	return !_quit;
 }
 

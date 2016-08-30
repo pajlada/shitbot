@@ -7,6 +7,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <atomic>
 
 class Items
 {
@@ -22,7 +23,7 @@ private:
 	std::map<std::string, int> _multiplyMap;
 	int _maxTrigger;
 	int _currentTrigger;
-	bool _quit;
+	std::atomic<bool> _quit;
 	bool run();
 	std::vector<int> getTimeTriggers();
 	std::map<std::string, int> getMultipliers();
