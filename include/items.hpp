@@ -25,6 +25,6 @@ private:
 	bool _quit;
 	bool run();
 	std::vector<int> getTimeTriggers();
-	std::map<std::string, int> Items::getMultipliers()
+	std::map<std::string, int> getMultipliers();
 	void incrementLoop();
 };

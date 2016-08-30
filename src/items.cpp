@@ -17,7 +17,7 @@ Items::Items()
 
 void Items::startLoop()
 {
-	_th = std::thread(&Items::incrementLoop, this);	
+	_thread = std::thread(&Items::incrementLoop, this);	
 }
 
 std::vector<int> Items::getTimeTriggers()
