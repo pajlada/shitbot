@@ -119,3 +119,4 @@
 !ding#admin#say#gong
 !ding#pajlada#say#DING DONG
 !is#all#say#@id1@ is @irnd@% @id2@
+!čas#all#say#Právě je @time@.

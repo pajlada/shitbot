@@ -12,6 +12,7 @@
 #include <locale>
 #include <condition_variable>
 #include <list>
+#include "sqlite3.h"
 
 struct Command
 {
@@ -137,6 +138,7 @@ public:
 		//std::cout << "ended waiting\n";
 	}
 	EventQueue<std::vector<std::string>> eventQueue;
+	void handleCommands(const std::string&, const std::string&, std::string&);
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -404,19 +406,19 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 	}
 }
 
-void handleCommands(IrcConnection* myIrc, const std::string& user, const std::string& channel, std::string msg)
+void IrcConnection::handleCommands(const std::string& user, const std::string& channel, std::string& msg)
 {
 	//std::cout << "HANDLING COMMAND\n";
 	if(msg.compare(0, strlen("!quit"), "!quit") == 0 && user == "hemirt")
 	{
-		myIrc->stop();
+		this->stop();
 		return;
 	}
 	
 	if(msg.compare(0, strlen("!rcn"), "!rcn") == 0 && user == "hemirt")
 	{
-		myIrc->leaveChannel(channel);
-		myIrc->joinChannel(channel);
+		this->leaveChannel(channel);
+		this->joinChannel(channel);
 		return;
 	}
 	
@@ -443,7 +445,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 		{
 			std::string cmd = vek[2] + "#" + vek[3] + "#" + vek[4];
 			std::cout << "adding: " << vek[1] << "#" << cmd << std::endl;
-			myIrc->addCmd(vek[1], cmd);
+			this->addCmd(vek[1], cmd);
 		}
 		return;
 	}
@@ -475,7 +477,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 			{
 				while(true)
 				{
-					int rolet = myIrc->dice();
+					int rolet = this->dice();
 					if(rolet > 50)
 					{
 						msgback = user + " won " + vek.at(1) + " in rolet and is now rich as fuck! FeelsAmazingMan";
@@ -489,7 +491,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 					else continue;
 				}
 			}
-			myIrc->sendMsg(channel, msgback);
+			this->sendMsg(channel, msgback);
 			return;
 				
 		}
@@ -518,7 +520,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 	vekmsg.push_back(msgcopy);
 	
 	
-	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = myIrc->commands.equal_range("!" + vekmsg.at(0));
+	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range("!" + vekmsg.at(0));
 	
 	if(vekmsg.at(0) == "asay" && user == "hemirt")
 	{
@@ -530,7 +532,6 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 	
 	if(ret.first == ret.second) 
 	{
-		std::cout << vekmsg.at(0) << " cmd not found" << std::endl;
 		return; //cmd not found
 	}
 	--ret.first;
@@ -550,7 +551,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 			//std::cout << "it " << it->first << it->second.who << std::endl;
 			if(it->second.who == users[i])
 			{
-				if(i == 1 && myIrc->isAdmin(user) == false)
+				if(i == 1 && this->isAdmin(user) == false)
 				{
 					--it;
 					continue; //found admin cmd, but user isnt an admin
@@ -587,7 +588,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 			msgback.replace(msgback.find("@all@"), 5, all);
 		}
 		
-		int rnd = myIrc->dice();
+		int rnd = this->dice();
 		while(msgback.find("@irnd@") != std::string::npos)
 		{
 			msgback.replace(msgback.find("@irnd@"), 6, std::to_string(rnd));
@@ -673,21 +674,25 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 		{
 			if(it->second.action == "say")
 			{
-				myIrc->sendMsg(channel, msgback);
+				this->sendMsg(channel, msgback);
 				return;
 			}
 		}
 		else if(it->second.who == "admin")
 		{
-			if(myIrc->isAdmin(user))
+			if(this->isAdmin(user))
 			{
 				if(it->second.action == "say")
 				{
-					myIrc->sendMsg(channel, msgback);
+					this->sendMsg(channel, msgback);
 					return;
 				}
 				else if (it->second.action == "repeat")
 				{
+					while(msgback.find("\u00A1") != std::string::npos)
+					{
+						msgback.replace(msgback.find("\u00A1"), strlen("\u00A1"), "!");
+					}
 					std::cout << "msgb: " << msgback << std::endl;
 					std::string delimiter = " ";
 					msgback.erase(0, 1);
@@ -700,7 +705,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 					}
 					for(int y = 0; y < rp; y++)
 					{
-						myIrc->sendMsg(channel, msgback);
+						this->sendMsg(channel, msgback);
 						std::this_thread::sleep_for(std::chrono::milliseconds(1501));
 					}
 				}
@@ -710,7 +715,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 		{
 			if(it->second.action == "say")
 			{
-				myIrc->sendMsg(channel, msgback);
+				this->sendMsg(channel, msgback);
 				return;
 			}
 		}
@@ -725,7 +730,7 @@ void IrcConnection::processEventQueue()
 		while(!(this->eventQueue.empty()))
 		{
 			std::vector<std::string> vek = this->eventQueue.pop();
-			handleCommands(this, vek[0], vek[1], vek[2]);
+			this->handleCommands(vek[0], vek[1], vek[2]);
 		}
 	}
 }
@@ -791,7 +796,7 @@ int main(int argc, char *argv[])
 	
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
-	myIrc.joinChannel("forsenlol");
+	myIrc.joinChannel("forsenlol");	
 
 	myIrc.waitEnd();
 	return 0;
