@@ -41,7 +41,7 @@ std::map<std::string, int> Items::getMultipliers()
 
 void Items::incrementLoop()
 {
-	while(run())
+	while(!_quit)
 	{
 		std::unique_lock<std::mutex> lk(_mutex);
 		if(_cv.wait_for(lk, std::chrono::minutes(1), [this](){return _quit;}))
@@ -71,11 +71,6 @@ void Items::incrementLoop()
 			}
 		}
 	}
-}
-
-bool Items::run()
-{
-	return !_quit;
 }
 
 void Items::stop()

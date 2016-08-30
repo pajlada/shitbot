@@ -24,7 +24,6 @@ private:
 	int _maxTrigger;
 	int _currentTrigger;
 	std::atomic<bool> _quit;
-	bool run();
 	std::vector<int> getTimeTriggers();
 	std::map<std::string, int> getMultipliers();
 	void incrementLoop();
