@@ -115,3 +115,6 @@
 !C++#all#say#I run on C++ FeelsGoodMan
 !FabulousPotato69#all#say#OpieOP
 !code#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
+!-lul#all#say#FOURTF: okay !LUL is getting too autistic
+!ding#admin#say#gong
+!ding#pajlada#say#DING DONG

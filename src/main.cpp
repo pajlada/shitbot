@@ -104,7 +104,7 @@ public:
 	bool isAdmin(const std::string& user);
 	void addAdmin(const std::string& admin);
 	void addCmd(const std::string& cmd, std::string msg);
-	std::map<std::string, Command> commands;
+	std::multimap<std::string, Command> commands;
 	int dice()
 	{
 		return this->dist(this->mt);
@@ -234,31 +234,37 @@ void IrcConnection::addAdmin(const std::string& admin)
 
 void IrcConnection::addCmd(const std::string& cmd, std::string message)
 {
-	if(this->commands.count(cmd) == 0)
+	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range(cmd);
+		
+	Command cmds;
+		
+	std::string delimiter = "#";
+	std::vector<std::string> vek;
+	size_t pos = 0;
+	int i = 1;
+	while((pos = message.find(delimiter)) != std::string::npos && i < 3)
 	{
-		Command cmds;
-		
-		std::string delimiter = "#";
-		std::vector<std::string> vek;
-		size_t pos = 0;
-		int i = 1;
-		while((pos = message.find(delimiter)) != std::string::npos && i < 3)
-		{
-			vek.push_back(message.substr(0, pos));
-			message.erase(0, pos + delimiter.length());
-			i++;
-		}
-		vek.push_back(message);
-		if(vek.size() == 3)
-		{
-			cmds = {vek[0], vek[1], vek[2]};
-			this->commands.insert(std::pair<std::string, Command>(cmd, cmds));
-			this->commandsFile.seekp(0, std::ios::end);
-			this->commandsFile << cmd << "#" << cmds.who << "#" << cmds.action << "#" << cmds.data << std::endl;
-		}
-		
-
+		vek.push_back(message.substr(0, pos));
+		message.erase(0, pos + delimiter.length());
+		i++;
 	}
+	vek.push_back(message);
+	if(vek.size() == 3)
+	{
+		cmds = {vek[0], vek[1], vek[2]};
+	
+		for(auto& itr = ret.first; itr != ret.second; ++itr)
+		{
+			if(itr->second.who == cmds.who)
+			{
+				return;
+			}
+		}
+		this->commands.insert(std::pair<std::string, Command>(cmd, cmds));
+		this->commandsFile.seekp(0, std::ios::end);
+		this->commandsFile << cmd << "#" << cmds.who << "#" << cmds.action << "#" << cmds.data << std::endl;
+	}
+
 }
 
 void IrcConnection::joinChannel(const std::string& chn)
@@ -511,6 +517,199 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 	}
 	vekmsg.push_back(msgcopy);
 	
+	
+	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = myIrc->commands.equal_range("!" + vekmsg.at(0));
+	
+	if(ret.first == ret.second) 
+	{
+		std::cout << vekmsg.at(0) << " cmd not found" << std::endl;
+		return; //cmd not found
+	}
+	--ret.first;
+	--ret.second;
+	
+	std::multimap<std::string, Command>::const_iterator it;
+	bool found = false;
+	std::string users[3] = {user, "admin", "all"};
+	int i = 0;
+	while(!found && i < 3)
+	{
+		std::cout << "ding: " << i << std::endl;
+		it = ret.second;
+		while(it != ret.first)
+		{
+			std::cout << "dong: " << i << std::endl;
+			//std::cout << "it " << it->first << it->second.who << std::endl;
+			if(it->second.who == users[i])
+			{
+				if(i == 1 && myIrc->isAdmin(user) == false)
+				{
+					--it;
+					continue; //found admin cmd, but user isnt an admin
+				}
+				found = true; //found command
+				std::cout << "found\n";
+				break;
+			}
+			--it;
+		}
+		if(!found) ++i;
+	}
+	
+	if(found)
+	{
+		std::string msgback = it->second.data;
+		while(msgback.find("@me@") != std::string::npos)
+		{
+			msgback.replace(msgback.find("@me@"), 4, user);
+		}
+		int i = 1;
+		std::stringstream ss;
+		ss << "@id" << i << "@";
+		while(msgback.find(ss.str()) != std::string::npos && i < vekmsg.size())
+		{
+			msgback.replace(msgback.find(ss.str()), ss.str().size(), vekmsg[i]);
+			i++;
+			ss.str("");
+			ss << "@id" << i << "@";
+		}
+		std::string all = msg.substr(it->first.size() - 1, std::string::npos);
+		while(msgback.find("@all@") != std::string::npos)
+		{
+			msgback.replace(msgback.find("@all@"), 5, all);
+		}
+		
+		int rnd = myIrc->dice();
+		while(msgback.find("@irnd@") != std::string::npos)
+		{
+			msgback.replace(msgback.find("@irnd@"), 6, std::to_string(rnd));
+		}
+		
+		size_t pos = 0;
+		while((pos = msgback.find("@ifrnd@")) != std::string::npos)
+		{
+			msgback.erase(pos, 7);
+			//std::cout << "msgback: " << "\"" << msgback << "\"" << std::endl;
+			//std::cout << "pos: " << msgback.at(pos) << std::endl;
+			if(msgback.at(pos) == '<')
+			{
+				msgback.erase(pos, 1);
+				size_t hash = msgback.find('#', pos);
+				std::string number = msgback.substr(pos, hash-pos);
+				int num = std::atoi(number.c_str());
+				//std::cout << "substr: " << msgback.substr(pos, hash-pos) << std::endl;
+				msgback.erase(pos, hash-pos);
+				if(rnd < num)
+				{
+					msgback.erase(pos, 1);
+					size_t end = msgback.find('#', pos);
+					msgback.erase(end, 1);
+				}
+				else
+				{
+					msgback.erase(pos, 1);
+					size_t end = msgback.find('#', pos);
+					msgback.erase(pos, end-pos + 1);
+				}
+			}
+			else if(msgback.at(pos) == '>')
+			{
+				msgback.erase(pos, 1);
+				size_t hash = msgback.find('#', pos);
+				std::string number = msgback.substr(pos, hash-pos);
+				int num = std::atoi(number.c_str());
+				std::cout << "substr: " << msgback.substr(pos, hash-pos) << std::endl;
+				msgback.erase(pos, hash-pos);
+				if(rnd > num)
+				{
+					msgback.erase(pos, 1);
+					size_t end = msgback.find('#', pos);
+					msgback.erase(end, 1);
+				}
+				else
+				{
+					msgback.erase(pos, 1);
+					size_t end = msgback.find('#', pos);
+					msgback.erase(pos, end-pos + 1);
+				}
+			}
+			if(msgback.at(pos) == '=')
+			{
+				msgback.erase(pos, 1);
+				size_t hash = msgback.find('#', pos);
+				std::string number = msgback.substr(pos, hash-pos);
+				int num = std::atoi(number.c_str());
+				std::cout << "substr: " << msgback.substr(pos, hash-pos) << std::endl;
+				msgback.erase(pos, hash-pos);
+				if(rnd == num)
+				{
+					msgback.erase(pos, 1);
+					size_t end = msgback.find('#', pos);
+					msgback.erase(end, 1);
+				}
+				else
+				{
+					msgback.erase(pos, 1);
+					size_t end = msgback.find('#', pos);
+					msgback.erase(pos, end-pos + 1);
+				}
+			}
+		}
+		
+		while(msgback.find("@time@") != std::string::npos)
+		{
+			msgback.replace(msgback.find("@time@"), 6, timenow());
+		}
+		
+		if(it->second.who == "all")
+		{
+			if(it->second.action == "say")
+			{
+				myIrc->sendMsg(channel, msgback);
+				return;
+			}
+		}
+		else if(it->second.who == "admin")
+		{
+			if(myIrc->isAdmin(user))
+			{
+				if(it->second.action == "say")
+				{
+					myIrc->sendMsg(channel, msgback);
+					return;
+				}
+				else if (it->second.action == "repeat")
+				{
+					std::cout << "msgb: " << msgback << std::endl;
+					std::string delimiter = " ";
+					msgback.erase(0, 1);
+					size_t pos = 0;
+					int rp = 0;
+					if((pos = msgback.find(delimiter)) != std::string::npos)
+					{
+						rp = std::atoi(msgback.substr(0, pos).c_str());
+						msgback.erase(0, pos + delimiter.length());
+					}
+					for(int y = 0; y < rp; y++)
+					{
+						myIrc->sendMsg(channel, msgback);
+						std::this_thread::sleep_for(std::chrono::milliseconds(1501));
+					}
+				}
+			}
+		}
+		else if(it->second.who == user)
+		{
+			if(it->second.action == "say")
+			{
+				myIrc->sendMsg(channel, msgback);
+				return;
+			}
+		}
+	}
+	
+	
+	/*
 	for(auto it = myIrc->commands.crbegin(); it != myIrc->commands.crend(); ++it)
 	{
 		if(vekmsg.at(0).compare(0, vekmsg.at(0).size(), it->first, 1, it->first.size()) == 0)
@@ -665,7 +864,7 @@ void handleCommands(IrcConnection* myIrc, const std::string& user, const std::st
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void IrcConnection::processEventQueue()
@@ -739,7 +938,7 @@ int main(int argc, char *argv[])
 {
 	IrcConnection myIrc;
 	myIrc.start(argv[1], argv[2]);
-	std::cout << "el";
+	
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
