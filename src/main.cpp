@@ -22,6 +22,22 @@ struct Command
 	std::string data;
 };
 
+
+std::vector<std::string> vekcharup{"Á", "Č", "Ď", "É", "Ě", "Í", "Ň", "Ó", "Ř", "Š", "Ť", "Ú", "Ů", "Ý", "Ž"};
+std::vector<std::string> vekchardown{"á", "č", "ď", "é", "ě", "í", "ň", "ó", "ř", "š", "ť", "ú", "ů", "ý", "ž"};
+void changeToLower(std::string& str)
+{
+	for(int i = 0; i < vekcharup.size(); ++i)
+	{
+		size_t pos = 0;
+		while((pos = str.find(vekcharup[i], 0)) != std::string::npos)
+		{
+			str.replace(pos, vekcharup[i].size(), vekchardown[i], 0, vekchardown[i].size());
+		}
+	}
+	std::transform(str.begin(), str.end(), str.begin(),[](char c){return std::tolower(c, std::locale("cs_CZ.utf8"));});
+}
+
 std::string timenow()
 {
 	std::time_t result = std::time(nullptr);
@@ -139,7 +155,7 @@ public:
 		//std::cout << "ended waiting\n";
 	}
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
-	void handleCommands(const std::string&, const std::string&, std::string&);
+	void handleCommands(std::string&, const std::string&, std::string&);
 	Items items;
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
@@ -203,6 +219,8 @@ IrcConnection::IrcConnection()
 			vek.push_back(line);
 			if(vek.size() == 4)
 			{
+				changeToLower(vek[0]);
+				changeToLower(vek[1]);
 				Command cmd = {vek[1], vek[2], vek[3]};
 				this->commands.insert(std::pair<std::string, Command>(vek[0], cmd));
 			}
@@ -409,9 +427,13 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 	}
 }
 
-void IrcConnection::handleCommands(const std::string& user, const std::string& channel, std::string& msg)
+void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
 	//std::cout << "HANDLING COMMAND\n";
+
+	//tolower the user name
+	changeToLower(user);
+	
 	if(msg.compare(0, strlen("!quit"), "!quit") == 0 && user == "hemirt")
 	{
 		this->stop();
@@ -446,6 +468,8 @@ void IrcConnection::handleCommands(const std::string& user, const std::string& c
 		
 		if(vek.size() == 5)
 		{
+			changeToLower(vek[1]);
+			changeToLower(vek[2]);
 			std::string cmd = vek[2] + "#" + vek[3] + "#" + vek[4];
 			std::cout << "adding: " << vek[1] << "#" << cmd << std::endl;
 			this->addCmd(vek[1], cmd);
@@ -522,6 +546,8 @@ void IrcConnection::handleCommands(const std::string& user, const std::string& c
 	}
 	vekmsg.push_back(msgcopy);
 	
+	//to lower the !cmd
+	changeToLower(vekmsg.at(0));
 	
 	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range("!" + vekmsg.at(0));
 	
@@ -822,7 +848,7 @@ int main(int argc, char *argv[])
 	
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
-	myIrc.joinChannel("forsenlol");
+	//myIrc.joinChannel("forsenlol");
 
 	myIrc.waitEnd();
 	return 0;

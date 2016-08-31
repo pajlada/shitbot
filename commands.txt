@@ -17,7 +17,6 @@
 !cas#all#say#Právě je @time@.
 !randompleb#all#say#https://i.gyazo.com/1b3c79e802bc12e3143865504f4c5062.png pajaH
 !toppleb#all#say#!toppoints http://imgur.com/a/dg4av KKaper
-!LUL#all#say#@me@, LUL
 !rip#all#say#rip bindik LUL
 !fab#all#say#OpieOP
 !trihard#all#say#lilguy066 STOLE MY POINTS TriHard
@@ -59,7 +58,6 @@
 !isgay#all#say#@all@ is @irnd@% gay KappaPride
 !isweeb#all#say#@all@ is @irnd@% weeb DansGame
 !f#all#say#Press f to pay respects. f
-!F#all#say#Press F to pay respects. F
 !isfag#all#say#@all@ is @irnd@% fag DansGame
 !3>#all#say#3> between @id1@ and @id2@ is @irnd@% <3
 !1mil#all#say#http://imgur.com/a/dg4av Hemirt VisLaud
@@ -111,8 +109,7 @@
 !istrue#all#say#@all@ is @irnd@% true Keepo
 !zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
 !lul#all#say#@me@, LUL
-!c++#all#say#I run on c++ FeelsGoodMan
-!C++#all#say#I run on C++ FeelsGoodMan
+!c++#all#say#I run on C++ FeelsGoodMan
 !FabulousPotato69#all#say#OpieOP
 !code#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
 !-lul#all#say#FOURTF: okay !LUL is getting too autistic
@@ -121,18 +118,15 @@
 !is#all#say#@id1@ is @irnd@% @id2@
 !čas#all#say#Právě je @time@.
 !xd#all#say#xD
-!xD#all#say#xD
-!XD#all#say#xD
-!Xd#all#say#xD
 !botroulete#all#say#!roulete all
 !bing#all#say#Have you heard of google? EleGiggle
 !icdb47#all#say#The Ice Cream Database (abbreviated icdb) is an online database of information related to ice cream, cones, and scoops, including flavour and nutrional information. It was named icdb47 for the year the website was established, in 2047. OpieOP
 !ding#ian678#say#dong gachiGASM
 !Toleplayer#all#say#The definition of Toleplayer is the act of roleplaying for so long that it starts to take a toll on you.
 !toleplayer#all#say#The definition of Toleplayer is the act of roleplaying for so long that it starts to take a toll on you.
-!Ian678#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
 !ian678#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
 !ian#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
-!Ian#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
-!nEvEr#all#say#WE WILL NEVER BE CASE INSENSITIVE SwiftRage
 !goldenkappa#all#say#Golden Kappa Check
+!breading#all#say#The Gentleman's sport of breading one another was a game originally divised by FabulousPotato69 and pajlada. The rules of this game is to ping your target and then bread them using 🍞. The target can counter the breading by typing 🍞 counter. If the target does not counter quick enough the point goes to the breader after they have shouted “YOU GOT BREADED :tf: ”
+!kanaattori#all#say#http://i.imgur.com/pvkawvq.png
+!gekota#all#say#http://i.imgur.com/PznxJl2.png FeelsGoodMan
