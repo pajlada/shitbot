@@ -120,3 +120,19 @@
 !ding#pajlada#say#DING DONG
 !is#all#say#@id1@ is @irnd@% @id2@
 !čas#all#say#Právě je @time@.
+!xd#all#say#xD
+!xD#all#say#xD
+!XD#all#say#xD
+!Xd#all#say#xD
+!botroulete#all#say#!roulete all
+!bing#all#say#Have you heard of google? EleGiggle
+!icdb47#all#say#The Ice Cream Database (abbreviated icdb) is an online database of information related to ice cream, cones, and scoops, including flavour and nutrional information. It was named icdb47 for the year the website was established, in 2047. OpieOP
+!ding#ian678#say#dong gachiGASM
+!Toleplayer#all#say#The definition of Toleplayer is the act of roleplaying for so long that it starts to take a toll on you.
+!toleplayer#all#say#The definition of Toleplayer is the act of roleplaying for so long that it starts to take a toll on you.
+!Ian678#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
+!ian678#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
+!ian#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
+!Ian#all#say#Just like the 677 Ian's before him, this poor soul has also devoted his life to programming in php. May god have mercy on him BibleThump
+!nEvEr#all#say#WE WILL NEVER BE CASE INSENSITIVE SwiftRage
+!goldenkappa#all#say#Golden Kappa Check

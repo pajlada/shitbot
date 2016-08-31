@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include <list>
 #include "sqlite3.h"
+#include "items.hpp"
 
 struct Command
 {
@@ -139,6 +140,7 @@ public:
 	}
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 	void handleCommands(const std::string&, const std::string&, std::string&);
+	Items items;
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -423,7 +425,7 @@ void IrcConnection::handleCommands(const std::string& user, const std::string& c
 		return;
 	}
 	
-	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && user == "hemirt")
+	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
 	{
 		std::string delimiter = "#";
 		std::vector<std::string> vek;
@@ -688,7 +690,7 @@ void IrcConnection::handleCommands(const std::string& user, const std::string& c
 					this->sendMsg(channel, msgback);
 					return;
 				}
-				else if (it->second.action == "repeat")
+				else if (it->second.action == "repeat" && user == "hemirt")
 				{
 					while(msgback.find("\u00A1") != std::string::npos)
 					{
@@ -728,7 +730,7 @@ void IrcConnection::processEventQueue()
 	while(!(this->quit()))
 	{
 		this->eventQueue.wait();
-		while(!(this->eventQueue.empty()))
+		while(!(this->eventQueue.empty()) && !(this->quit()))
 		{
 			auto pair = this->eventQueue.pop();
 			std::unique_ptr<asio::streambuf> b(std::move(pair.first));
@@ -782,20 +784,16 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 		{
 			while(!(this->quit()))
 			{
-				std::cout << "listening ";
-				std::cout << chn;
-				std::cout << std::endl;
 				std::unique_ptr<asio::streambuf> b(new asio::streambuf);
 				asio::error_code ec;
-				asio::read_until(*(this->channelSockets[chn]), *b, "\r\n", ec);
-				std::cout << "afteread\n";
-				std::cout << "read: " << chn << " ecx: " << ec << std::endl;
+				asio::read_until(*(this->channelSockets[chn]), *b, "\r\n", ec);				
 				if(!(ec && !(this->quit())))
 				{
 					this->eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), chn));
 				}
 				else
 				{
+					std::cout << "error: " << chn << " ecx: " << ec << std::endl;
 					std::cout << "err leaving " << chn << std::endl;
 					this->leaveChannel(chn);
 					std::cout << "err reconnecting " << chn << std::endl;
@@ -808,6 +806,12 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 	catch (std::exception& e)
 	{
 		std::cout << "exc : " << chn << " " << e.what() << std::endl;
+		if(!(this->quit()))
+		{
+			this->leaveChannel(chn);
+			this->joinChannel(chn);
+			return;
+		}
 	}
 }
 

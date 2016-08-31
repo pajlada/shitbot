@@ -1,19 +1,38 @@
 #include "items.hpp"
-#include <iostream>
-#include <condition_variable>
-#include <chrono>
-#include <thread>
-#include <mutex>
-#include "sqlite3.h"
-#include <algorithm>
-#include <atomic>
 
 Items::Items()
 {
-	_timeTriggers = getTimeTriggers();
-	_maxTrigger = std::max_element(_timeTriggers.begin(), _timeTriggers.end());
 	_quit = false;
 	_currentTrigger = 0;
+	int rc;
+	rc = sqlite3_open("items.db", &_db);
+	if(rc)
+	{
+		throw std::runtime_error(sqlite3_errmsg(_db));
+	}	
+	char *error;
+	const char* sql = "CREATE TABLE IF NOT EXISTS Increments(id INTEGER PRIMARY KEY ASC, trigger INTEGER, per TEXT, what TEXT, howmuch REAL, percent BOOL);";
+	rc = sqlite3_exec(_db, sql, NULL, NULL, &error);
+	if(rc)
+	{
+		fprintf(stderr, "Error executing Increments statement: %s\n", error);
+		sqlite3_free(error);
+		throw;
+	}
+	const char* sql2 = "CREATE TABLE IF NOT EXISTS Items(id INTEGER PRIMARY KEY ASC, name TEXT);";
+	rc = sqlite3_exec(_db, sql2, NULL, NULL, &error);
+	if(rc)
+	{
+		fprintf(stderr, "Error executing Items statement: %s\n", error);
+		sqlite3_free(error);
+		throw;
+	}
+}
+
+Items::~Items()
+{
+	this->stop();
+	sqlite3_close(_db);
 }
 
 void Items::startLoop()
@@ -21,22 +40,21 @@ void Items::startLoop()
 	_thread = std::thread(&Items::incrementLoop, this);	
 }
 
-std::vector<int> Items::getTimeTriggers()
+bool Items::getIncrements()
 {
-	std::vector<int> vec;
+	_vecIncrements.clear();
 	
 	//get triggers from sql
-	
-	return vec;
-}
 
-std::map<std::string, int> Items::getMultipliers()
-{
-	std::map<std::string, int> map;
-	
-	//get multiply values from sql
-	
-	return map;
+	if(_vecIncrements.size() == 0)
+	{
+		return false;
+	}
+	else
+	{
+		_maxTrigger = (std::max_element(_vecIncrements.begin(), _vecIncrements.end(), [](const Increments& i1, const Increments& i2){return i1.trigger < i2.trigger;}))->trigger;
+		return true;
+	}
 }
 
 void Items::incrementLoop()
@@ -44,18 +62,22 @@ void Items::incrementLoop()
 	while(!_quit)
 	{
 		std::unique_lock<std::mutex> lk(_mutex);
-		if(_cv.wait_for(lk, std::chrono::minutes(1), [this](){return _quit;}))
+		if(_cv.wait_for(lk, std::chrono::minutes(1), [this](){return _quit.load();}))
 		{
 			// got notified to quit
 			return;
 		}
 		else // 1 minute passed
 		{
+			if(!getIncrements())
+			{
+				continue;
+			}
 			++_currentTrigger;
 			
-			for(const int& i : _timeTriggers)
+			for(const Increments& i : _vecIncrements)
 			{
-				if(_currentTrigger % i) //increment correct intervals only
+				if(_currentTrigger % i.trigger) //increment correct intervals only
 				{
 					
 					//get twitch users
