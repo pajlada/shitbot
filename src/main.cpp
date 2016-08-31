@@ -283,17 +283,19 @@ void IrcConnection::joinChannel(const std::string& chn)
 	sock->send(asio::buffer(nickx));
 	sock->send(asio::buffer(cmds));	
 	
-	std::string join = "JOIN #" + chn + " \r\n";
+	std::string join = "JOIN #" + chn + "\r\n";
 	sock->send(asio::buffer(join));
 	this->channelTimes.insert(std::pair<std::string, std::chrono::high_resolution_clock::time_point>(chn, std::chrono::high_resolution_clock::now()));
 	this->channelMsgs.insert(std::pair<std::string, unsigned>(chn, 0));
 	this->channelBools.insert(std::pair<std::string, bool>(chn, false));
 	std::cout << "joined" << chn << std::endl;
 	
+	/*
 	asio::error_code ec;
 	asio::socket_base::keep_alive option(true);
 	sock->set_option(option, ec);
 	std::cout << "keepalive set ec: " << ec << " option.value() " << option.value();
+	*/
 	
 	this->listenThreads.push_back(std::thread(&IrcConnection::listenAndHandle, this, chn));
 	std::cout << "started thread: " << chn << std::endl;
@@ -302,7 +304,7 @@ void IrcConnection::joinChannel(const std::string& chn)
 
 void IrcConnection::leaveChannel(const std::string& chn)
 {
-	std::string part = "PART #" + chn + " \r\n";
+	std::string part = "PART #" + chn + "\r\n";
 	this->channelSockets[chn]->send(asio::buffer(part));
 	this->channelSockets[chn]->close();
 	this->channelSockets.erase(chn);
@@ -741,12 +743,33 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 		{
 			while(!(this->quit()))
 			{
+				/*
 				std::vector<char> buf(4096);
-				this->channelSockets[chn]->read_some(asio::buffer(buf));
-				std::cout << "read: " << chn << std::endl;
+				std::cout << "starting reading: " << chn << " " << timenow() << std::endl;
+				asio::error_code ec;
+				this->channelSockets[chn]->read_some(asio::buffer(buf), ec);
+				std::cout << "read: " << chn << " ec: " << ec << std::endl;
 				std::string line(buf.begin(), buf.end());
-				
+				*/
 				std::string delimiter = "\r\n";
+				
+				asio::streambuf b;
+				asio::error_code ec;
+				asio::read_until(*(this->channelSockets[chn]), b, "\r\n", ec);
+				std::cout << "read: " << chn << " ecx: " << ec << std::endl;
+				if(ec)
+				{
+					std::cout << "err leaving " << chn << std::endl;
+					this->leaveChannel(chn);
+					std::cout << "err reconnecting " << chn << std::endl;
+					this->joinChannel(chn);
+					std::cout << "err reconnected " << chn << std::endl;
+					return;
+				}
+				std::istream is(&b);
+				std::string line(std::istreambuf_iterator<char>(is), {});
+				
+				
 				std::vector<std::string> vek;
 				size_t pos = 0;
 				while((pos = line.find(delimiter)) != std::string::npos)
@@ -754,12 +777,14 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 					vek.push_back(line.substr(0, pos));
 					line.erase(0, pos + delimiter.length());
 				}
+				
 				//std::cout << "VEKBEGIN\n";
 				for(int i = 0; i < vek.size(); ++i)
 				{
+					
 					std::string oneline = vek.at(i);
 				
-					//std::cout << "oneline:\n" << oneline << "\nendline" <<std::endl;
+					std::cout << oneline <<std::endl;
 					if(oneline.find("PRIVMSG") != std::string::npos)
 					{
 						size_t pos = oneline.find("PRIVMSG #") + strlen("PRIVMSG #");		
@@ -770,12 +795,13 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 
 						if(msg[0] == '!')
 						{
+							//std::cout << "MSG: " << msg << std::endl;
 							this->eventQueue.push(std::vector<std::string>{user, channel, msg});
 						}
 					}
 					else if(oneline.find("PING") != std::string::npos)
 					{
-						std::cout << "PONGING\n";
+						std::cout << "PONGING" << chn << std::endl;
 						std::string pong = "PONG :tmi.twitch.tv\r\n";
 						this->channelSockets[chn]->async_send(asio::buffer(pong), handler);
 					}
@@ -798,7 +824,7 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");	
-
+	
 	myIrc.waitEnd();
 	return 0;
 }
