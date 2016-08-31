@@ -137,7 +137,7 @@ public:
 			this->events.join();
 		//std::cout << "ended waiting\n";
 	}
-	EventQueue<std::vector<std::string>> eventQueue;
+	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 	void handleCommands(const std::string&, const std::string&, std::string&);
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
@@ -209,7 +209,7 @@ IrcConnection::IrcConnection()
 		this->commandsFile.open("commands.txt", std::ios::out | std::ios::app);
 	}
 
-	std::cout << "lulopened\n";
+	std::cout << "lulopxened\n";
 }
 IrcConnection::~IrcConnection()
 {
@@ -354,7 +354,6 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	this->work = std::thread(&IrcConnection::run, this);
 	this->msg = std::thread(&IrcConnection::msgCount, this);
 	this->events = std::thread(&IrcConnection::processEventQueue, this);
-	//this->pingThread = std::thread(&IrcConnection::pingAll, this);
 }
 
 void handler(const asio::error_code& error,std::size_t bytes_transferred)
@@ -731,8 +730,48 @@ void IrcConnection::processEventQueue()
 		this->eventQueue.wait();
 		while(!(this->eventQueue.empty()))
 		{
-			std::vector<std::string> vek = this->eventQueue.pop();
-			this->handleCommands(vek[0], vek[1], vek[2]);
+			auto pair = this->eventQueue.pop();
+			std::unique_ptr<asio::streambuf> b(std::move(pair.first));
+			std::string chn = pair.second;
+			
+			std::istream is(&(*b));
+			std::string line(std::istreambuf_iterator<char>(is), {});
+			
+			std::string delimiter = "\r\n";
+			std::vector<std::string> vek;
+			size_t pos = 0;
+			while((pos = line.find(delimiter)) != std::string::npos)
+			{
+				vek.push_back(line.substr(0, pos));
+				line.erase(0, pos + delimiter.length());
+			}
+			
+			for(int i = 0; i < vek.size(); ++i)
+			{
+				
+				std::string oneline = vek.at(i);
+			
+				std::cout << oneline <<std::endl;
+				if(oneline.find("PRIVMSG") != std::string::npos)
+				{
+					size_t pos = oneline.find("PRIVMSG #") + strlen("PRIVMSG #");		
+					std::string channel = oneline.substr(pos, oneline.find(":", oneline.find("PRIVMSG #")) - pos - 1);
+					std::string ht_chn = "#" + channel;
+					std::string msg = oneline.substr(oneline.find(":", oneline.find(ht_chn)) + 1, std::string::npos);
+					std::string user = oneline.substr(oneline.find(":") + 1, oneline.find("!") - oneline.find(":") - 1);
+
+					if(msg[0] == '!')
+					{
+						this->handleCommands(user, channel, msg);
+					}
+				}
+				else if(oneline.find("PING") != std::string::npos)
+				{
+					std::cout << "PONGING" << chn << std::endl;
+					std::string pong = "PONG :tmi.twitch.tv\r\n";
+					this->channelSockets[chn]->async_send(asio::buffer(pong), handler);
+				}
+			}			
 		}
 	}
 }
@@ -743,21 +782,19 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 		{
 			while(!(this->quit()))
 			{
-				/*
-				std::vector<char> buf(4096);
-				std::cout << "starting reading: " << chn << " " << timenow() << std::endl;
+				std::cout << "listening ";
+				std::cout << chn;
+				std::cout << std::endl;
+				std::unique_ptr<asio::streambuf> b(new asio::streambuf);
 				asio::error_code ec;
-				this->channelSockets[chn]->read_some(asio::buffer(buf), ec);
-				std::cout << "read: " << chn << " ec: " << ec << std::endl;
-				std::string line(buf.begin(), buf.end());
-				*/
-				std::string delimiter = "\r\n";
-				
-				asio::streambuf b;
-				asio::error_code ec;
-				asio::read_until(*(this->channelSockets[chn]), b, "\r\n", ec);
+				asio::read_until(*(this->channelSockets[chn]), *b, "\r\n", ec);
+				std::cout << "afteread\n";
 				std::cout << "read: " << chn << " ecx: " << ec << std::endl;
-				if(ec)
+				if(!(ec && !(this->quit())))
+				{
+					this->eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), chn));
+				}
+				else
 				{
 					std::cout << "err leaving " << chn << std::endl;
 					this->leaveChannel(chn);
@@ -766,48 +803,6 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 					std::cout << "err reconnected " << chn << std::endl;
 					return;
 				}
-				std::istream is(&b);
-				std::string line(std::istreambuf_iterator<char>(is), {});
-				
-				
-				std::vector<std::string> vek;
-				size_t pos = 0;
-				while((pos = line.find(delimiter)) != std::string::npos)
-				{
-					vek.push_back(line.substr(0, pos));
-					line.erase(0, pos + delimiter.length());
-				}
-				
-				//std::cout << "VEKBEGIN\n";
-				for(int i = 0; i < vek.size(); ++i)
-				{
-					
-					std::string oneline = vek.at(i);
-				
-					std::cout << oneline <<std::endl;
-					if(oneline.find("PRIVMSG") != std::string::npos)
-					{
-						size_t pos = oneline.find("PRIVMSG #") + strlen("PRIVMSG #");		
-						std::string channel = oneline.substr(pos, oneline.find(":", oneline.find("PRIVMSG #")) - pos - 1);
-						std::string ht_chn = "#" + channel;
-						std::string msg = oneline.substr(oneline.find(":", oneline.find(ht_chn)) + 1, std::string::npos);
-						std::string user = oneline.substr(oneline.find(":") + 1, oneline.find("!") - oneline.find(":") - 1);
-
-						if(msg[0] == '!')
-						{
-							//std::cout << "MSG: " << msg << std::endl;
-							this->eventQueue.push(std::vector<std::string>{user, channel, msg});
-						}
-					}
-					else if(oneline.find("PING") != std::string::npos)
-					{
-						std::cout << "PONGING" << chn << std::endl;
-						std::string pong = "PONG :tmi.twitch.tv\r\n";
-						this->channelSockets[chn]->async_send(asio::buffer(pong), handler);
-					}
-				}
-				//std::cout<< "VEKEND\n";
-
 			}
 		}
 	catch (std::exception& e)
@@ -823,8 +818,8 @@ int main(int argc, char *argv[])
 	
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
-	myIrc.joinChannel("forsenlol");	
-	
+	myIrc.joinChannel("forsenlol");
+
 	myIrc.waitEnd();
 	return 0;
 }
