@@ -19,6 +19,11 @@ public:
 	~Items();
 	void startLoop();
 	void stop();
+	int createChannelTable(const std::string&);
+	int addItemCategory(const std::string&);
+	std::vector<std::string> getItems();
+	std::vector<std::string> getColumnNames(const std::string& table);
+	std::vector<std::string> getTableNames();
 private:
 	struct Increments
 	{

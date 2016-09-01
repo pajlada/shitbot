@@ -27,6 +27,14 @@ Items::Items()
 		sqlite3_free(error);
 		throw;
 	}
+	const char* sql3 = "CREATE TABLE IF NOT EXISTS Channels(id INTEGER PRIMARY KEY ASC, name TEXT);";
+	rc = sqlite3_exec(_db, sql3, NULL, NULL, &error);
+	if(rc)
+	{
+		fprintf(stderr, "Error executing Items statement: %s\n", error);
+		sqlite3_free(error);
+		throw;
+	}
 }
 
 Items::~Items()
@@ -38,6 +46,63 @@ Items::~Items()
 void Items::startLoop()
 {
 	_thread = std::thread(&Items::incrementLoop, this);	
+}
+
+void Items::stop()
+{
+	std::unique_lock<std::mutex> lk(_mutex);
+	lk.lock();
+	_quit = true;
+	lk.unlock();
+	_cv.notify_all();
+	_thread.join();
+	return;
+}
+
+int Items::createChannelTable(const std::string& chn)
+{
+	//get items
+	char *error;
+	int rc;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "CREATE TABLE IF NOT EXISTS ?(...);", -1, &statement, NULL);
+	sqlite3_bind_text(statement, 1, chn.c_str(), -1, 0);
+	sqlite3_step(statement);
+	rc = sqlite3_finalize(statement);
+	if(rc)
+	{
+		fprintf(stderr, "Error executing Increments statement: %s\n", error);
+		sqlite3_free(error);
+		return rc;
+	}
+	else
+	{
+		char *error;
+		sqlite3_stmt * statement;
+		sqlite3_prepare_v2(_db, "INSERT OR IGNORE INTO Channels('name') VALUES (?);", -1, &statement, NULL);
+		sqlite3_bind_text(statement, 1, chn.c_str(), -1, 0);
+		sqlite3_step(statement);
+		rc = sqlite3_finalize(statement);
+		return rc;
+	}
+	return rc;
+}
+
+int Items::addItemCategory(const std::string& item)
+{
+	auto v = getItems();
+	if(std::find(v.begin(), v.end(), item) != v.end())
+	{
+		return -1;
+	}
+	char *error;
+	int rc;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "INSERT OR IGNORE INTO Items('name') VALUES (?);", -1, &statement, NULL);
+	sqlite3_bind_text(statement, 1, item.c_str(), -1, 0);
+	sqlite3_step(statement);
+	rc = sqlite3_finalize(statement);
+	return rc;
 }
 
 bool Items::getIncrements()
@@ -95,13 +160,52 @@ void Items::incrementLoop()
 	}
 }
 
-void Items::stop()
+std::vector<std::string> Items::getItems()
 {
-	std::unique_lock<std::mutex> lk(_mutex);
-	lk.lock();
-	_quit = true;
-	lk.unlock();
-	_cv.notify_all();
-	_thread.join();
-	return;
+	int rc;
+	std::vector<std::string> vek;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "SELECT name FROM Items;", -1, &statement, NULL);
+	while((rc = sqlite3_step(statement)) == SQLITE_ROW)
+	{
+		std::string text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+		vek.push_back(text);
+	}
+	rc = sqlite3_finalize(statement);
+	return vek;
+}
+
+std::vector<std::string> Items::getTableNames()
+{
+	int rc;
+	std::vector<std::string> vek;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "SELECT * FROM sqlite_master;", -1, &statement, NULL);
+	while((rc = sqlite3_step(statement)) == SQLITE_ROW)
+	{
+		std::string text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
+		vek.push_back(text);
+	}
+	rc = sqlite3_finalize(statement);
+	return vek;
+}
+
+std::vector<std::string> Items::getColumnNames(const std::string& table)
+{
+	std::vector<std::string> vek;
+	auto v = getTableNames();
+	if(std::find(v.begin(), v.end(), table) != v.end())
+	{
+		int rc;
+		sqlite3_stmt * statement;
+		std::string sql = "PRAGMA table_info(" + table + ");";
+		sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+		while((rc = sqlite3_step(statement)) == SQLITE_ROW)
+		{
+			std::string text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
+			vek.push_back(text);
+		}
+		rc = sqlite3_finalize(statement);
+	}
+	return vek;	
 }
