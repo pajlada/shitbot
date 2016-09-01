@@ -22,11 +22,11 @@ struct Command
 	std::string data;
 };
 
-
-std::vector<std::string> vekcharup{"Á", "Č", "Ď", "É", "Ě", "Í", "Ň", "Ó", "Ř", "Š", "Ť", "Ú", "Ů", "Ý", "Ž"};
-std::vector<std::string> vekchardown{"á", "č", "ď", "é", "ě", "í", "ň", "ó", "ř", "š", "ť", "ú", "ů", "ý", "ž"};
 void changeToLower(std::string& str)
 {
+	static std::vector<std::string> vekcharup{"Á", "Č", "Ď", "É", "Ě", "Í", "Ň", "Ó", "Ř", "Š", "Ť", "Ú", "Ů", "Ý", "Ž"};
+	static std::vector<std::string> vekchardown{"á", "č", "ď", "é", "ě", "í", "ň", "ó", "ř", "š", "ť", "ú", "ů", "ý", "ž"};
+
 	for(int i = 0; i < vekcharup.size(); ++i)
 	{
 		size_t pos = 0;
