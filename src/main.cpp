@@ -14,6 +14,7 @@
 #include <list>
 #include "sqlite3.h"
 #include "items.hpp"
+#include "curl/curl.h"
 
 struct Command
 {
@@ -170,6 +171,13 @@ private:
 	std::condition_variable quit_cv;
 };
 
+size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
+{
+	((std::string*)userp)->append((char*)contents, size * nmemb);
+	std::cout << size * nmemb << std::endl;
+	return size * nmemb;
+}
+
 void IrcConnection::IncrementLoop()
 {
 	int currentTrigger;
@@ -181,22 +189,42 @@ void IrcConnection::IncrementLoop()
 			std::cout << "quiting IncrementLoop" << std::endl;
 			return;
 		}
-		else // 15 seconds passed
+		else // 1 minute passed
 		{	
 			++currentTrigger;
+			std::cout << "current trigger: " << currentTrigger << std::endl;
 			
-			for(const Items::Increments& i : this->items._increments)
+			CURL *curl;
+			CURLcode res;
+			curl = curl_easy_init();
+			struct curl_slist *chunk = NULL;
+			chunk = curl_slist_append(chunk, "Accept: application/json");
+			
+			for(auto& nm : this->channelSockets)
 			{
-				if(currentTrigger % i.trigger) //increment correct intervals only
+				
+				std::string tmi = "http://tmi.twitch.tv/group/user/" + nm.first + "/chatters";
+				std::string readBuffer;
+				
+				res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+				curl_easy_setopt(curl, CURLOPT_URL, tmi.c_str());
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFn);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+				res = curl_easy_perform(curl);
+				curl_easy_reset(curl);
+				//std::cout << "READBUFFER: " << readBuffer << std::endl;
+				for(auto i : this->items._increments)
 				{
-					
-					//get twitch users
-					//for each user increment the data in sql table
-					//get old data, calculate new data, set new data in sql table
-					
+					//std::cout << i.what << std::endl;
+					//if(currentTrigger % i.trigger == 0) //increment correct intervals only
+					{
+						//for each user increment the data in sql table
+						//get old data, calculate new data, set new data in sql table
+						
+					}
 				}
 			}
-			
+
 			if(currentTrigger == this->items._maxTrigger)
 			{
 				currentTrigger = 0;
@@ -436,8 +464,6 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					std::unique_lock<std::mutex> lk(this->pingMap[i.first]->mtx);
 					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(15), [this, &i](){return this->pingMap[i.first]->pinged;}))
 					{
-						std::string names = "NAMES #pajlada\r\n";
-						this->channelSockets["pajlada"]->send(asio::buffer(names));
 						std::cout << "received the ping back " << i.first << std::endl;
 						this->pingMap[i.first]->pinged = false;
 					}
@@ -453,7 +479,8 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 		}
 	};
 	
-	this->threads.push_back(std::thread(lambda));	
+	this->threads.push_back(std::thread(lambda));
+	this->threads.push_back(std::thread(&IrcConnection::IncrementLoop, this));
 }
 
 
@@ -835,7 +862,7 @@ void IrcConnection::processEventQueue()
 		this->eventQueue.wait();
 		while(!(this->eventQueue.empty()) && !(this->quit()))
 		{
-			std::cout << "event" << std::endl;
+			//std::cout << "event" << std::endl;
 			auto pair = this->eventQueue.pop();
 			std::unique_ptr<asio::streambuf> b(std::move(pair.first));
 			std::string chn = pair.second;
@@ -857,7 +884,7 @@ void IrcConnection::processEventQueue()
 				
 				std::string oneline = vek.at(i);
 			
-				std::cout << oneline <<std::endl;
+				//std::cout << oneline <<std::endl;
 				if(oneline.find("PRIVMSG") != std::string::npos)
 				{
 					size_t pos = oneline.find("PRIVMSG #") + strlen("PRIVMSG #");		
@@ -941,9 +968,8 @@ int main(int argc, char *argv[])
 	myIrc.items.addItemCategory("appletree");
 	myIrc.items.createChannelTable("pajlada");
 	myIrc.items.addItemCategory("apple");
-	myIrc.items.addIncrement(2, "appletree", "apple", "14.00023999418", true);
+	//myIrc.items.addIncrement(2, "appletree", "apple", "14.00023999418", true);
 	
-
 	myIrc.waitEnd();
 	return 0;
 }

@@ -138,7 +138,7 @@ void Items::getIncrements()
 	_increments.clear();
 	int rc;
 	sqlite3_stmt * statement;
-	sqlite3_prepare_v2(_db, "SELECT 'trigger', 'per', 'what', 'howmuch', 'percent' FROM Increments;", -1, &statement, NULL);
+	sqlite3_prepare_v2(_db, "SELECT trigger, per, what, howmuch, percent FROM Increments;", -1, &statement, NULL);
 	while((rc = sqlite3_step(statement)) == SQLITE_ROW)
 	{
 		Increments incr;
@@ -251,7 +251,6 @@ int Items::addIncrement(int trigger, const std::string& per, const std::string& 
 		std::cout << e.what();
 		return -3;
 	}
-	std::cout << "incrementing\n";
 	char *error;
 	int rc;
 	sqlite3_stmt * statement;
