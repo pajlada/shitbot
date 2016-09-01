@@ -112,9 +112,6 @@ public:
 	std::map<std::string, std::shared_ptr<asio::ip::tcp::socket>> channelSockets;
 	void stop();
 	void start(const std::string& pass, const std::string& nick);
-	std::thread work;
-	std::thread msg;
-	std::thread events;
 	std::map<std::string, std::chrono::high_resolution_clock::time_point> channelTimes;
 	void joinChannel(const std::string&);
 	void leaveChannel(const std::string&);
@@ -133,30 +130,28 @@ public:
 	std::mutex irc_m;
 	bool quit();
 	bool quit_m = false;
-	std::vector<std::thread> listenThreads;
+	std::vector<std::thread> threads;
 	void waitEnd()
 	{
 		std::unique_lock<std::mutex> lock(irc_m);
 		this->quit_cv.wait(lock, [this](){return this->quit_m;});
 		lock.unlock();
-		//std::cout << "ending\n";
-		for(auto& th : this->listenThreads) 
+		for(auto& th : this->threads) 
 		{
-			//std::cout << "nativ: " << th.native_handle() << std::endl;
 			if(th.joinable())
 				th.join();
 		}
-		if(this->work.joinable())
-			this->work.join();
-		if(this->msg.joinable())
-			this->msg.join();
-		if(this->events.joinable())
-			this->events.join();
-		//std::cout << "ended waiting\n";
 	}
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 	void handleCommands(std::string&, const std::string&, std::string&);
 	Items items;
+	struct Pings
+	{
+		std::condition_variable cv;
+		std::mutex mtx;
+		bool pinged = false;
+	};
+	std::map<std::string, std::unique_ptr<Pings>> pingMap;
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -316,8 +311,9 @@ void IrcConnection::joinChannel(const std::string& chn)
 	sock->set_option(option, ec);
 	std::cout << "keepalive set ec: " << ec << " option.value() " << option.value();
 	*/
-	
-	this->listenThreads.push_back(std::thread(&IrcConnection::listenAndHandle, this, chn));
+	std::unique_ptr<Pings> ptr(new Pings);
+	this->pingMap.insert(std::pair<std::string, std::unique_ptr<Pings>>(chn, std::move(ptr)));
+	this->threads.push_back(std::thread(&IrcConnection::listenAndHandle, this, chn));
 	std::cout << "started thread: " << chn << std::endl;
 	
 }
@@ -331,6 +327,7 @@ void IrcConnection::leaveChannel(const std::string& chn)
 	this->channelBools.erase(chn);
 	this->channelMsgs.erase(chn);
 	this->channelTimes.erase(chn);
+	this->pingMap.erase(chn);
 }
 
 bool IrcConnection::quit()
@@ -354,10 +351,16 @@ void IrcConnection::stop()
 		this->channelSockets.clear();
 		this->channelBools.clear();
 		this->channelMsgs.clear();
-		this->channelTimes.clear();	
+		this->channelTimes.clear();
+		this->pingMap.clear();
 	}
 	this->quit_cv.notify_all();
 	this->eventQueue.notify();
+}
+
+void handler(const asio::error_code& error,std::size_t bytes_transferred)
+{
+	std::cout << "sent msg: " << bytes_transferred << std::endl;
 }
 
 void IrcConnection::start(const std::string& pass, const std::string& nick)
@@ -370,16 +373,52 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	asio::ip::tcp::resolver resolver(m_io_service);
 	asio::ip::tcp::resolver::query query("irc.chat.twitch.tv", "6667");
 	this->twitch_it = resolver.resolve(query);
+		
+	this->threads.push_back(std::thread(&IrcConnection::run, this));
+	this->threads.push_back(std::thread(&IrcConnection::msgCount, this));
+	this->threads.push_back(std::thread(&IrcConnection::processEventQueue, this));
 	
-	this->work = std::thread(&IrcConnection::run, this);
-	this->msg = std::thread(&IrcConnection::msgCount, this);
-	this->events = std::thread(&IrcConnection::processEventQueue, this);
+	auto lambda = [this]()
+	{
+		while(!(this->quit()))
+		{
+			std::unique_lock<std::mutex> lock(irc_m);
+			if(this->quit_cv.wait_for(lock, std::chrono::seconds(15),[this](){return this->quit_m;}))			
+			{
+				std::cout << "quiting pingmap" << std::endl;
+				return;
+			}
+			else // 15 seconds passed
+			{	
+				lock.unlock();
+				for(const auto& i : this->channelSockets)
+				{
+					std::string sendirc = "PING :tmi.twitch.tv\r\n";
+					
+					this->channelSockets[i.first]->send(asio::buffer(sendirc));
+					std::cout << "pinging" << i.first << std::endl;
+					std::unique_lock<std::mutex> lk(this->pingMap[i.first]->mtx);
+					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(15), [this, &i](){return this->pingMap[i.first]->pinged;}))
+					{
+						std::cout << "received the ping back " << i.first << std::endl;
+						this->pingMap[i.first]->pinged = false;
+					}
+					else // didnt get back;
+					{
+						std::cout << "didnt receive ping back " << i.first << std::endl;
+						this->leaveChannel(i.first);
+						this->joinChannel(i.first);
+						std::cout << "didnt receive, rejoined " << i.first << std::endl;
+					}
+				}
+			}
+		}
+	};
+	
+	this->threads.push_back(std::thread(lambda));	
 }
 
-void handler(const asio::error_code& error,std::size_t bytes_transferred)
-{
-	std::cout << "sent msg: " << bytes_transferred << std::endl;
-}
+
 
 void IrcConnection::run()
 {
@@ -758,6 +797,7 @@ void IrcConnection::processEventQueue()
 		this->eventQueue.wait();
 		while(!(this->eventQueue.empty()) && !(this->quit()))
 		{
+			std::cout << "event" << std::endl;
 			auto pair = this->eventQueue.pop();
 			std::unique_ptr<asio::streambuf> b(std::move(pair.first));
 			std::string chn = pair.second;
@@ -798,6 +838,15 @@ void IrcConnection::processEventQueue()
 					std::cout << "PONGING" << chn << std::endl;
 					std::string pong = "PONG :tmi.twitch.tv\r\n";
 					this->channelSockets[chn]->async_send(asio::buffer(pong), handler);
+				}
+				else if(oneline.find("PONG") != std::string::npos)
+				{
+					{
+						std::cout << "got ping " << chn << std::endl;
+						std::lock_guard<std::mutex> lk(this->pingMap[chn]->mtx);
+						this->pingMap[chn]->pinged = true;
+					}
+					this->pingMap[chn]->cv.notify_all();
 				}
 			}			
 		}
@@ -848,8 +897,10 @@ int main(int argc, char *argv[])
 	
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
-	//myIrc.joinChannel("forsenlol");
+	myIrc.joinChannel("forsenlol");
 
 	myIrc.waitEnd();
+	std::this_thread::sleep_for(std::chrono::seconds(5));
+
 	return 0;
 }
