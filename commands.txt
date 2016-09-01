@@ -130,3 +130,5 @@
 !breading#all#say#The Gentleman's sport of breading one another was a game originally divised by FabulousPotato69 and pajlada. The rules of this game is to ping your target and then bread them using 🍞. The target can counter the breading by typing 🍞 counter. If the target does not counter quick enough the point goes to the breader after they have shouted “YOU GOT BREADED :tf: ”
 !kanaattori#all#say#http://i.imgur.com/pvkawvq.png
 !gekota#all#say#http://i.imgur.com/PznxJl2.png FeelsGoodMan
+!jonas#all#say#Have you hit your macro's today? OMGScoots
+!deletecmd#all#say#Deleted @id1@ cmd Kappa

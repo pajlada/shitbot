@@ -1,9 +1,29 @@
 #include "items.hpp"
 
+void escape(std::string& str)
+{
+	size_t pos = 0;
+	while((pos = str.find("\\", pos)) != std::string::npos)
+	{
+		str.insert(pos, "\\");
+		pos += 2;
+	}
+	pos = 0;
+	while((pos = str.find("\'", pos)) != std::string::npos)
+	{
+		str.insert(pos, "\\");
+		pos += 2;
+	}
+	pos = 0;
+	while((pos = str.find("\"", pos)) != std::string::npos)
+	{
+		str.insert(pos, "\\");
+		pos += 2;
+	}
+}
+
 Items::Items()
 {
-	_quit = false;
-	_currentTrigger = 0;
 	int rc;
 	rc = sqlite3_open("items.db", &_db);
 	if(rc)
@@ -35,55 +55,48 @@ Items::Items()
 		sqlite3_free(error);
 		throw;
 	}
+	getIncrements();
 }
 
 Items::~Items()
 {
-	this->stop();
 	sqlite3_close(_db);
-}
-
-void Items::startLoop()
-{
-	_thread = std::thread(&Items::incrementLoop, this);	
-}
-
-void Items::stop()
-{
-	std::unique_lock<std::mutex> lk(_mutex);
-	lk.lock();
-	_quit = true;
-	lk.unlock();
-	_cv.notify_all();
-	_thread.join();
-	return;
 }
 
 int Items::createChannelTable(const std::string& chn)
 {
-	//get items
+	auto vek = getItems();
+	std::string sql = "CREATE TABLE IF NOT EXISTS " + chn + " (id INTEGER PRIMARY KEY ASC, username TEXT";
+	for(auto i : vek)
+	{
+		sql += ", " + i + " TEXT";
+	}
+	sql += ");";
 	char *error;
 	int rc;
 	sqlite3_stmt * statement;
-	sqlite3_prepare_v2(_db, "CREATE TABLE IF NOT EXISTS ?(...);", -1, &statement, NULL);
-	sqlite3_bind_text(statement, 1, chn.c_str(), -1, 0);
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
 	sqlite3_step(statement);
 	rc = sqlite3_finalize(statement);
 	if(rc)
 	{
-		fprintf(stderr, "Error executing Increments statement: %s\n", error);
+		fprintf(stderr, "Error adding %s table: %s\n", chn.c_str(), error);
 		sqlite3_free(error);
 		return rc;
 	}
 	else
 	{
-		char *error;
-		sqlite3_stmt * statement;
-		sqlite3_prepare_v2(_db, "INSERT OR IGNORE INTO Channels('name') VALUES (?);", -1, &statement, NULL);
-		sqlite3_bind_text(statement, 1, chn.c_str(), -1, 0);
-		sqlite3_step(statement);
-		rc = sqlite3_finalize(statement);
-		return rc;
+		auto v = getChannels();
+		if(std::find(v.begin(), v.end(), chn) == v.end())
+		{
+			char *error;
+			sqlite3_stmt * statement;
+			sqlite3_prepare_v2(_db, "INSERT OR IGNORE INTO Channels('name') VALUES (?);", -1, &statement, NULL);
+			sqlite3_bind_text(statement, 1, chn.c_str(), -1, 0);
+			sqlite3_step(statement);
+			rc = sqlite3_finalize(statement);
+			return rc;
+		}
 	}
 	return rc;
 }
@@ -102,62 +115,55 @@ int Items::addItemCategory(const std::string& item)
 	sqlite3_bind_text(statement, 1, item.c_str(), -1, 0);
 	sqlite3_step(statement);
 	rc = sqlite3_finalize(statement);
+	if(!rc)
+	{
+		auto channels = getChannels();
+		for(const auto& chn : channels)
+		{
+			std::cout << chn;
+			sqlite3_stmt * statement2;
+			std::string itemE = item;
+			escape(itemE);
+			std::string sql = "ALTER TABLE " + chn + " ADD COLUMN " + itemE + " TEXT;";
+			sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement2, NULL);
+			sqlite3_step(statement2);
+			rc = sqlite3_finalize(statement2);
+		}
+	}
 	return rc;
 }
 
-bool Items::getIncrements()
+void Items::getIncrements()
 {
-	_vecIncrements.clear();
-	
-	//get triggers from sql
-
-	if(_vecIncrements.size() == 0)
+	_increments.clear();
+	int rc;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "SELECT 'trigger', 'per', 'what', 'howmuch', 'percent' FROM Increments;", -1, &statement, NULL);
+	while((rc = sqlite3_step(statement)) == SQLITE_ROW)
 	{
-		return false;
+		Increments incr;
+		incr.trigger = sqlite3_column_int(statement, 0);
+		incr.per = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
+		incr.what = reinterpret_cast<const char*>(sqlite3_column_text(statement, 2));
+		incr.howmuch = reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
+		if(sqlite3_column_int(statement, 4) == 0)
+		{
+			incr.percent = false;
+		}
+		else incr.percent = true;
+		
+		_increments.push_back(incr);
+	}
+	rc = sqlite3_finalize(statement);
+	if(_increments.size() == 0)
+	{
+		_maxTrigger = 0;
 	}
 	else
 	{
-		_maxTrigger = (std::max_element(_vecIncrements.begin(), _vecIncrements.end(), [](const Increments& i1, const Increments& i2){return i1.trigger < i2.trigger;}))->trigger;
-		return true;
+		_maxTrigger = (std::max_element(_increments.begin(), _increments.end(), [](const Increments& i1, const Increments& i2){return i1.trigger < i2.trigger;}))->trigger;
 	}
-}
 
-void Items::incrementLoop()
-{
-	while(!_quit)
-	{
-		std::unique_lock<std::mutex> lk(_mutex);
-		if(_cv.wait_for(lk, std::chrono::minutes(1), [this](){return _quit.load();}))
-		{
-			// got notified to quit
-			return;
-		}
-		else // 1 minute passed
-		{
-			if(!getIncrements())
-			{
-				continue;
-			}
-			++_currentTrigger;
-			
-			for(const Increments& i : _vecIncrements)
-			{
-				if(_currentTrigger % i.trigger) //increment correct intervals only
-				{
-					
-					//get twitch users
-					//for each user increment the data in sql table
-					//get old data, calculate new data, set new data in sql table
-					
-				}
-			}
-			
-			if(_currentTrigger == _maxTrigger)
-			{
-				_currentTrigger = 0;
-			}
-		}
-	}
 }
 
 std::vector<std::string> Items::getItems()
@@ -193,7 +199,7 @@ std::vector<std::string> Items::getTableNames()
 std::vector<std::string> Items::getColumnNames(const std::string& table)
 {
 	std::vector<std::string> vek;
-	auto v = getTableNames();
+	auto v = getChannels();
 	if(std::find(v.begin(), v.end(), table) != v.end())
 	{
 		int rc;
@@ -208,4 +214,56 @@ std::vector<std::string> Items::getColumnNames(const std::string& table)
 		rc = sqlite3_finalize(statement);
 	}
 	return vek;	
+}
+
+std::vector<std::string> Items::getChannels()
+{
+	int rc;
+	std::vector<std::string> vek;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "SELECT name FROM Channels;", -1, &statement, NULL);
+	while((rc = sqlite3_step(statement)) == SQLITE_ROW)
+	{
+		std::string text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+		vek.push_back(text);
+	}
+	rc = sqlite3_finalize(statement);
+	return vek;
+}
+
+int Items::addIncrement(int trigger, const std::string& per, const std::string& what, const std::string& howmuch, bool percent)
+{
+	auto v = getItems();
+	if(std::find(v.begin(), v.end(), per) == v.end())
+	{
+		return -1;
+	}
+	if(std::find(v.begin(), v.end(), what) == v.end())
+	{
+		return -2;
+	}
+	try
+	{
+		double much = std::stod(howmuch, nullptr);
+	}
+	catch(std::exception& e)
+	{
+		std::cout << e.what();
+		return -3;
+	}
+	std::cout << "incrementing\n";
+	char *error;
+	int rc;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "INSERT INTO Increments('trigger', 'per', 'what', 'howmuch', 'percent') VALUES (?, ?, ?, ?, ?);", -1, &statement, NULL);
+	sqlite3_bind_int(statement, 1, trigger);
+	sqlite3_bind_text(statement, 2, per.c_str(), -1, 0);
+	sqlite3_bind_text(statement, 3, what.c_str(), -1, 0);
+	sqlite3_bind_text(statement, 4, howmuch.c_str(), -1, 0);
+	sqlite3_bind_int(statement, 5, percent);
+	sqlite3_step(statement);
+	rc = sqlite3_finalize(statement);
+	if(!rc)
+		_increments.push_back({trigger, per, what, howmuch, percent});
+	return rc;
 }

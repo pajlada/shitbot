@@ -17,32 +17,27 @@ class Items
 public:
 	Items();
 	~Items();
-	void startLoop();
 	void stop();
 	int createChannelTable(const std::string&);
 	int addItemCategory(const std::string&);
 	std::vector<std::string> getItems();
 	std::vector<std::string> getColumnNames(const std::string& table);
 	std::vector<std::string> getTableNames();
-private:
+	std::vector<std::string> getChannels();
+	int addIncrement(int trigger, const std::string& per, const std::string& what, const std::string& howmuch, bool percent);
+	void getIncrements();
 	struct Increments
 	{
 		int trigger;
 		std::string per;
 		std::string what;
-		double howmuch;
+		std::string howmuch;
 		bool percent;
 	};
-	sqlite3* _db;
-	std::thread _thread;
-	std::condition_variable _cv;
-	std::mutex _mutex;
+	std::vector<Increments> _increments;
 	int _maxTrigger;
-	int _currentTrigger;
-	std::atomic<bool> _quit;
-	bool getIncrements();
-	std::vector<Increments> _vecIncrements;
-	void incrementLoop();
+private:
+	sqlite3* _db;
 };
 
 #endif

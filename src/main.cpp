@@ -152,6 +152,7 @@ public:
 		bool pinged = false;
 	};
 	std::map<std::string, std::unique_ptr<Pings>> pingMap;
+	void IncrementLoop();
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -168,6 +169,41 @@ private:
 	asio::ip::tcp::resolver::iterator twitch_it;
 	std::condition_variable quit_cv;
 };
+
+void IrcConnection::IncrementLoop()
+{
+	int currentTrigger;
+	while(!(this->quit()))
+	{
+		std::unique_lock<std::mutex> lock(irc_m);
+		if(this->quit_cv.wait_for(lock, std::chrono::minutes(1),[this](){return this->quit_m;}))			
+		{
+			std::cout << "quiting IncrementLoop" << std::endl;
+			return;
+		}
+		else // 15 seconds passed
+		{	
+			++currentTrigger;
+			
+			for(const Items::Increments& i : this->items._increments)
+			{
+				if(currentTrigger % i.trigger) //increment correct intervals only
+				{
+					
+					//get twitch users
+					//for each user increment the data in sql table
+					//get old data, calculate new data, set new data in sql table
+					
+				}
+			}
+			
+			if(currentTrigger == this->items._maxTrigger)
+			{
+				currentTrigger = 0;
+			}
+		}
+	}
+}
 
 IrcConnection::IrcConnection()
 {
@@ -400,6 +436,8 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					std::unique_lock<std::mutex> lk(this->pingMap[i.first]->mtx);
 					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(15), [this, &i](){return this->pingMap[i.first]->pinged;}))
 					{
+						std::string names = "NAMES #pajlada\r\n";
+						this->channelSockets["pajlada"]->send(asio::buffer(names));
 						std::cout << "received the ping back " << i.first << std::endl;
 						this->pingMap[i.first]->pinged = false;
 					}
@@ -898,6 +936,13 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
+	
+	
+	myIrc.items.addItemCategory("appletree");
+	myIrc.items.createChannelTable("pajlada");
+	myIrc.items.addItemCategory("apple");
+	myIrc.items.addIncrement(2, "appletree", "apple", "14.00023999418", true);
+	
 
 	myIrc.waitEnd();
 	return 0;
