@@ -170,6 +170,7 @@ private:
 	std::string nick;
 	asio::ip::tcp::resolver::iterator twitch_it;
 	std::condition_variable quit_cv;
+	int currentTrigger = 0;
 };
 
 size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
@@ -180,7 +181,6 @@ size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 
 void IrcConnection::IncrementLoop()
 {
-	int currentTrigger;
 	while(!(this->quit()))
 	{
 		std::unique_lock<std::mutex> lock(irc_m);
@@ -250,82 +250,35 @@ void IrcConnection::IncrementLoop()
 					//int trigger;
 					//std::string per;
 					//std::string what;
-					//std::string howmuch;
-					//bool percent;
-					std::map<std::string, double> increases;
+					//double howmuch;
+					std::vector<std::pair<std::string, long long>> increases;
 					for(auto i : currentOnes)
 					{
-						double incr = 0.0;
-						double current = 0.0;
-						double adding = 0.0;
-						try
-						{
-							incr = std::stod(i.howmuch);
-						}
-						catch(std::exception &e)
-						{
-							incr = 0.0;
-						}
-						if(incr == 0.0) continue;
+						long long current = 0;
+						long long adding = 0;
+
+						if(i.howmuch == 0.0) continue;
 						std::string perwhat;
 						if(i.per == "default")
 						{
-							adding = incr;
-							increases.insert({i.what, adding});
+							adding = i.howmuch;
+							increases.push_back({i.what, adding});
 						}
 						else
 						{
 							perwhat = i.per;
-							try
-							{
-								std::string per = this->items.getCount(nm, name, perwhat);
-								if(per.size() != 0)
-								{
-									current = std::stod(per, nullptr);
-								}
-							}
-							catch(std::exception &e)
-							{
-								current = 0.0;
-							}
-							if(current == 0.0) continue;
-							adding = current * incr;
-							if(i.percent == true)
-							{
-								adding /= 100;
-							}
-							increases.insert({i.what, adding});
+							
+							long long per = this->items.getCount(nm, name, perwhat);
+
+							adding = (per * i.howmuch);
+							increases.push_back({i.what, adding});
 						}
 					}
 					for(auto i : increases)
 					{
-						//void Items::insertOrReplace(std::vector<std::string> vek)
-						//vek[0] == channel
-						//vek[1] == username
-						//vek[2] == what
-						//vek[3] == howmany
-						std::vector<std::string> vek;
-						vek.push_back(nm);
-						vek.push_back(name);
-						vek.push_back(i.first);
-						
-						double current = 0.0;
-						try
-						{
-							std::string per = this->items.getCount(nm, name, i.first);
-							//std::cout << "nm: " << nm << "\nname: " << name << "\ni.first: " << i.first << "\nper: " << per << std::endl;
-							if(per.size() != 0)
-							{
-								current = std::stod(per, nullptr);
-							}
-						}
-						catch(std::exception &e)
-						{
-							continue;
-						}
+						long long current = this->items.getCount(nm, name, i.first);
 						current += i.second;
-						vek.push_back(std::to_string(current));
-						this->items.insertOrReplace(vek);
+						this->items.insertOrReplace(nm, name, i.first, current);
 					}
 				}
 				auto end = std::chrono::high_resolution_clock::now();
@@ -671,6 +624,29 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		vek.push_back(msg);
 		if(vek.size() == 2)
 		this->items.createChannelTable(vek[1]);
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!deleteincrement"), "!deleteincrement") == 0 && user == "hemirt")
+	{
+		
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+		{
+			int id = 0;
+			std::stringstream(vek[1]) >> id;
+			if(id == 0) return;
+			this->items.deleteIncrement(id);
+		}
+		return;
 	}
 	
 	if(msg.compare(0, strlen("!additemcategory"), "!additemcategory") == 0 && user == "hemirt")
@@ -699,8 +675,8 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
-		if(vek.size() == 6)
-		this->items.addIncrement(stoi(vek[1]), vek[2], vek[3], vek[4], stoi(vek[5]));
+		if(vek.size() == 5)
+		this->items.addIncrement(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
 	}
 	
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
@@ -746,12 +722,21 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		vek.push_back(msg);
 		if(vek.size() == 2)
 		std::cout << vek[1] << std::endl;
-		std::string count = this->items.getCount(channel, user, vek[1]);
-		if(count.size() == 0) count = "0";
+		long long count = this->items.getCount(channel, user, vek[1]);
 		std::stringstream ss;
-		ss << user << ", you have " << atoi(count.c_str()) << " " << vek[1];
-		if(count != "1") ss<< "s";
+		ss << user << ", you have " << count << " " << vek[1];
+		if(count != 1) ss << "s";
 		ss << ".";
+		this->sendMsg(channel, ss.str());
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!peng"), "!peng") == 0)
+	{
+		std::string delimiter = " ";
+		
+		std::stringstream ss;
+		ss << user << ", weneedmoreautisticbots is running for " <<  this->currentTrigger << " minutes PogChamp";
 		this->sendMsg(channel, ss.str());
 		return;
 	}

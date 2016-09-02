@@ -24,20 +24,19 @@ public:
 	std::vector<std::string> getColumnNames(const std::string& table);
 	std::vector<std::string> getTableNames();
 	std::vector<std::string> getChannels();
-	int addIncrement(int trigger, const std::string& per, const std::string& what, const std::string& howmuch, bool percent);
+	int addIncrement(int trigger, const std::string& per, const std::string& what, double howmuch);
 	void getIncrements();
-	void insertOrReplace(std::vector<std::string>);
-	std::string getCount(const std::string&, const std::string&, const std::string&);
+	void insertOrReplace(const std::string& channel, const std::string& username, const std::string& what, long long howmany);
+	long long getCount(const std::string&, const std::string&, const std::string&);
 	struct Increments
 	{
 		int trigger;
 		std::string per;
 		std::string what;
-		std::string howmuch;
-		bool percent;
+		double howmuch;
 	};
 	std::vector<Increments> _increments;
-	int _maxTrigger;
+	int deleteIncrement(int);
 private:
 	sqlite3* _db;
 };

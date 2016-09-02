@@ -31,7 +31,7 @@ Items::Items()
 		throw std::runtime_error(sqlite3_errmsg(_db));
 	}	
 	char *error;
-	const char* sql = "CREATE TABLE IF NOT EXISTS Increments(id INTEGER PRIMARY KEY ASC, trigger INTEGER, per TEXT, what TEXT, howmuch REAL, percent BOOL);";
+	const char* sql = "CREATE TABLE IF NOT EXISTS Increments(id INTEGER PRIMARY KEY ASC, trigger INTEGER, per TEXT, what TEXT, howmuch REAL);";
 	rc = sqlite3_exec(_db, sql, NULL, NULL, &error);
 	if(rc)
 	{
@@ -69,7 +69,7 @@ int Items::createChannelTable(const std::string& chn)
 	std::string sql = "CREATE TABLE IF NOT EXISTS " + chn + " (id INTEGER PRIMARY KEY ASC, username TEXT UNIQUE";
 	for(auto i : vek)
 	{
-		sql += ", " + i + " TEXT";
+		sql += ", " + i + " INT";
 	}
 	sql += ");";
 	char *error;
@@ -124,7 +124,7 @@ int Items::addItemCategory(const std::string& item)
 			sqlite3_stmt * statement2;
 			std::string itemE = item;
 			escape(itemE);
-			std::string sql = "ALTER TABLE " + chn + " ADD COLUMN " + itemE + " TEXT;";
+			std::string sql = "ALTER TABLE " + chn + " ADD COLUMN " + itemE + " INT;";
 			sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement2, NULL);
 			sqlite3_step(statement2);
 			rc = sqlite3_finalize(statement2);
@@ -138,32 +138,18 @@ void Items::getIncrements()
 	_increments.clear();
 	int rc;
 	sqlite3_stmt * statement;
-	sqlite3_prepare_v2(_db, "SELECT trigger, per, what, howmuch, percent FROM Increments;", -1, &statement, NULL);
+	sqlite3_prepare_v2(_db, "SELECT trigger, per, what, howmuch FROM Increments;", -1, &statement, NULL);
 	while((rc = sqlite3_step(statement)) == SQLITE_ROW)
 	{
 		Increments incr;
 		incr.trigger = sqlite3_column_int(statement, 0);
 		incr.per = reinterpret_cast<const char*>(sqlite3_column_text(statement, 1));
 		incr.what = reinterpret_cast<const char*>(sqlite3_column_text(statement, 2));
-		incr.howmuch = reinterpret_cast<const char*>(sqlite3_column_text(statement, 3));
-		if(sqlite3_column_int(statement, 4) == 0)
-		{
-			incr.percent = false;
-		}
-		else incr.percent = true;
+		incr.howmuch = sqlite3_column_double(statement, 3);
 		
 		_increments.push_back(incr);
 	}
 	rc = sqlite3_finalize(statement);
-	if(_increments.size() == 0)
-	{
-		_maxTrigger = 0;
-	}
-	else
-	{
-		_maxTrigger = (std::max_element(_increments.begin(), _increments.end(), [](const Increments& i1, const Increments& i2){return i1.trigger < i2.trigger;}))->trigger;
-	}
-
 }
 
 std::vector<std::string> Items::getItems()
@@ -231,7 +217,7 @@ std::vector<std::string> Items::getChannels()
 	return vek;
 }
 
-int Items::addIncrement(int trigger, const std::string& per, const std::string& what, const std::string& howmuch, bool percent)
+int Items::addIncrement(int trigger, const std::string& per, const std::string& what, double howmuch)
 {
 	auto v = getItems();
 	if(std::find(v.begin(), v.end(), per) == v.end() && per != "default")
@@ -242,24 +228,14 @@ int Items::addIncrement(int trigger, const std::string& per, const std::string& 
 	{
 		return -2;
 	}
-	try
-	{
-		double much = std::stod(howmuch, nullptr);
-	}
-	catch(std::exception& e)
-	{
-		std::cout << e.what();
-		return -3;
-	}
 	char *error;
 	int rc;
 	sqlite3_stmt * statement;
-	sqlite3_prepare_v2(_db, "INSERT INTO Increments('trigger', 'per', 'what', 'howmuch', 'percent') VALUES (?, ?, ?, ?, ?);", -1, &statement, NULL);
+	sqlite3_prepare_v2(_db, "INSERT INTO Increments('trigger', 'per', 'what', 'howmuch') VALUES (?, ?, ?, ?);", -1, &statement, NULL);
 	sqlite3_bind_int(statement, 1, trigger);
 	sqlite3_bind_text(statement, 2, per.c_str(), -1, 0);
 	sqlite3_bind_text(statement, 3, what.c_str(), -1, 0);
-	sqlite3_bind_text(statement, 4, howmuch.c_str(), -1, 0);
-	sqlite3_bind_int(statement, 5, percent);
+	sqlite3_bind_double(statement, 4, howmuch);
 	sqlite3_step(statement);
 	rc = sqlite3_finalize(statement);
 	if(!rc)
@@ -267,43 +243,52 @@ int Items::addIncrement(int trigger, const std::string& per, const std::string& 
 	return rc;
 }
 
-void Items::insertOrReplace(std::vector<std::string> vek)
+int Items::deleteIncrement(int id)
+{
+	char *error;
+	int rc;
+	sqlite3_stmt * statement;
+	sqlite3_prepare_v2(_db, "DELETE FROM Increments WHERE id = ?;", -1, &statement, NULL);
+	sqlite3_bind_int(statement, 1, id);
+	sqlite3_step(statement);
+	rc = sqlite3_finalize(statement);
+	if(!rc)
+		getIncrements();
+	return rc;
+}
+
+void Items::insertOrReplace(const std::string& channel, const std::string& username, const std::string& what, long long howmany)
 {
 	//vek[0] == channel
 	//vek[1] == username
 	//vek[2] == what
 	//vek[3] == howmany
 	sqlite3_stmt * statement;
-	std::string sql = "INSERT OR IGNORE INTO " + vek[0] + "(username) VALUES(?);";
+	std::string sql = "INSERT OR IGNORE INTO " + channel + "(username) VALUES(?);";
 	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
-	sqlite3_bind_text(statement, 1, vek[1].c_str(), -1, 0);
+	sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
 	sqlite3_step(statement);
 	sqlite3_finalize(statement);
 	
-	if(vek.size() == 4)
-	{
-		sql = "UPDATE " + vek[0] + " SET " + vek[2] + " = ? WHERE username = ?;";
-		sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
-		sqlite3_bind_text(statement, 1, vek[3].c_str(), -1, 0);
-		sqlite3_bind_text(statement, 2, vek[1].c_str(), -1, 0);
-		sqlite3_step(statement);
-		sqlite3_finalize(statement);
-	}
+	sql = "UPDATE " + channel + " SET " + what + " = ? WHERE username = ?;";
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+	sqlite3_bind_int64(statement, 1, howmany);
+	sqlite3_bind_text(statement, 2, username.c_str(), -1, 0);
+	sqlite3_step(statement);
+	sqlite3_finalize(statement);
 }
 
-std::string Items::getCount(const std::string& channel, const std::string& username, const std::string& what)
+long long Items::getCount(const std::string& channel, const std::string& username, const std::string& what)
 {
 	sqlite3_stmt * statement;
 	std::string sql = "SELECT " + what + " FROM " + channel + " WHERE username = ?;"; 
 	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
 	sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
-	std::string text;
+	long long value = 0;
 	if(sqlite3_step(statement) == SQLITE_ROW)
 	{
 		if(sqlite3_column_type(statement, 0) != SQLITE_NULL)
-			text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+			value = sqlite3_column_int64(statement, 0);
 	}
-	if(text.size() == 0)
-	sqlite3_finalize(statement);
-	return text;
+	return value;
 }
