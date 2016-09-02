@@ -264,18 +264,22 @@ void Items::insertOrReplace(const std::string& channel, const std::string& usern
 	//vek[2] == what
 	//vek[3] == howmany
 	sqlite3_stmt * statement;
-	std::string sql = "INSERT OR IGNORE INTO " + channel + "(username) VALUES(?);";
-	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
-	sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
-	sqlite3_step(statement);
-	sqlite3_finalize(statement);
-	
-	sql = "UPDATE " + channel + " SET " + what + " = ? WHERE username = ?;";
+	std::string sql = "UPDATE " + channel + " SET " + what + " = ? WHERE username = ?;";
 	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
 	sqlite3_bind_int64(statement, 1, howmany);
 	sqlite3_bind_text(statement, 2, username.c_str(), -1, 0);
-	sqlite3_step(statement);
+	int rc = sqlite3_step(statement);
 	sqlite3_finalize(statement);
+	if(rc != SQLITE_DONE)
+	{
+		sql = "INSERT INTO " + channel + "(username, " + what +") VALUES(?, ?);";
+		sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+		sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
+		sqlite3_bind_int64(statement, 2, howmany);
+		sqlite3_step(statement);
+		sqlite3_finalize(statement);
+	}
+	
 }
 
 long long Items::getCount(const std::string& channel, const std::string& username, const std::string& what)

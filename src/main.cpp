@@ -184,7 +184,7 @@ void IrcConnection::IncrementLoop()
 	while(!(this->quit()))
 	{
 		std::unique_lock<std::mutex> lock(irc_m);
-		if(this->quit_cv.wait_for(lock, std::chrono::minutes(1),[this](){return this->quit_m;}))			
+		if(this->quit_cv.wait_for(lock, std::chrono::seconds(5),[this](){return this->quit_m;}))			
 		{
 			std::cout << "quiting IncrementLoop" << std::endl;
 			return;
@@ -249,7 +249,7 @@ void IrcConnection::IncrementLoop()
 					std::string what;
 					long long current;
 				};
-				std::vector<incr> vek(chatters.size() * currentOnes.size());
+				std::vector<incr> vek;
 				for(auto name : chatters)
 				{
 					//Items::getCount(channel, username, what)
@@ -291,12 +291,13 @@ void IrcConnection::IncrementLoop()
 				}
 				auto nm1 = std::chrono::high_resolution_clock::now();
 				this->items.begin();
-				for(const auto& i : vek)
+				for(const auto& i :vek)
 				{
 					this->items.insertOrReplace(nm, i.name, i.what, i.current);
 				}
 				this->items.end();
 				auto end = std::chrono::high_resolution_clock::now();
+				std::cout << "chatters: " << chatters.size() << "\ncurrentones: " << currentOnes.size() << std::endl;
 				std::cout << "insert operations: " << vek.size() << std::endl;
 				std::cout << "took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds" << std::endl;
 				std::cout << "took2: " << std::chrono::duration_cast<std::chrono::milliseconds>(nm1 - start).count() << " milliseconds" << std::endl;
