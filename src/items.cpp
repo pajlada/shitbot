@@ -26,11 +26,11 @@ Items::Items()
 {
 	int rc;
 	rc = sqlite3_open("items.db", &_db);
+	char *error;
 	if(rc)
 	{
 		throw std::runtime_error(sqlite3_errmsg(_db));
 	}	
-	char *error;
 	const char* sql = "CREATE TABLE IF NOT EXISTS Increments(id INTEGER PRIMARY KEY ASC, trigger INTEGER, per TEXT, what TEXT, howmuch REAL);";
 	rc = sqlite3_exec(_db, sql, NULL, NULL, &error);
 	if(rc)
@@ -340,5 +340,5 @@ void Items::begin()
 
 void Items::end()
 {
-	sqlite3_exec(_db, "END TRANSACTION;", NULL, NULL, NULL);
+	sqlite3_exec(_db, "END TRANSACTION;", NULL, NULL, NULL);		
 }

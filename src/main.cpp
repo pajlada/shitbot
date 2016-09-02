@@ -146,7 +146,7 @@ public:
 	}
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 	void handleCommands(std::string&, const std::string&, std::string&);
-	Items items;
+	//Items items;
 	struct Pings
 	{
 		std::condition_variable cv;
@@ -154,7 +154,7 @@ public:
 		bool pinged = false;
 	};
 	std::map<std::string, std::unique_ptr<Pings>> pingMap;
-	void IncrementLoop();
+	//void IncrementLoop();
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -178,7 +178,7 @@ size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
-
+/*
 void IrcConnection::IncrementLoop()
 {
 	while(!(this->quit()))
@@ -307,15 +307,15 @@ void IrcConnection::IncrementLoop()
 				std::cout << "took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds" << std::endl;
 				std::cout << "took2: " << std::chrono::duration_cast<std::chrono::milliseconds>(nm1 - start).count() << " milliseconds" << std::endl;
 				//get old data, calculate new data, set new data in sql table
-				/*for(auto ...)
+				for(auto ...)
 				{
 					if()
-				}*/
+				}
 			}
 		}
 	}
 }
-
+*/
 IrcConnection::IrcConnection()
 {
 	this->adminsFile.open("admins.txt", std::ios::in);
@@ -563,7 +563,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	};
 	
 	this->threads.push_back(std::thread(lambda));
-	this->threads.push_back(std::thread(&IrcConnection::IncrementLoop, this));
+	//this->threads.push_back(std::thread(&IrcConnection::IncrementLoop, this));
 }
 
 
@@ -633,7 +633,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		this->joinChannel(channel);
 		return;
 	}
-	
+	/*
 	if(msg.compare(0, strlen("!addchannel"), "!addchannel") == 0 && user == "hemirt")
 	{
 		std::string delimiter = " ";
@@ -701,7 +701,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		if(vek.size() == 5)
 		this->items.addIncrement(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
 	}
-	
+	*/
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
 	{
 		std::string delimiter = "#";
@@ -731,7 +731,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		return;
 	}
-	
+	/*
 	if(msg.compare(0, strlen("!mycount"), "!mycount") == 0)
 	{
 		std::string delimiter = " ";
@@ -753,7 +753,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		this->sendMsg(channel, ss.str());
 		return;
 	}
-	
+	*/
 	if(msg.compare(0, strlen("!peng"), "!peng") == 0)
 	{
 		std::string delimiter = " ";
