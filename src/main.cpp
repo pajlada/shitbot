@@ -184,7 +184,7 @@ void IrcConnection::IncrementLoop()
 	while(!(this->quit()))
 	{
 		std::unique_lock<std::mutex> lock(irc_m);
-		if(this->quit_cv.wait_for(lock, std::chrono::seconds(5),[this](){return this->quit_m;}))			
+		if(this->quit_cv.wait_for(lock, std::chrono::seconds(1),[this](){return this->quit_m;}))			
 		{
 			std::cout << "quiting IncrementLoop" << std::endl;
 			return;
@@ -252,6 +252,11 @@ void IrcConnection::IncrementLoop()
 				std::vector<incr> vek;
 				for(auto name : chatters)
 				{
+					if(this->items.chnusers[nm].count(name) == 0)
+					{
+						//std::cout << name << " doesnt exist in " << nm << std::endl;
+						this->items.insert(nm, name);
+					}
 					//Items::getCount(channel, username, what)
 					//i.
 					//int trigger;

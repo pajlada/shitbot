@@ -11,6 +11,7 @@
 #include <map>
 #include <algorithm>
 #include <iostream>
+#include <unordered_set>
 
 class Items
 {
@@ -27,6 +28,7 @@ public:
 	int addIncrement(int trigger, const std::string& per, const std::string& what, double howmuch);
 	void getIncrements();
 	void insertOrReplace(const std::string& channel, const std::string& username, const std::string& what, long long howmany);
+	void insert(const std::string& channel, const std::string& username);
 	long long getCount(const std::string&, const std::string&, const std::string&);
 	struct Increments
 	{
@@ -39,6 +41,9 @@ public:
 	int deleteIncrement(int);
 	void begin();
 	void end();
+	bool exists(const std::string&, const std::string&);
+	std::map<std::string, std::unordered_set<std::string>> chnusers;
+	void getUsers(const std::string& channel);
 private:
 	sqlite3* _db;
 };

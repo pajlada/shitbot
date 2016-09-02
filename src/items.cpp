@@ -212,6 +212,7 @@ std::vector<std::string> Items::getChannels()
 	{
 		std::string text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
 		vek.push_back(text);
+		getUsers(text);
 	}
 	rc = sqlite3_finalize(statement);
 	return vek;
@@ -257,6 +258,18 @@ int Items::deleteIncrement(int id)
 	return rc;
 }
 
+void Items::insert(const std::string& channel, const std::string& username)
+{
+	sqlite3_stmt * statement;
+	std::string sql = "INSERT INTO " + channel + "(username) VALUES(?);";
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+	sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
+	sqlite3_step(statement);
+	sqlite3_finalize(statement);
+	chnusers[channel].insert(username);
+}
+
+//update
 void Items::insertOrReplace(const std::string& channel, const std::string& username, const std::string& what, long long howmany)
 {
 	//vek[0] == channel
@@ -270,16 +283,6 @@ void Items::insertOrReplace(const std::string& channel, const std::string& usern
 	sqlite3_bind_text(statement, 2, username.c_str(), -1, 0);
 	int rc = sqlite3_step(statement);
 	sqlite3_finalize(statement);
-	if(rc != SQLITE_DONE)
-	{
-		sql = "INSERT INTO " + channel + "(username, " + what +") VALUES(?, ?);";
-		sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
-		sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
-		sqlite3_bind_int64(statement, 2, howmany);
-		sqlite3_step(statement);
-		sqlite3_finalize(statement);
-	}
-	
 }
 
 long long Items::getCount(const std::string& channel, const std::string& username, const std::string& what)
@@ -295,6 +298,39 @@ long long Items::getCount(const std::string& channel, const std::string& usernam
 			value = sqlite3_column_int64(statement, 0);
 	}
 	return value;
+}
+
+bool Items::exists(const std::string& channel, const std::string& username)
+{
+	sqlite3_stmt * statement;
+	std::string sql = "SELECT id FROM " + channel + " WHERE username = ?;"; 
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+	sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
+	int value = 0;
+	if(sqlite3_step(statement) == SQLITE_ROW)
+	{
+		if(sqlite3_column_type(statement, 0) != SQLITE_NULL)
+			value = sqlite3_column_int(statement, 0);
+	}
+	if(value != 0)
+	{
+		return true;
+	}
+	else return false;
+}
+
+void Items::getUsers(const std::string& channel)
+{
+	begin();
+	sqlite3_stmt * statement;
+	std::string sql = "SELECT username FROM " + channel + ";"; 
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+	while(sqlite3_step(statement) == SQLITE_ROW)
+	{
+		std::string text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+		chnusers[channel].insert(text);
+	}
+	end();
 }
 
 void Items::begin()
