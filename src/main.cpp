@@ -243,6 +243,13 @@ void IrcConnection::IncrementLoop()
 					}
 				}
 				auto start = std::chrono::high_resolution_clock::now();
+				struct incr
+				{
+					std::string name;
+					std::string what;
+					long long current;
+				};
+				std::vector<incr> vek(chatters.size() * currentOnes.size());
 				for(auto name : chatters)
 				{
 					//Items::getCount(channel, username, what)
@@ -278,11 +285,21 @@ void IrcConnection::IncrementLoop()
 					{
 						long long current = this->items.getCount(nm, name, i.first);
 						current += i.second;
-						this->items.insertOrReplace(nm, name, i.first, current);
+						vek.push_back({name, i.first, current});
 					}
+					
 				}
+				auto nm1 = std::chrono::high_resolution_clock::now();
+				this->items.begin();
+				for(const auto& i : vek)
+				{
+					this->items.insertOrReplace(nm, i.name, i.what, i.current);
+				}
+				this->items.end();
 				auto end = std::chrono::high_resolution_clock::now();
+				std::cout << "insert operations: " << vek.size() << std::endl;
 				std::cout << "took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds" << std::endl;
+				std::cout << "took2: " << std::chrono::duration_cast<std::chrono::milliseconds>(nm1 - start).count() << " milliseconds" << std::endl;
 				//get old data, calculate new data, set new data in sql table
 				/*for(auto ...)
 				{

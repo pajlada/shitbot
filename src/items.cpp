@@ -292,3 +292,13 @@ long long Items::getCount(const std::string& channel, const std::string& usernam
 	}
 	return value;
 }
+
+void Items::begin()
+{
+	sqlite3_exec(_db, "BEGIN TRANSACTION;", NULL, NULL, NULL);
+}
+
+void Items::end()
+{
+	sqlite3_exec(_db, "END TRANSACTION;", NULL, NULL, NULL);
+}

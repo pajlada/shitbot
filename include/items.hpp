@@ -37,6 +37,8 @@ public:
 	};
 	std::vector<Increments> _increments;
 	int deleteIncrement(int);
+	void begin();
+	void end();
 private:
 	sqlite3* _db;
 };
