@@ -15,6 +15,7 @@
 #include "sqlite3.h"
 #include "items.hpp"
 #include "curl/curl.h"
+#include <limits>
 
 struct Command
 {
@@ -174,7 +175,6 @@ private:
 size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
-	std::cout << size * nmemb << std::endl;
 	return size * nmemb;
 }
 
@@ -200,11 +200,13 @@ void IrcConnection::IncrementLoop()
 			struct curl_slist *chunk = NULL;
 			chunk = curl_slist_append(chunk, "Accept: application/json");
 			
-			for(auto& nm : this->channelSockets)
+			auto v = this->items.getChannels();
+			for(auto& nm : v)
 			{
 				
-				std::string tmi = "http://tmi.twitch.tv/group/user/" + nm.first + "/chatters";
+				std::string tmi = "http://tmi.twitch.tv/group/user/" + nm + "/chatters";
 				std::string readBuffer;
+				std::vector<std::string> readVector;
 				
 				res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 				curl_easy_setopt(curl, CURLOPT_URL, tmi.c_str());
@@ -212,22 +214,127 @@ void IrcConnection::IncrementLoop()
 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 				res = curl_easy_perform(curl);
 				curl_easy_reset(curl);
-				//std::cout << "READBUFFER: " << readBuffer << std::endl;
+				
+				std::vector<std::string> chatters;
+				std::string fullchatters;
+				size_t	pos = readBuffer.find("\"moderators\": [");
+				pos += strlen("\"moderators\": [");
+				size_t endpos = readBuffer.find("]", pos);
+				fullchatters.append(readBuffer.substr(pos, endpos-pos));
+				pos = readBuffer.find("\"viewers\": [");
+				pos += strlen("\"viewers\": [");
+				endpos = readBuffer.find("]", pos);
+				fullchatters.append(readBuffer.substr(pos, endpos-pos));
+				
+				pos = 0;
+				while((pos = fullchatters.find("\"", pos + 1)) != std::string::npos)
+				{
+					endpos = fullchatters.find("\"", pos + 1);
+					chatters.push_back(fullchatters.substr(pos + 1, endpos-pos - 1));
+					pos = endpos;
+				}
+				
+				std::vector<Items::Increments> currentOnes;
 				for(auto i : this->items._increments)
 				{
-					//std::cout << i.what << std::endl;
-					//if(currentTrigger % i.trigger == 0) //increment correct intervals only
+					if(currentTrigger % i.trigger == 0) //increment correct intervals only
 					{
-						//for each user increment the data in sql table
-						//get old data, calculate new data, set new data in sql table
-						
+						currentOnes.push_back(i);						
 					}
 				}
-			}
-
-			if(currentTrigger == this->items._maxTrigger)
-			{
-				currentTrigger = 0;
+				auto start = std::chrono::high_resolution_clock::now();
+				for(auto name : chatters)
+				{
+					//Items::getCount(channel, username, what)
+					//i.
+					//int trigger;
+					//std::string per;
+					//std::string what;
+					//std::string howmuch;
+					//bool percent;
+					std::map<std::string, double> increases;
+					for(auto i : currentOnes)
+					{
+						double incr = 0.0;
+						double current = 0.0;
+						double adding = 0.0;
+						try
+						{
+							incr = std::stod(i.howmuch);
+						}
+						catch(std::exception &e)
+						{
+							incr = 0.0;
+						}
+						if(incr == 0.0) continue;
+						std::string perwhat;
+						if(i.per == "default")
+						{
+							adding = incr;
+							increases.insert({i.what, adding});
+						}
+						else
+						{
+							perwhat = i.per;
+							try
+							{
+								std::string per = this->items.getCount(nm, name, perwhat);
+								if(per.size() != 0)
+								{
+									current = std::stod(per, nullptr);
+								}
+							}
+							catch(std::exception &e)
+							{
+								current = 0.0;
+							}
+							if(current == 0.0) continue;
+							adding = current * incr;
+							if(i.percent == true)
+							{
+								adding /= 100;
+							}
+							increases.insert({i.what, adding});
+						}
+					}
+					for(auto i : increases)
+					{
+						//void Items::insertOrReplace(std::vector<std::string> vek)
+						//vek[0] == channel
+						//vek[1] == username
+						//vek[2] == what
+						//vek[3] == howmany
+						std::vector<std::string> vek;
+						vek.push_back(nm);
+						vek.push_back(name);
+						vek.push_back(i.first);
+						
+						double current = 0.0;
+						try
+						{
+							std::string per = this->items.getCount(nm, name, i.first);
+							//std::cout << "nm: " << nm << "\nname: " << name << "\ni.first: " << i.first << "\nper: " << per << std::endl;
+							if(per.size() != 0)
+							{
+								current = std::stod(per, nullptr);
+							}
+						}
+						catch(std::exception &e)
+						{
+							continue;
+						}
+						current += i.second;
+						vek.push_back(std::to_string(current));
+						this->items.insertOrReplace(vek);
+					}
+				}
+				auto end = std::chrono::high_resolution_clock::now();
+				std::cout << "took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds" << std::endl;
+				//get old data, calculate new data, set new data in sql table
+				/*for(auto ...)
+				{
+					if()
+				}*/
 			}
 		}
 	}
@@ -551,6 +658,51 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 	}
 	
+	if(msg.compare(0, strlen("!addchannel"), "!addchannel") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+		this->items.createChannelTable(vek[1]);
+	}
+	
+	if(msg.compare(0, strlen("!additemcategory"), "!additemcategory") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+		this->items.addItemCategory(vek[1]);
+	}
+	
+	if(msg.compare(0, strlen("!additemincrement"), "!additemincrement") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 6)
+		this->items.addIncrement(stoi(vek[1]), vek[2], vek[3], vek[4], stoi(vek[5]));
+	}
+	
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
 	{
 		std::string delimiter = "#";
@@ -578,6 +730,29 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			std::cout << "adding: " << vek[1] << "#" << cmd << std::endl;
 			this->addCmd(vek[1], cmd);
 		}
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!mycount"), "!mycount") == 0)
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+		std::cout << vek[1] << std::endl;
+		std::string count = this->items.getCount(channel, user, vek[1]);
+		if(count.size() == 0) count = "0";
+		std::stringstream ss;
+		ss << user << ", you have " << atoi(count.c_str()) << " " << vek[1];
+		if(count != "1") ss<< "s";
+		ss << ".";
+		this->sendMsg(channel, ss.str());
 		return;
 	}
 	
@@ -629,7 +804,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 		
 	}
-
+	try{
 	while(msg.find(".") != std::string::npos)
 	{
 		msg.replace(msg.find("."), 1, "·");
@@ -638,6 +813,10 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	while(msg.find("!") != std::string::npos)
 	{
 		msg.replace(msg.find("!"), 1, "\u00A1");
+	}
+	while(msg.find("/") != std::string::npos)
+	{
+		msg.replace(msg.find("/"), 1, "\\");
 	}
 	std::string msgcopy = msg;
 	std::string delimiter = " ";
@@ -660,6 +839,10 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		while(msg.find("\u00A1") != std::string::npos)
 		{
 			msg.replace(msg.find("\u00A1"), strlen("\u00A1"), "!");
+		}
+		while(msg.find("\\") != std::string::npos)
+		{
+			msg.replace(msg.find("\\"), 1, "/");
 		}
 	}
 	
@@ -853,6 +1036,11 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			}
 		}
 	}
+	}catch(std::exception& e)
+	{
+		std::cout << msg << std::endl;
+		std::cout << e.what() << std::endl;
+	}
 }
 
 void IrcConnection::processEventQueue()
@@ -963,13 +1151,7 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
-	
-	
-	myIrc.items.addItemCategory("appletree");
-	myIrc.items.createChannelTable("pajlada");
-	myIrc.items.addItemCategory("apple");
-	//myIrc.items.addIncrement(2, "appletree", "apple", "14.00023999418", true);
-	
+		
 	myIrc.waitEnd();
 	return 0;
 }

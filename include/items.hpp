@@ -26,6 +26,8 @@ public:
 	std::vector<std::string> getChannels();
 	int addIncrement(int trigger, const std::string& per, const std::string& what, const std::string& howmuch, bool percent);
 	void getIncrements();
+	void insertOrReplace(std::vector<std::string>);
+	std::string getCount(const std::string&, const std::string&, const std::string&);
 	struct Increments
 	{
 		int trigger;

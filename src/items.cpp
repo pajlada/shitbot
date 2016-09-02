@@ -66,7 +66,7 @@ Items::~Items()
 int Items::createChannelTable(const std::string& chn)
 {
 	auto vek = getItems();
-	std::string sql = "CREATE TABLE IF NOT EXISTS " + chn + " (id INTEGER PRIMARY KEY ASC, username TEXT";
+	std::string sql = "CREATE TABLE IF NOT EXISTS " + chn + " (id INTEGER PRIMARY KEY ASC, username TEXT UNIQUE";
 	for(auto i : vek)
 	{
 		sql += ", " + i + " TEXT";
@@ -234,7 +234,7 @@ std::vector<std::string> Items::getChannels()
 int Items::addIncrement(int trigger, const std::string& per, const std::string& what, const std::string& howmuch, bool percent)
 {
 	auto v = getItems();
-	if(std::find(v.begin(), v.end(), per) == v.end())
+	if(std::find(v.begin(), v.end(), per) == v.end() && per != "default")
 	{
 		return -1;
 	}
@@ -263,6 +263,47 @@ int Items::addIncrement(int trigger, const std::string& per, const std::string& 
 	sqlite3_step(statement);
 	rc = sqlite3_finalize(statement);
 	if(!rc)
-		_increments.push_back({trigger, per, what, howmuch, percent});
+		getIncrements();
 	return rc;
+}
+
+void Items::insertOrReplace(std::vector<std::string> vek)
+{
+	//vek[0] == channel
+	//vek[1] == username
+	//vek[2] == what
+	//vek[3] == howmany
+	sqlite3_stmt * statement;
+	std::string sql = "INSERT OR IGNORE INTO " + vek[0] + "(username) VALUES(?);";
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+	sqlite3_bind_text(statement, 1, vek[1].c_str(), -1, 0);
+	sqlite3_step(statement);
+	sqlite3_finalize(statement);
+	
+	if(vek.size() == 4)
+	{
+		sql = "UPDATE " + vek[0] + " SET " + vek[2] + " = ? WHERE username = ?;";
+		sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+		sqlite3_bind_text(statement, 1, vek[3].c_str(), -1, 0);
+		sqlite3_bind_text(statement, 2, vek[1].c_str(), -1, 0);
+		sqlite3_step(statement);
+		sqlite3_finalize(statement);
+	}
+}
+
+std::string Items::getCount(const std::string& channel, const std::string& username, const std::string& what)
+{
+	sqlite3_stmt * statement;
+	std::string sql = "SELECT " + what + " FROM " + channel + " WHERE username = ?;"; 
+	sqlite3_prepare_v2(_db, sql.c_str(), -1, &statement, NULL);
+	sqlite3_bind_text(statement, 1, username.c_str(), -1, 0);
+	std::string text;
+	if(sqlite3_step(statement) == SQLITE_ROW)
+	{
+		if(sqlite3_column_type(statement, 0) != SQLITE_NULL)
+			text = reinterpret_cast<const char*>(sqlite3_column_text(statement, 0));
+	}
+	if(text.size() == 0)
+	sqlite3_finalize(statement);
+	return text;
 }
