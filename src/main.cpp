@@ -594,6 +594,7 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 
 void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
+	try{
 	//std::cout << "HANDLING COMMAND\n";
 
 	//tolower the user name
@@ -657,6 +658,19 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		vek.push_back(msg);
 		if(vek.size() == 5)
 		this->itemincr.add(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
+	}
+	
+	if(msg.compare(0, strlen("!allitems"), "!allitems") == 0)
+	{
+		std::string msgback = user + ", ";
+		for(auto i : this->itemincr.allItems)
+		{
+			msgback += i + ", ";
+		}
+		msgback.pop_back();
+		msgback.pop_back();
+		msgback += ".";
+		this->sendMsg(channel, msgback);
 	}
 	
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
@@ -777,7 +791,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 		
 	}
-	try{
 	while(msg.find(".") != std::string::npos)
 	{
 		msg.replace(msg.find("."), 1, "·");

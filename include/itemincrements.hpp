@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <set>
 
 class ItemIncrements
 {
@@ -22,6 +23,7 @@ public:
 	};
 	std::vector<Increments> allIncrements;
 	void remove(int triggerminute, const std::string& what, const std::string& per, double howmuch);
+	std::set<std::string> allItems;
 private:
 	std::fstream file;
 };

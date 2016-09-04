@@ -3,6 +3,7 @@
 void ItemIncrements::add(int triggerminute, const std::string& what, const std::string& per, double howmuch)
 {
 	allIncrements.push_back({triggerminute, what, per, howmuch});
+	allItems.insert(what);
 }
 
 ItemIncrements::ItemIncrements()
@@ -12,6 +13,7 @@ ItemIncrements::ItemIncrements()
 	while(file >> incr.trigger >> incr.what >> incr.per >> incr.howmuch)
 	{
 		allIncrements.push_back(incr);
+		allItems.insert(incr.what);
 	}
 	file.close();
 }
