@@ -12,10 +12,11 @@
 #include <locale>
 #include <condition_variable>
 #include <list>
-#include "sqlite3.h"
-#include "items.hpp"
 #include "curl/curl.h"
 #include <limits>
+#include "channels.hpp"
+#include "channelitems.hpp"
+#include "itemincrements.hpp"
 
 struct Command
 {
@@ -146,7 +147,7 @@ public:
 	}
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 	void handleCommands(std::string&, const std::string&, std::string&);
-	//Items items;
+	Channels channels;
 	struct Pings
 	{
 		std::condition_variable cv;
@@ -154,7 +155,8 @@ public:
 		bool pinged = false;
 	};
 	std::map<std::string, std::unique_ptr<Pings>> pingMap;
-	//void IncrementLoop();
+	void IncrementLoop();
+	ItemIncrements itemincr;
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -170,7 +172,7 @@ private:
 	std::string nick;
 	asio::ip::tcp::resolver::iterator twitch_it;
 	std::condition_variable quit_cv;
-	int currentTrigger = 0;
+	std::chrono::high_resolution_clock::time_point currentTrigger = std::chrono::high_resolution_clock::now();
 };
 
 size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
@@ -178,33 +180,31 @@ size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 	((std::string*)userp)->append((char*)contents, size * nmemb);
 	return size * nmemb;
 }
-/*
+
 void IrcConnection::IncrementLoop()
 {
+	int current = 0;
 	while(!(this->quit()))
 	{
 		std::unique_lock<std::mutex> lock(irc_m);
-		if(this->quit_cv.wait_for(lock, std::chrono::seconds(1),[this](){return this->quit_m;}))			
+		if(this->quit_cv.wait_for(lock, std::chrono::minutes(1),[this](){return this->quit_m;}))			
 		{
 			std::cout << "quiting IncrementLoop" << std::endl;
 			return;
 		}
 		else // 1 minute passed
 		{	
-			++currentTrigger;
-			std::cout << "current trigger: " << currentTrigger << std::endl;
-			
+			++current;
 			CURL *curl;
 			CURLcode res;
 			curl = curl_easy_init();
 			struct curl_slist *chunk = NULL;
 			chunk = curl_slist_append(chunk, "Accept: application/json");
 			
-			auto v = this->items.getChannels();
-			for(auto& nm : v)
+			for(auto& nm : this->channels.channelsItemsMap)
 			{
 				
-				std::string tmi = "http://tmi.twitch.tv/group/user/" + nm + "/chatters";
+				std::string tmi = "http://tmi.twitch.tv/group/user/" + nm.first + "/chatters";
 				std::string readBuffer;
 				std::vector<std::string> readVector;
 				
@@ -234,12 +234,12 @@ void IrcConnection::IncrementLoop()
 					pos = endpos;
 				}
 				
-				std::vector<Items::Increments> currentOnes;
-				for(auto i : this->items._increments)
+				std::vector<ItemIncrements::Increments> currentOnes;
+				for(auto i : this->itemincr.allIncrements)
 				{
-					if(currentTrigger % i.trigger == 0) //increment correct intervals only
+					if(current % i.trigger == 0)
 					{
-						currentOnes.push_back(i);						
+						currentOnes.push_back(i);
 					}
 				}
 				auto start = std::chrono::high_resolution_clock::now();
@@ -247,30 +247,17 @@ void IrcConnection::IncrementLoop()
 				{
 					std::string name;
 					std::string what;
-					long long current;
+					unsigned long long current;
 				};
 				std::vector<incr> vek;
 				for(auto name : chatters)
 				{
-					if(this->items.chnusers[nm].count(name) == 0)
-					{
-						//std::cout << name << " doesnt exist in " << nm << std::endl;
-						this->items.insert(nm, name);
-					}
-					//Items::getCount(channel, username, what)
-					//i.
-					//int trigger;
-					//std::string per;
-					//std::string what;
-					//double howmuch;
-					std::vector<std::pair<std::string, long long>> increases;
+					std::vector<std::pair<std::string, unsigned long long>> increases;
 					for(auto i : currentOnes)
 					{
-						long long current = 0;
-						long long adding = 0;
-
-						if(i.howmuch == 0.0) continue;
-						std::string perwhat;
+						unsigned long long current = 0;
+						unsigned long long adding = 0;
+						
 						if(i.per == "default")
 						{
 							adding = i.howmuch;
@@ -278,44 +265,35 @@ void IrcConnection::IncrementLoop()
 						}
 						else
 						{
-							perwhat = i.per;
-							
-							long long per = this->items.getCount(nm, name, perwhat);
-
-							adding = (per * i.howmuch);
+							auto pair = nm.second.get(name, i.per);
+							if(pair.first == false) continue;
+							adding = i.howmuch * pair.second;
 							increases.push_back({i.what, adding});
 						}
 					}
 					for(auto i : increases)
 					{
-						long long current = this->items.getCount(nm, name, i.first);
+						auto pair = nm.second.get(name, i.first);
+						unsigned long long current;
+						if(pair.first == false) current = 0;
+						else current = pair.second;
 						current += i.second;
 						vek.push_back({name, i.first, current});
 					}
 					
 				}
-				auto nm1 = std::chrono::high_resolution_clock::now();
-				this->items.begin();
 				for(const auto& i :vek)
 				{
-					this->items.insertOrReplace(nm, i.name, i.what, i.current);
+					nm.second.insert(i.name, i.what, i.current);
 				}
-				this->items.end();
+				nm.second.writeFile();
 				auto end = std::chrono::high_resolution_clock::now();
-				std::cout << "chatters: " << chatters.size() << "\ncurrentones: " << currentOnes.size() << std::endl;
-				std::cout << "insert operations: " << vek.size() << std::endl;
-				std::cout << "took: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " milliseconds" << std::endl;
-				std::cout << "took2: " << std::chrono::duration_cast<std::chrono::milliseconds>(nm1 - start).count() << " milliseconds" << std::endl;
-				//get old data, calculate new data, set new data in sql table
-				for(auto ...)
-				{
-					if()
-				}
+				std::cout << "took: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns" << std::endl;
 			}
 		}
 	}
 }
-*/
+
 IrcConnection::IrcConnection()
 {
 	this->adminsFile.open("admins.txt", std::ios::in);
@@ -563,7 +541,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	};
 	
 	this->threads.push_back(std::thread(lambda));
-	//this->threads.push_back(std::thread(&IrcConnection::IncrementLoop, this));
+	this->threads.push_back(std::thread(&IrcConnection::IncrementLoop, this));
 }
 
 
@@ -649,7 +627,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		this->items.createChannelTable(vek[1]);
 		return;
 	}
-	
+	*/
 	if(msg.compare(0, strlen("!deleteincrement"), "!deleteincrement") == 0 && user == "hemirt")
 	{
 		
@@ -662,29 +640,8 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
-		if(vek.size() == 2)
-		{
-			int id = 0;
-			std::stringstream(vek[1]) >> id;
-			if(id == 0) return;
-			this->items.deleteIncrement(id);
-		}
-		return;
-	}
-	
-	if(msg.compare(0, strlen("!additemcategory"), "!additemcategory") == 0 && user == "hemirt")
-	{
-		std::string delimiter = " ";
-		std::vector<std::string> vek;
-		size_t pos = 0;
-		while((pos = msg.find(delimiter)) != std::string::npos)
-		{
-			vek.push_back(msg.substr(0, pos));
-			msg.erase(0, pos + delimiter.length());
-		}
-		vek.push_back(msg);
-		if(vek.size() == 2)
-		this->items.addItemCategory(vek[1]);
+		if(vek.size() == 5)
+		this->itemincr.remove(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
 	}
 	
 	if(msg.compare(0, strlen("!additemincrement"), "!additemincrement") == 0 && user == "hemirt")
@@ -699,9 +656,9 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		vek.push_back(msg);
 		if(vek.size() == 5)
-		this->items.addIncrement(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
+		this->itemincr.add(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
 	}
-	*/
+	
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
 	{
 		std::string delimiter = "#";
@@ -731,7 +688,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		return;
 	}
-	/*
+	
 	if(msg.compare(0, strlen("!mycount"), "!mycount") == 0)
 	{
 		std::string delimiter = " ";
@@ -743,9 +700,17 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
-		if(vek.size() == 2)
-		std::cout << vek[1] << std::endl;
-		long long count = this->items.getCount(channel, user, vek[1]);
+		std::pair<bool, unsigned long long> pair;
+		try
+		{
+			pair = this->channels.channelsItemsMap.at(channel).get(user, vek[1]);
+		}
+		catch(std::exception &e)
+		{
+			std::cout << "exception get mycount: " << e.what() << std::endl;
+		}
+		if(pair.first == false) return;
+		unsigned long long count = pair.second;
 		std::stringstream ss;
 		ss << user << ", you have " << count << " " << vek[1];
 		if(count != 1) ss << "s";
@@ -753,13 +718,13 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		this->sendMsg(channel, ss.str());
 		return;
 	}
-	*/
+	
 	if(msg.compare(0, strlen("!peng"), "!peng") == 0)
 	{
 		std::string delimiter = " ";
 		
 		std::stringstream ss;
-		ss << user << ", weneedmoreautisticbots is running for " <<  this->currentTrigger << " minutes PogChamp";
+		ss << user << ", weneedmoreautisticbots is running for " <<  std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - this->currentTrigger).count()  << " nanoseconds EleGiggle";
 		this->sendMsg(channel, ss.str());
 		return;
 	}
@@ -1091,7 +1056,14 @@ void IrcConnection::processEventQueue()
 
 					if(msg[0] == '!')
 					{
-						this->handleCommands(user, channel, msg);
+						try
+						{
+							this->handleCommands(user, channel, msg);
+						}
+						catch(std::exception& e)
+						{
+							std::cout << "exception handling cmds: " << e.what() << std::endl;
+						}
 					}
 				}
 				else if(oneline.find("PING") != std::string::npos)
@@ -1159,7 +1131,8 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
-		
+	myIrc.channels.addChannel("pajlada");
+	
 	myIrc.waitEnd();
 	return 0;
 }
