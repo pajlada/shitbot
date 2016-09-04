@@ -288,7 +288,7 @@ void IrcConnection::IncrementLoop()
 				}
 				nm.second.writeFile();
 				auto end = std::chrono::high_resolution_clock::now();
-				std::cout << "took: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns" << std::endl;
+				std::cout << nm.first << " took: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns" << std::endl;
 			}
 		}
 	}
@@ -1132,6 +1132,8 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
 	myIrc.channels.addChannel("pajlada");
+	myIrc.channels.addChannel("hemirt");
+	myIrc.channels.addChannel("forsenlol");
 	
 	myIrc.waitEnd();
 	return 0;
