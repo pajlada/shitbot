@@ -12,21 +12,18 @@ ChannelItems::ChannelItems(const std::string& channel)
 
 void ChannelItems::insert(const std::string& username)
 {
-	std::lock_guard<std::mutex> lk(*mtx);
 	usersMap[username];
 	return;
 }
 	
 void ChannelItems::insert(const std::string& username, const std::string& key, unsigned long long value)
 {
-	std::lock_guard<std::mutex> lk(*mtx);
 	usersMap[username][key] = value;
 	return;
 }
 
 std::pair<bool, unsigned long long> ChannelItems::get(const std::string& username, const std::string& key)
 {
-	std::lock_guard<std::mutex> lk(*mtx);
 	std::map<std::string, unsigned long long>::iterator it = usersMap[username].find(key);
 	if(it != usersMap[username].end())
 	{

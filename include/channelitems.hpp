@@ -20,9 +20,9 @@ public:
 	int readFile();
 	int writeFile();
 	void readAll();
+	std::mutex* mtx;
 private:
 	std::unordered_map<std::string, std::map<std::string, unsigned long long>> usersMap;
-	std::mutex* mtx;
 	std::string m_channel;
 };
 

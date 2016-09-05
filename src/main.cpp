@@ -214,18 +214,20 @@ void IrcConnection::IncrementLoop()
 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 				res = curl_easy_perform(curl);
 				curl_easy_reset(curl);
-				
+				size_t	pos;
+				size_t endpos;
 				std::vector<std::string> chatters;
 				std::string fullchatters;
-				size_t	pos = readBuffer.find("\"moderators\": [");
+				pos = readBuffer.find("\"moderators\": [");
+				if(pos == std::string::npos) continue;
 				pos += strlen("\"moderators\": [");
-				size_t endpos = readBuffer.find("]", pos);
+				endpos = readBuffer.find("]", pos);
 				fullchatters.append(readBuffer.substr(pos, endpos-pos));
 				pos = readBuffer.find("\"viewers\": [");
+				if(pos == std::string::npos) continue;
 				pos += strlen("\"viewers\": [");
 				endpos = readBuffer.find("]", pos);
 				fullchatters.append(readBuffer.substr(pos, endpos-pos));
-				
 				pos = 0;
 				while((pos = fullchatters.find("\"", pos + 1)) != std::string::npos)
 				{
@@ -233,7 +235,6 @@ void IrcConnection::IncrementLoop()
 					chatters.push_back(fullchatters.substr(pos + 1, endpos-pos - 1));
 					pos = endpos;
 				}
-				
 				std::vector<ItemIncrements::Increments> currentOnes;
 				for(auto i : this->itemincr.allIncrements)
 				{
@@ -249,6 +250,7 @@ void IrcConnection::IncrementLoop()
 					std::string what;
 					unsigned long long current;
 				};
+				std::unique_lock<std::mutex> lk(*(nm.second.mtx));
 				std::vector<incr> vek;
 				for(auto name : chatters)
 				{
@@ -286,6 +288,7 @@ void IrcConnection::IncrementLoop()
 				{
 					nm.second.insert(i.name, i.what, i.current);
 				}
+				lk.unlock();
 				nm.second.writeFile();
 				auto end = std::chrono::high_resolution_clock::now();
 				std::cout << nm.first << " took: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns" << std::endl;
@@ -783,14 +786,17 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
+		std::unique_lock<std::mutex> lk;
 		std::pair<bool, unsigned long long> pair;
 		try
 		{
+			lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
 			pair = this->channels.channelsItemsMap.at(channel).get(user, vek[1]);
 		}
 		catch(std::exception &e)
 		{
 			std::cout << "exception get mycount: " << e.what() << std::endl;
+			return;
 		}
 		if(pair.first == false) 
 		{
@@ -802,6 +808,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			catch(std::exception &e)
 			{
 				std::cout << "exception get mycount: " << e.what() << std::endl;
+				return;
 			}
 			if(pair.first == false) return;
 			unsigned long long count = pair.second;
@@ -843,7 +850,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		return;
 	}
-	std::cout << "rolet" << std::endl;
 	if(msg.compare(0, strlen("!rolet "), "!rolet ") == 0)
 	{
 		std::vector<std::string> vek;
@@ -892,7 +898,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 		
 	}
-	std::cout << "dot" << std::endl;
 	while(msg.find(".") != std::string::npos)
 	{
 		msg.replace(msg.find("."), 1, "·");
@@ -919,7 +924,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	
 	//to lower the !cmd
 	changeToLower(vekmsg.at(0));
-	std::cout << "lower" << std::endl;
 	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range("!" + vekmsg.at(0));
 	
 	if(vekmsg.at(0) == "asay" && user == "hemirt")
@@ -940,7 +944,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	}
 	--ret.first;
 	--ret.second;
-	std::cout << "while" << std::endl;
 	std::multimap<std::string, Command>::const_iterator it;
 	bool found = false;
 	std::string users[3] = {user, "admin", "all"};
@@ -1149,7 +1152,6 @@ void IrcConnection::processEventQueue()
 			std::string delimiter = "\r\n";
 			std::vector<std::string> vek;
 			size_t pos = 0;
-			std::cout << "process event queue: " << std::endl;
 			while((pos = line.find(delimiter)) != std::string::npos)
 			{
 				vek.push_back(line.substr(0, pos));
@@ -1172,7 +1174,6 @@ void IrcConnection::processEventQueue()
 
 					if(msg[0] == '!')
 					{
-						std::cout << "handle commmands: " << std::endl;
 						this->handleCommands(user, channel, msg);
 					}
 				}
