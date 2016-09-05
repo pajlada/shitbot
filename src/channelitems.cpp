@@ -37,7 +37,6 @@ std::pair<bool, unsigned long long> ChannelItems::get(const std::string& usernam
 
 int ChannelItems::writeFile()
 {
-	std::lock_guard<std::mutex> lk(*mtx);
 	std::fstream userItemsFile;
 	userItemsFile.open(m_channel, std::ios::binary | std::ios::out | std::ios::trunc);
 	if(!userItemsFile) 

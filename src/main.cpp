@@ -288,8 +288,8 @@ void IrcConnection::IncrementLoop()
 				{
 					nm.second.insert(i.name, i.what, i.current);
 				}
-				lk.unlock();
 				nm.second.writeFile();
+				lk.unlock();
 				auto end = std::chrono::high_resolution_clock::now();
 				std::cout << nm.first << " took: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns" << std::endl;
 			}
