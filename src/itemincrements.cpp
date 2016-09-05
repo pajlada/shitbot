@@ -2,8 +2,10 @@
 
 void ItemIncrements::add(int triggerminute, const std::string& what, const std::string& per, double howmuch)
 {
-	allIncrements.push_back({triggerminute, what, per, howmuch});
-	allItems.insert(what);
+	if(allItems.count(what) == 1 && (allItems.count(per) == 1 || per == "default"))
+	{
+		allIncrements.push_back({triggerminute, what, per, howmuch});
+	}
 }
 
 ItemIncrements::ItemIncrements()
@@ -13,9 +15,17 @@ ItemIncrements::ItemIncrements()
 	while(file >> incr.trigger >> incr.what >> incr.per >> incr.howmuch)
 	{
 		allIncrements.push_back(incr);
-		allItems.insert(incr.what);
 	}
 	file.close();
+	itemsFile.open("allitems.txt", std::ios::in);
+	std::string line;
+	unsigned long long cost;
+	while(itemsFile >> line >> cost)
+	{
+		allItems.insert({line, cost});
+	}
+	itemsFile.close();
+	allItems.insert({"coin", 0});
 }
 	
 ItemIncrements::~ItemIncrements()
@@ -26,6 +36,17 @@ ItemIncrements::~ItemIncrements()
 		file << i.trigger << " " << i.what << " " << i.per << " " << i.howmuch << std::endl;
 	}
 	file.close();
+	itemsFile.open("allitems.txt", std::ios::out | std::ios::trunc);
+	for(auto i : allItems)
+	{
+		itemsFile << i.first << " " << i.second << std::endl;
+	}
+	itemsFile.close();
+}
+
+void ItemIncrements::addNewItem(const std::string& what, unsigned long long cost)
+{
+	allItems.insert({what, cost});
 }
 
 bool operator== (const ItemIncrements::Increments &i1, const ItemIncrements::Increments &i2)

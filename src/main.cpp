@@ -642,7 +642,8 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		vek.push_back(msg);
 		if(vek.size() == 5)
-		this->itemincr.remove(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
+			this->itemincr.remove(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
+		return;
 	}
 	
 	if(msg.compare(0, strlen("!additemincrement"), "!additemincrement") == 0 && user == "hemirt")
@@ -657,20 +658,88 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		vek.push_back(msg);
 		if(vek.size() == 5)
-		this->itemincr.add(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
+			this->itemincr.add(stoi(vek[1]), vek[2], vek[3], stod(vek[4]));
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!addnewitem"), "!addnewitem") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 3)
+			this->itemincr.addNewItem(vek[1], stoull(vek[2]));
+		return;
 	}
 	
 	if(msg.compare(0, strlen("!allitems"), "!allitems") == 0)
 	{
-		std::string msgback = user + ", ";
+		std::string msgback = user + ", the existing items are ";
 		for(auto i : this->itemincr.allItems)
 		{
-			msgback += i + ", ";
+			msgback += i.first + "s, ";
 		}
 		msgback.pop_back();
 		msgback.pop_back();
 		msgback += ".";
 		this->sendMsg(channel, msgback);
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!price"), "!price") == 0)
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() != 2)
+			return;
+		auto it = this->itemincr.allItems.find(vek[1]);
+		if(it != this->itemincr.allItems.end())
+		{
+			std::stringstream ss;
+			if(it->second == 0)
+			{
+				ss << user << ", you can't buy " << it->first << "s.";
+				this->sendMsg(channel, ss.str());
+				return;
+			}
+			ss << user << ", " << it->first << "s cost " << it->second << " coin";
+			if(it->second != 1) ss << "s";
+			ss << " each.";
+			this->sendMsg(channel, ss.str());
+		}
+		else
+		{
+			vek[1].pop_back();
+			it = this->itemincr.allItems.find(vek[1]);
+			if(it != this->itemincr.allItems.end())
+			{
+				std::stringstream ss;
+				if(it->second == 0)
+				{
+					ss << user << ", you can't buy " << it->first << "s.";
+					this->sendMsg(channel, ss.str());
+					return;
+				}
+				ss << user << ", " << it->first << "s cost " << it->second << " coin";
+				if(it->second != 1) ss << "s";
+				ss << " each.";
+				this->sendMsg(channel, ss.str());
+			}
+		}
+		return;
 	}
 	
 	if(msg.compare(0, strlen("!addcmd"), "!addcmd") == 0 && isAdmin(user))
@@ -723,7 +792,26 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		{
 			std::cout << "exception get mycount: " << e.what() << std::endl;
 		}
-		if(pair.first == false) return;
+		if(pair.first == false) 
+		{
+			vek[1].pop_back();
+			try
+			{
+				pair = this->channels.channelsItemsMap.at(channel).get(user, vek[1]);
+			}
+			catch(std::exception &e)
+			{
+				std::cout << "exception get mycount: " << e.what() << std::endl;
+			}
+			if(pair.first == false) return;
+			unsigned long long count = pair.second;
+			std::stringstream ss;
+			ss << user << ", you have " << count << " " << vek[1];
+			if(count != 1) ss << "s";
+			ss << ".";
+			this->sendMsg(channel, ss.str());
+			return;
+		}
 		unsigned long long count = pair.second;
 		std::stringstream ss;
 		ss << user << ", you have " << count << " " << vek[1];
