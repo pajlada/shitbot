@@ -16,6 +16,7 @@ public:
 	void insert(const std::string& username);
 	void insert(const std::string& username, const std::string& key, unsigned long long value);
 	std::pair<bool, unsigned long long> get(const std::string& username, const std::string& key);
+	size_t size();
 	int readFile();
 	int writeFile();
 	void readAll();

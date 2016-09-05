@@ -127,3 +127,8 @@ void ChannelItems::readAll()
 		}
 	}
 }
+
+size_t ChannelItems::size()
+{
+	return usersMap.size();
+}

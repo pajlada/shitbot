@@ -252,23 +252,23 @@ void IrcConnection::IncrementLoop()
 				std::vector<incr> vek;
 				for(auto name : chatters)
 				{
-					std::vector<std::pair<std::string, unsigned long long>> increases;
+					std::map<std::string, unsigned long long> increases;
 					for(auto i : currentOnes)
 					{
+						auto it = increases.find(i.what);
+						if(it == increases.end()) increases[i.what] = 0;
 						unsigned long long current = 0;
 						unsigned long long adding = 0;
 						
 						if(i.per == "default")
 						{
-							adding = i.howmuch;
-							increases.push_back({i.what, adding});
+							increases[i.what] += i.howmuch;
 						}
 						else
 						{
 							auto pair = nm.second.get(name, i.per);
 							if(pair.first == false) continue;
-							adding = i.howmuch * pair.second;
-							increases.push_back({i.what, adding});
+							increases[i.what] += i.howmuch * pair.second;
 						}
 					}
 					for(auto i : increases)
@@ -743,6 +743,19 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 	}
 	
+	if(msg.compare(0, strlen("!size"), "!size") == 0)
+	{
+		try
+		{
+			std::cout << channel << " size: " << this->channels.channelsItemsMap.at(channel).size() << std::endl;
+		}
+		catch(std::exception &e)
+		{
+			std::cout << "exception get size: " << e.what() << std::endl;
+		}
+		return;
+	}
+	std::cout << "rolet" << std::endl;
 	if(msg.compare(0, strlen("!rolet "), "!rolet ") == 0)
 	{
 		std::vector<std::string> vek;
@@ -791,6 +804,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 		
 	}
+	std::cout << "dot" << std::endl;
 	while(msg.find(".") != std::string::npos)
 	{
 		msg.replace(msg.find("."), 1, "·");
@@ -817,7 +831,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	
 	//to lower the !cmd
 	changeToLower(vekmsg.at(0));
-	
+	std::cout << "lower" << std::endl;
 	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range("!" + vekmsg.at(0));
 	
 	if(vekmsg.at(0) == "asay" && user == "hemirt")
@@ -838,7 +852,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	}
 	--ret.first;
 	--ret.second;
-	
+	std::cout << "while" << std::endl;
 	std::multimap<std::string, Command>::const_iterator it;
 	bool found = false;
 	std::string users[3] = {user, "admin", "all"};
@@ -866,7 +880,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		if(!found) ++i;
 	}
-	
+	std::cout << "found" << std::endl;
 	if(found)
 	{
 		std::string msgback = it->second.data;
@@ -971,7 +985,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		{
 			msgback.replace(msgback.find("@time@"), 6, timenow());
 		}
-		
+		std::cout << "aftersend" << std::endl;
 		if(it->second.who == "all")
 		{
 			if(it->second.action == "say")
@@ -1047,6 +1061,7 @@ void IrcConnection::processEventQueue()
 			std::string delimiter = "\r\n";
 			std::vector<std::string> vek;
 			size_t pos = 0;
+			std::cout << "process event queue: " << std::endl;
 			while((pos = line.find(delimiter)) != std::string::npos)
 			{
 				vek.push_back(line.substr(0, pos));
@@ -1069,14 +1084,8 @@ void IrcConnection::processEventQueue()
 
 					if(msg[0] == '!')
 					{
-						try
-						{
-							this->handleCommands(user, channel, msg);
-						}
-						catch(std::exception& e)
-						{
-							std::cout << "exception handling cmds: " << e.what() << std::endl;
-						}
+						std::cout << "handle commmands: " << std::endl;
+						this->handleCommands(user, channel, msg);
 					}
 				}
 				else if(oneline.find("PING") != std::string::npos)
@@ -1144,9 +1153,10 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
-	myIrc.channels.addChannel("pajlada");
+	
 	myIrc.channels.addChannel("hemirt");
 	myIrc.channels.addChannel("forsenlol");
+	myIrc.channels.addChannel("pajlada");
 	
 	myIrc.waitEnd();
 	return 0;
