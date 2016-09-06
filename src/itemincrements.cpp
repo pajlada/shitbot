@@ -26,6 +26,7 @@ ItemIncrements::ItemIncrements()
 	}
 	itemsFile.close();
 	allItems.insert({"coin", 0});
+	allItems.insert({"land", 1000});
 }
 	
 ItemIncrements::~ItemIncrements()

@@ -135,3 +135,4 @@
 !češi#all#say#ČEŠI V CHATE FailFish
 !chromosomes#all#say#@me@ has @irnd@ chromosomes MingLee @ifrnd@=47#Klinefelter syndrome #@ifrnd@=48#XXYY syndrome #@ifrnd@=49#XXXXY syndrome #@ifrnd@=45#Turner syndrome #@ifrnd@=46#a healthy human PogChamp #@ifrnd@=21#Down Syndrome #@ifrnd@>49#not a human in 2016 LUL #@ifrnd@<23#not a human in 2016 LUL #@ifrnd@=69#gachiGASM #
 !chromosome#all#say#A chromosome is a strand of DNA that is encoded with genes. In most cells, humans have 22 pairs of these chromosomes plus the two sex chromosomes (XX in females and XY in males) for a total of 46.
+!java#all#say#java in 2016 EleGiggle

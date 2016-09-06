@@ -157,6 +157,8 @@ public:
 	std::map<std::string, std::unique_ptr<Pings>> pingMap;
 	void IncrementLoop();
 	ItemIncrements itemincr;
+	int buyItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
+	int sellItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -174,6 +176,114 @@ private:
 	std::condition_variable quit_cv;
 	std::chrono::high_resolution_clock::time_point currentTrigger = std::chrono::high_resolution_clock::now();
 };
+
+int IrcConnection::buyItem(const std::string& channel, const std::string& user, std::string& what, unsigned long long howmuch)
+{
+	std::unique_lock<std::mutex> lk;
+	auto it = this->itemincr.allItems.find(what);
+	if(it == this->itemincr.allItems.end()) 
+	{
+		what.pop_back();
+		it = this->itemincr.allItems.find(what);
+		if(it == this->itemincr.allItems.end()) return 0;
+	}
+	std::pair<bool, unsigned long long> pair;
+	try
+	{
+		lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
+		pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	if(pair.first == false) 
+	{
+		return 0;
+	}
+	unsigned long long coincount = pair.second;
+	if(howmuch * it->second > coincount)
+	{
+		return -1;
+	}
+	try
+	{
+		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	unsigned long long newval;
+	if(pair.first == false) 
+	{
+		newval = 0;
+	}
+	else
+	{
+		newval = pair.second;
+	}
+	newval += howmuch;
+	this->channels.channelsItemsMap.at(channel).insert(user, what, newval);
+	this->channels.channelsItemsMap.at(channel).insert(user, "coin", coincount - (howmuch * it->second));
+	return 1;
+}
+
+int IrcConnection::sellItem(const std::string& channel, const std::string& user, std::string& what, unsigned long long howmuch)
+{
+	std::unique_lock<std::mutex> lk;
+	auto it = this->itemincr.allItems.find(what);
+	if(it == this->itemincr.allItems.end()) 
+	{
+		what.pop_back();
+		it = this->itemincr.allItems.find(what);
+		if(it == this->itemincr.allItems.end()) return 0;
+	}
+	std::pair<bool, unsigned long long> pair;
+	try
+	{
+		lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
+		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	if(pair.first == false) 
+	{
+		return -1;
+	}
+	unsigned long long itemcount = pair.second;
+	if(howmuch > itemcount)
+	{
+		return -1;
+	}
+	try
+	{
+		pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	unsigned long long newval;
+	if(pair.first == false) 
+	{
+		newval = 0;
+	}
+	else
+	{
+		newval = pair.second;
+	}
+	newval += (howmuch * it->second * 0.8);
+	this->channels.channelsItemsMap.at(channel).insert(user, what, itemcount - howmuch);
+	this->channels.channelsItemsMap.at(channel).insert(user, "coin", newval);
+	return 1;
+}
 
 size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -695,6 +805,60 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 	}
 	
+	if(msg.compare(0, strlen("!abuy"), "!abuy") == 0)
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() != 3)
+			return;
+		int rc = this->buyItem(channel, user, vek[1], stoull(vek[2]));
+		if(rc == -1)
+		{
+			std::string msgback = user + ", you don't have enough coins.";
+			this->sendMsg(channel, msgback);
+		}
+		else if(rc == 1)
+		{
+			std::string msgback = user + ", you bought " + vek[2] + " " + vek[1] + "s.";
+			this->sendMsg(channel, msgback);
+		}
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!asell"), "!asell") == 0)
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() != 3)
+			return;
+		int rc = this->sellItem(channel, user, vek[1], stoull(vek[2]));
+		if(rc == -1)
+		{
+			std::string msgback = user + ", you don't have enough " + vek[1] + "s.";
+			this->sendMsg(channel, msgback);
+		}
+		else if(rc == 1)
+		{
+			std::string msgback = user + ", you sold " + vek[2] + " " + vek[1] + "s.";
+			this->sendMsg(channel, msgback);
+		}
+		return;
+	}
+	
 	if(msg.compare(0, strlen("!price"), "!price") == 0)
 	{
 		std::string delimiter = " ";
@@ -811,13 +975,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 				return;
 			}
 			if(pair.first == false) return;
-			unsigned long long count = pair.second;
-			std::stringstream ss;
-			ss << user << ", you have " << count << " " << vek[1];
-			if(count != 1) ss << "s";
-			ss << ".";
-			this->sendMsg(channel, ss.str());
-			return;
 		}
 		unsigned long long count = pair.second;
 		std::stringstream ss;
