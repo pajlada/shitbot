@@ -820,7 +820,12 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		vek.push_back(msg);
 		if(vek.size() != 3)
 			return;
-		int rc = this->buyItem(channel, user, vek[1], stoull(vek[2]));
+		if(vek[2][0] == '-')
+		{
+			std::string msgback = user + " wants to buy a negative number of " + vek[1] + "s EleGiggle";
+			this->sendMsg(channel, msgback);
+		}
+		int rc = this->buyItem(channel, user, vek[1], stoull(vek[2], nullptr, 10));
 		if(rc == -1)
 		{
 			std::string msgback = user + ", you don't have enough coins.";
@@ -852,7 +857,12 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		vek.push_back(msg);
 		if(vek.size() != 3)
 			return;
-		int rc = this->sellItem(channel, user, vek[1], stoull(vek[2]));
+		if(vek[2][0] == '-')
+		{
+			std::string msgback = user + " wants to sell a negative number of " + vek[1] + "s EleGiggle";
+			this->sendMsg(channel, msgback);
+		}
+		int rc = this->sellItem(channel, user, vek[1], stoull(vek[2], nullptr, 10));
 		if(rc == -1)
 		{
 			std::string msgback = user + ", you don't have enough " + vek[1] + "s.";
