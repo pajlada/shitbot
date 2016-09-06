@@ -187,6 +187,7 @@ int IrcConnection::buyItem(const std::string& channel, const std::string& user, 
 		it = this->itemincr.allItems.find(what);
 		if(it == this->itemincr.allItems.end()) return 0;
 	}
+	if(it->second == 0) return -2;
 	std::pair<bool, unsigned long long> pair;
 	try
 	{
@@ -241,6 +242,7 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 		it = this->itemincr.allItems.find(what);
 		if(it == this->itemincr.allItems.end()) return 0;
 	}
+	if(it->second == 0) return -2;
 	std::pair<bool, unsigned long long> pair;
 	try
 	{
@@ -829,6 +831,11 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			std::string msgback = user + ", you bought " + vek[2] + " " + vek[1] + "s.";
 			this->sendMsg(channel, msgback);
 		}
+		else if(rc == -2)
+		{
+			std::string msgback = user + ", you cant buy " + vek[1] + "s.";
+			this->sendMsg(channel, msgback);
+		}
 		return;
 	}
 	
@@ -854,6 +861,11 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		else if(rc == 1)
 		{
 			std::string msgback = user + ", you sold " + vek[2] + " " + vek[1] + "s.";
+			this->sendMsg(channel, msgback);
+		}
+		else if(rc == -2)
+		{
+			std::string msgback = user + ", you can't sell " + vek[1] + "s.";
 			this->sendMsg(channel, msgback);
 		}
 		return;
