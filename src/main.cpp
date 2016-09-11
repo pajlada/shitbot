@@ -46,7 +46,7 @@ std::string timenow()
 	std::time_t result = std::time(nullptr);
 	std::stringstream ss;
 	ss.imbue(std::locale());
-	ss << std::put_time(std::localtime(&result), "%c");
+	ss << std::put_time(std::localtime(&result), "%T %Z (UTC%z)");
 	return ss.str();
 }
 
