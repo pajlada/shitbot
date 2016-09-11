@@ -38,14 +38,14 @@ void changeToLower(std::string& str)
 			str.replace(pos, vekcharup[i].size(), vekchardown[i], 0, vekchardown[i].size());
 		}
 	}
-	std::transform(str.begin(), str.end(), str.begin(),[](char c){return std::tolower(c, std::locale("cs_CZ.utf8"));});
+	std::transform(str.begin(), str.end(), str.begin(),[](char c){return std::tolower(c, std::locale());});
 }
 
 std::string timenow()
 {
 	std::time_t result = std::time(nullptr);
 	std::stringstream ss;
-	ss.imbue(std::locale("cs_CZ.utf8"));
+	ss.imbue(std::locale());
 	ss << std::put_time(std::localtime(&result), "%c");
 	return ss.str();
 }
@@ -159,6 +159,8 @@ public:
 	ItemIncrements itemincr;
 	int buyItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
 	int sellItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
+	int buyItem(const std::string& channel, const std::string& username, std::string& what);
+	int sellItem(const std::string& channel, const std::string& username, std::string& what);
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -208,6 +210,58 @@ int IrcConnection::buyItem(const std::string& channel, const std::string& user, 
 	{
 		return -1;
 	}
+	try
+	{
+		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	unsigned long long newval;
+	if(pair.first == false) 
+	{
+		newval = 0;
+	}
+	else
+	{
+		newval = pair.second;
+	}
+	newval += howmuch;
+	this->channels.channelsItemsMap.at(channel).insert(user, what, newval);
+	this->channels.channelsItemsMap.at(channel).insert(user, "coin", coincount - (howmuch * it->second));
+	return 1;
+}
+
+int IrcConnection::buyItem(const std::string& channel, const std::string& user, std::string& what)
+{
+	std::unique_lock<std::mutex> lk;
+	auto it = this->itemincr.allItems.find(what);
+	if(it == this->itemincr.allItems.end()) 
+	{
+		what.pop_back();
+		it = this->itemincr.allItems.find(what);
+		if(it == this->itemincr.allItems.end()) return 0;
+	}
+	if(it->second == 0) return -2;
+	std::pair<bool, unsigned long long> pair;
+	try
+	{
+		lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
+		pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	if(pair.first == false) 
+	{
+		return 0;
+	}
+	unsigned long long coincount = pair.second;
+	unsigned long long howmuch = coincount / it->second;
 	try
 	{
 		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
@@ -287,6 +341,57 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	return 1;
 }
 
+int IrcConnection::sellItem(const std::string& channel, const std::string& user, std::string& what)
+{
+	std::unique_lock<std::mutex> lk;
+	auto it = this->itemincr.allItems.find(what);
+	if(it == this->itemincr.allItems.end()) 
+	{
+		what.pop_back();
+		it = this->itemincr.allItems.find(what);
+		if(it == this->itemincr.allItems.end()) return 0;
+	}
+	if(it->second == 0) return -2;
+	std::pair<bool, unsigned long long> pair;
+	try
+	{
+		lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
+		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	if(pair.first == false) 
+	{
+		return -1;
+	}
+	unsigned long long itemcount = pair.second;
+	try
+	{
+		pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "exception get buy: " << e.what() << std::endl;
+		return 0;
+	}
+	unsigned long long newval;
+	if(pair.first == false) 
+	{
+		newval = 0;
+	}
+	else
+	{
+		newval = pair.second;
+	}
+	newval += (itemcount * it->second * 0.8);
+	this->channels.channelsItemsMap.at(channel).insert(user, what, 0);
+	this->channels.channelsItemsMap.at(channel).insert(user, "coin", newval);
+	return 1;
+}
+
 size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 {
 	((std::string*)userp)->append((char*)contents, size * nmemb);
@@ -299,7 +404,7 @@ void IrcConnection::IncrementLoop()
 	while(!(this->quit()))
 	{
 		std::unique_lock<std::mutex> lock(irc_m);
-		if(this->quit_cv.wait_for(lock, std::chrono::minutes(1),[this](){return this->quit_m;}))			
+		if(this->quit_cv.wait_for(lock, std::chrono::seconds(60),[this](){return this->quit_m;}))			
 		{
 			std::cout << "quiting IncrementLoop" << std::endl;
 			return;
@@ -313,6 +418,15 @@ void IrcConnection::IncrementLoop()
 			struct curl_slist *chunk = NULL;
 			chunk = curl_slist_append(chunk, "Accept: application/json");
 			
+			std::vector<ItemIncrements::Increments> currentOnes;
+			for(auto i : this->itemincr.allIncrements)
+			{
+				if(current % i.trigger == 0)
+				{
+					currentOnes.push_back(i);
+				}
+			}
+				
 			for(auto& nm : this->channels.channelsItemsMap)
 			{
 				
@@ -347,14 +461,7 @@ void IrcConnection::IncrementLoop()
 					chatters.push_back(fullchatters.substr(pos + 1, endpos-pos - 1));
 					pos = endpos;
 				}
-				std::vector<ItemIncrements::Increments> currentOnes;
-				for(auto i : this->itemincr.allIncrements)
-				{
-					if(current % i.trigger == 0)
-					{
-						currentOnes.push_back(i);
-					}
-				}
+				
 				auto start = std::chrono::high_resolution_clock::now();
 				struct incr
 				{
@@ -364,15 +471,14 @@ void IrcConnection::IncrementLoop()
 				};
 				std::unique_lock<std::mutex> lk(*(nm.second.mtx));
 				std::vector<incr> vek;
+				unsigned long long mymax = std::numeric_limits<unsigned long long>::max();
 				for(auto name : chatters)
 				{
-					std::map<std::string, unsigned long long> increases;
+					std::map<std::string, long long> increases;
 					for(auto i : currentOnes)
 					{
 						auto it = increases.find(i.what);
 						if(it == increases.end()) increases[i.what] = 0;
-						unsigned long long current = 0;
-						unsigned long long adding = 0;
 						
 						if(i.per == "default")
 						{
@@ -382,7 +488,11 @@ void IrcConnection::IncrementLoop()
 						{
 							auto pair = nm.second.get(name, i.per);
 							if(pair.first == false) continue;
-							increases[i.what] += i.howmuch * pair.second;
+							long long adding = i.howmuch * pair.second;
+							//if(name == "hemirt") std::cout << "start\n" << i.what << "\n" << i.per << "\n" << i.howmuch << "\n" << pair.second << "\n" << adding << "\nend" << std::endl;
+							if(i.howmuch < 0 && adding > 0) continue;
+							if(i.howmuch > 0 && adding < 0) continue;
+							increases[i.what] += adding;
 						}
 					}
 					for(auto i : increases)
@@ -391,7 +501,27 @@ void IrcConnection::IncrementLoop()
 						unsigned long long current;
 						if(pair.first == false) current = 0;
 						else current = pair.second;
-						current += i.second;
+						if(i.second < 0)
+						{
+							//if(name == "hemirt") std::cout << "upminus\n" << current << "\n" << i.first << "\n" << i.second << "\nupminusend" << std::endl;
+							if(current > (-1 * i.second))
+							{
+								current += i.second;
+							}
+							else
+							{
+								current = 0;
+							}
+						}
+						else if(mymax - current < i.second)
+						{
+							//if(name == "hemirt") std::cout << "up\n" << current << "\n" << i.first << "\n" << i.second << "\nupend" << std::endl;
+							current = mymax;
+						}
+						else 
+						{
+							current += i.second;
+						}
 						vek.push_back({name, i.first, current});
 					}
 					
@@ -689,8 +819,14 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 {
 	if(this->channelMsgs[channel] < 19 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - this->channelTimes[channel]).count() > 1500)
 	{
+		
 		std::cout << "Sending msg okay\n";
-		std::string sendirc = "PRIVMSG #" + channel + " :" + msg; // + " \r\n";
+		std::string sendirc = "PRIVMSG #" + channel + " :";
+		if(msg[0] == '/')
+		{
+			sendirc += '\\' + msg.substr(1, std::string::npos);
+		}
+		else sendirc += msg;
 		if(sendirc.length() > 387)
 			sendirc = sendirc.substr(0, 387) + " \r\n";
 		else sendirc += " \r\n";
@@ -818,14 +954,18 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
-		if(vek.size() != 3)
+		if(vek.size() < 3)
 			return;
 		if(vek[2][0] == '-')
 		{
 			std::string msgback = user + " wants to buy a negative number of " + vek[1] + "s EleGiggle";
 			this->sendMsg(channel, msgback);
 		}
-		int rc = this->buyItem(channel, user, vek[1], stoull(vek[2], nullptr, 10));
+		int rc = 0;
+		if(vek[1] == "all") 
+			rc = this->buyItem(channel, user, vek[2]);
+		else
+			rc = this->buyItem(channel, user, vek[2], stoull(vek[1], nullptr, 10));
 		if(rc == -1)
 		{
 			std::string msgback = user + ", you don't have enough coins.";
@@ -833,12 +973,12 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		else if(rc == 1)
 		{
-			std::string msgback = user + ", you bought " + vek[2] + " " + vek[1] + "s.";
+			std::string msgback = user + ", you bought " + vek[1] + " " + vek[2] + "s.";
 			this->sendMsg(channel, msgback);
 		}
 		else if(rc == -2)
 		{
-			std::string msgback = user + ", you cant buy " + vek[1] + "s.";
+			std::string msgback = user + ", you cant buy " + vek[2] + "s.";
 			this->sendMsg(channel, msgback);
 		}
 		return;
@@ -855,27 +995,31 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
-		if(vek.size() != 3)
+		if(vek.size() < 3)
 			return;
 		if(vek[2][0] == '-')
 		{
 			std::string msgback = user + " wants to sell a negative number of " + vek[1] + "s EleGiggle";
 			this->sendMsg(channel, msgback);
 		}
-		int rc = this->sellItem(channel, user, vek[1], stoull(vek[2], nullptr, 10));
+		int rc = 0;
+		if(vek[1] == "all") 
+			rc = this->sellItem(channel, user, vek[2]);
+		else 
+			rc = this->sellItem(channel, user, vek[2], stoull(vek[1], nullptr, 10));
 		if(rc == -1)
 		{
-			std::string msgback = user + ", you don't have enough " + vek[1] + "s.";
+			std::string msgback = user + ", you don't have enough " + vek[2] + "s.";
 			this->sendMsg(channel, msgback);
 		}
 		else if(rc == 1)
 		{
-			std::string msgback = user + ", you sold " + vek[2] + " " + vek[1] + "s.";
+			std::string msgback = user + ", you sold " + vek[1] + " " + vek[2] + "s.";
 			this->sendMsg(channel, msgback);
 		}
 		else if(rc == -2)
 		{
-			std::string msgback = user + ", you can't sell " + vek[1] + "s.";
+			std::string msgback = user + ", you can't sell " + vek[2] + "s.";
 			this->sendMsg(channel, msgback);
 		}
 		return;
@@ -1012,7 +1156,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		std::string delimiter = " ";
 		
 		std::stringstream ss;
-		ss << user << ", weneedmoreautisticbots is running for " <<  std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() - this->currentTrigger).count()  << " nanoseconds EleGiggle";
+		ss << user << ", weneedmoreautisticbots is running for " <<  std::chrono::duration_cast<std::chrono::minutes>(std::chrono::high_resolution_clock::now() - this->currentTrigger).count()  << " minutes PogChamp";
 		this->sendMsg(channel, ss.str());
 		return;
 	}
@@ -1086,10 +1230,10 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	{
 		msg.replace(msg.find("!"), 1, "\u00A1");
 	}
-	while(msg.find("/") != std::string::npos)
+	/*while(msg.find("/") != std::string::npos)
 	{
 		msg.replace(msg.find("/"), 1, "\\");
-	}
+	}*/
 	std::string msgcopy = msg;
 	std::string delimiter = " ";
 	std::vector<std::string> vekmsg;
