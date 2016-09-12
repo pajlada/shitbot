@@ -656,6 +656,11 @@ void IrcConnection::addCmd(const std::string& cmd, std::string message)
 
 void IrcConnection::joinChannel(const std::string& chn)
 {
+	if(this->channelSockets.count(chn) == 1)
+	{
+		this->leaveChannel(chn);
+		this->channelBools.erase(chn); //should already be deleted tho
+	}
 	std::shared_ptr<asio::ip::tcp::socket> sock(new asio::ip::tcp::socket(this->m_io_service));
 	this->channelSockets.insert(std::pair<std::string, std::shared_ptr<asio::ip::tcp::socket>>(chn, sock));
 	asio::connect(*sock, this->twitch_it);
@@ -672,7 +677,6 @@ void IrcConnection::joinChannel(const std::string& chn)
 	sock->send(asio::buffer(join));
 	this->channelTimes.insert(std::pair<std::string, std::chrono::high_resolution_clock::time_point>(chn, std::chrono::high_resolution_clock::now()));
 	this->channelMsgs.insert(std::pair<std::string, unsigned>(chn, 0));
-	this->channelBools.insert(std::pair<std::string, bool>(chn, false));
 	std::cout << "joined" << chn << std::endl;
 	
 	/*
@@ -690,14 +694,22 @@ void IrcConnection::joinChannel(const std::string& chn)
 
 void IrcConnection::leaveChannel(const std::string& chn)
 {
+	if(this->channelSockets.count(chn) == 0)
+		return;
 	std::string part = "PART #" + chn + "\r\n";
 	this->channelSockets[chn]->send(asio::buffer(part));
 	this->channelSockets[chn]->close();
+	
+	//std::cout << "closedd" <<std::endl;
+	//std::this_thread::sleep_for(std::chrono::seconds(5));
+	//std::cout << "slept" <<std::endl;
+	
+	/*
 	this->channelSockets.erase(chn);
-	this->channelBools.erase(chn);
 	this->channelMsgs.erase(chn);
 	this->channelTimes.erase(chn);
 	this->pingMap.erase(chn);
+	*/
 }
 
 bool IrcConnection::quit()
@@ -768,7 +780,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					this->channelSockets[i.first]->send(asio::buffer(sendirc));
 					std::cout << "pinging" << i.first << std::endl;
 					std::unique_lock<std::mutex> lk(this->pingMap[i.first]->mtx);
-					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(15), [this, &i](){return this->pingMap[i.first]->pinged;}))
+					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(1), [this, &i](){return this->pingMap[i.first]->pinged;}))
 					{
 						std::cout << "received the ping back " << i.first << std::endl;
 						this->pingMap[i.first]->pinged = false;
@@ -860,9 +872,56 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	if(msg.compare(0, strlen("!rcn"), "!rcn") == 0 && user == "hemirt")
 	{
 		this->leaveChannel(channel);
-		this->joinChannel(channel);
+		this->channelBools.insert({channel, true});
 		return;
 	}
+	
+	if(msg.compare(0, strlen("!joinchn"), "!joinchn") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+			this->joinChannel(vek[1]);
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!leavechn"), "!leavechn") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+			this->leaveChannel(vek[1]);
+		return;
+	}
+	
+	if(msg.compare(0, strlen("!chns"), "!chns") == 0 && user == "hemirt")
+	{
+		std::string msgback = "Connected in: ";
+		for(const auto& i : this->channelSockets)
+		{
+			msgback += i.first + ", ";
+		}
+		msgback.pop_back();
+		msgback.pop_back();
+		msgback += ".";
+		this->sendMsg(channel, msgback);
+		return;
+	}
+	
 	/*
 	if(msg.compare(0, strlen("!addchannel"), "!addchannel") == 0 && user == "hemirt")
 	{
@@ -1535,12 +1594,28 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 				}
 				else
 				{
-					std::cout << "error: " << chn << " ecx: " << ec << std::endl;
+					this->channelSockets.erase(chn);
+					this->channelMsgs.erase(chn);
+					this->channelTimes.erase(chn);
+					this->pingMap.erase(chn);
+					if(this->channelBools.count(chn) == 1)
+					{
+						this->channelBools.erase(chn);
+						this->joinChannel(chn);
+					}
+					/*std::cout << "error: " << chn << " ecx: " << ec << std::endl;
 					std::cout << "err leaving " << chn << std::endl;
-					this->leaveChannel(chn);
-					std::cout << "err reconnecting " << chn << std::endl;
-					this->joinChannel(chn);
-					std::cout << "err reconnected " << chn << std::endl;
+					
+					if(this->channelSockets.count(chn) == 1)
+						this->leaveChannel(chn);
+					if(this->channelBools.count(chn) == 0)
+					{
+						std::cout << "err reconnecting " << chn << std::endl;
+						this->joinChannel(chn);
+						std::cout << "err reconnected " << chn << std::endl;
+						return;
+					}
+					this->channelBools.erase(chn);*/
 					return;
 				}
 			}
@@ -1550,8 +1625,18 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 		std::cout << "exc : " << chn << " " << e.what() << std::endl;
 		if(!(this->quit()))
 		{
-			this->leaveChannel(chn);
-			this->joinChannel(chn);
+			this->channelSockets.erase(chn);
+			this->channelMsgs.erase(chn);
+			this->channelTimes.erase(chn);
+			this->pingMap.erase(chn);
+			if(this->channelBools.count(chn) == 1)
+			{
+				this->channelBools.erase(chn);
+				this->joinChannel(chn);
+			}
+			
+			//this->leaveChannel(chn);
+			//this->joinChannel(chn);
 			return;
 		}
 	}
