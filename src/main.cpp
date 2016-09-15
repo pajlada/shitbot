@@ -335,7 +335,16 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	{
 		newval = pair.second;
 	}
-	newval += (howmuch * it->second * 0.8);
+	unsigned long long diff = howmuch * 0.8L * it->second;
+	unsigned long long mymax = std::numeric_limits<unsigned long long>::max();
+	if(mymax - newval < diff)
+	{
+		newval = mymax;
+	}
+	else 
+	{
+		newval += diff;
+	}
 	this->channels.channelsItemsMap.at(channel).insert(user, what, itemcount - howmuch);
 	this->channels.channelsItemsMap.at(channel).insert(user, "coin", newval);
 	return 1;
@@ -386,7 +395,16 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	{
 		newval = pair.second;
 	}
-	newval += (itemcount * it->second * 0.8);
+	unsigned long long diff = itemcount * 0.8L * it->second;
+	unsigned long long mymax = std::numeric_limits<unsigned long long>::max();
+	if(mymax - newval < diff)
+	{
+		newval = mymax;
+	}
+	else 
+	{
+		newval += diff;
+	}
 	this->channels.channelsItemsMap.at(channel).insert(user, what, 0);
 	this->channels.channelsItemsMap.at(channel).insert(user, "coin", newval);
 	return 1;
@@ -472,29 +490,48 @@ void IrcConnection::IncrementLoop()
 				std::unique_lock<std::mutex> lk(*(nm.second.mtx));
 				std::vector<incr> vek;
 				unsigned long long mymax = std::numeric_limits<unsigned long long>::max();
+				struct incrdecr
+				{
+					unsigned long long incr = 0;
+					unsigned long long decr = 0;
+				};
 				for(auto name : chatters)
 				{
-					std::map<std::string, long long> increases;
+					std::map<std::string, incrdecr> increases;
 					for(auto i : currentOnes)
 					{
 						auto it = increases.find(i.what);
-						if(it == increases.end()) increases[i.what] = 0;
-						
+						if(it == increases.end()) 
+						{
+							increases[i.what].incr = 0;
+							increases[i.what].decr = 0;
+						}
 						if(i.per == "default")
 						{
-							increases[i.what] += i.howmuch;
+							increases[i.what].incr += i.howmuch;
 						}
 						else
 						{
 							auto pair = nm.second.get(name, i.per);
 							if(pair.first == false) continue;
-							long long adding = i.howmuch * pair.second;
-							//if(name == "hemirt") std::cout << "start\n" << i.what << "\n" << i.per << "\n" << i.howmuch << "\n" << pair.second << "\n" << adding << "\nend" << std::endl;
-							if(i.howmuch < 0 && adding > 0) continue;
-							if(i.howmuch > 0 && adding < 0) continue;
-							increases[i.what] += adding;
+							unsigned long long adding = 0;
+							long double multiplier = static_cast<long double>(i.howmuch);
+							if(multiplier > 0)
+							{
+								adding = multiplier * pair.second;
+								increases[i.what].incr += adding;
+							}
+							else if(multiplier < 0)
+							{
+								adding = (-1 * multiplier) * pair.second;
+								increases[i.what].decr += adding;
+							}
+							else if(multiplier == 0) continue;
+							
+							if(name == "hemirt") std::cout << "start\n" << i.what << "\n" << i.per << "\n" << multiplier << "\n" << pair.second << "\n" << adding << "\nend" << std::endl;
 						}
 					}
+					/* for signed long long
 					for(auto i : increases)
 					{
 						auto pair = nm.second.get(name, i.first);
@@ -521,6 +558,53 @@ void IrcConnection::IncrementLoop()
 						else 
 						{
 							current += i.second;
+						}
+						vek.push_back({name, i.first, current});
+					}*/
+					for(auto i : increases)
+					{
+						auto pair = nm.second.get(name, i.first);
+						unsigned long long current;
+						if(pair.first == false) current = 0;
+						else current = pair.second;
+						unsigned long long diff;
+						bool sign;
+						if(i.second.incr > i.second.decr)
+						{
+							diff = i.second.incr - i.second.decr;
+							sign = true;
+						}
+						else if(i.second.incr < i.second.decr)
+						{
+							diff = i.second.decr - i.second.incr;
+							sign = false;
+						}
+						else if(i.second.incr == i.second.decr)
+						{
+							continue;
+						}
+						
+						if(sign == true)
+						{
+							if(mymax - current < diff)
+							{
+								current = mymax;
+							}
+							else 
+							{
+								current += diff;
+							}
+						}
+						else
+						{
+							if(diff > current)
+							{
+								current = 0;
+							}
+							else
+							{
+								current -= diff;
+							}
 						}
 						vek.push_back({name, i.first, current});
 					}
@@ -780,7 +864,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					this->channelSockets[i.first]->send(asio::buffer(sendirc));
 					std::cout << "pinging" << i.first << std::endl;
 					std::unique_lock<std::mutex> lk(this->pingMap[i.first]->mtx);
-					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(1), [this, &i](){return this->pingMap[i.first]->pinged;}))
+					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(3), [this, &i](){return this->pingMap[i.first]->pinged;}))
 					{
 						std::cout << "received the ping back " << i.first << std::endl;
 						this->pingMap[i.first]->pinged = false;
@@ -789,7 +873,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					{
 						std::cout << "didnt receive ping back " << i.first << std::endl;
 						this->leaveChannel(i.first);
-						this->joinChannel(i.first);
+						this->channelBools.insert({i.first, true});
 						std::cout << "didnt receive, rejoined " << i.first << std::endl;
 					}
 				}
@@ -1189,6 +1273,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		if(pair.first == false) 
 		{
+			auto x = vek[1].back();
 			vek[1].pop_back();
 			try
 			{
@@ -1199,7 +1284,12 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 				std::cout << "exception get mycount: " << e.what() << std::endl;
 				return;
 			}
-			if(pair.first == false) return;
+			if(pair.first == false) 
+			{
+				std::string msgback = user + ", you have 0 " + vek[1] + x + "s.";
+				this->sendMsg(channel, msgback);
+				return;
+			}
 		}
 		unsigned long long count = pair.second;
 		std::stringstream ss;
@@ -1280,19 +1370,18 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return;
 		
 	}
-	while(msg.find(".") != std::string::npos)
-	{
-		msg.replace(msg.find("."), 1, "·");
-	}
-	msg.erase(0, 1);
-	while(msg.find("!") != std::string::npos)
-	{
-		msg.replace(msg.find("!"), 1, "\u00A1");
-	}
-	/*while(msg.find("/") != std::string::npos)
-	{
-		msg.replace(msg.find("/"), 1, "\\");
-	}*/
+	
+	
+//	while(msg.find(".") != std::string::npos)
+//	{
+//		msg.replace(msg.find("."), 1, "·");
+//	}
+//	msg.erase(0, 1);
+//	while(msg.find("!") != std::string::npos)
+//	{
+//		msg.replace(msg.find("!"), 1, "\u00A1");
+//	}
+
 	std::string msgcopy = msg;
 	std::string delimiter = " ";
 	std::vector<std::string> vekmsg;
@@ -1306,24 +1395,13 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	
 	//to lower the !cmd
 	changeToLower(vekmsg.at(0));
-	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range("!" + vekmsg.at(0));
-	
-	if(vekmsg.at(0) == "asay" && user == "hemirt")
-	{
-		while(msg.find("\u00A1") != std::string::npos)
-		{
-			msg.replace(msg.find("\u00A1"), strlen("\u00A1"), "!");
-		}
-		while(msg.find("\\") != std::string::npos)
-		{
-			msg.replace(msg.find("\\"), 1, "/");
-		}
-	}
-	
+	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range(vekmsg.at(0));
+		
 	if(ret.first == ret.second) 
 	{
 		return; //cmd not found
 	}
+	//LUL i dont remember why i did this LUL, i think it was because i wanted to iterate backwards but LUL its a multimap, its somehow sorted ... i think... so i think it doesnt matter LUL
 	--ret.first;
 	--ret.second;
 	std::multimap<std::string, Command>::const_iterator it;
@@ -1332,12 +1410,9 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	int i = 0;
 	while(!found && i < 3)
 	{
-		//std::cout << "ding: " << i << std::endl;
 		it = ret.second;
 		while(it != ret.first)
 		{
-			//std::cout << "dong: " << i << std::endl;
-			//std::cout << "it " << it->first << it->second.who << std::endl;
 			if(it->second.who == users[i])
 			{
 				if(i == 1 && this->isAdmin(user) == false)
@@ -1346,16 +1421,16 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 					continue; //found admin cmd, but user isnt an admin
 				}
 				found = true; //found command
-				//std::cout << "found\n";
 				break;
 			}
 			--it;
 		}
 		if(!found) ++i;
 	}
-	std::cout << "found" << std::endl;
+	
 	if(found)
 	{
+		//i should probably rework this LUL
 		std::string msgback = it->second.data;
 		while(msgback.find("@me@") != std::string::npos)
 		{
@@ -1371,7 +1446,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			ss.str("");
 			ss << "@id" << i << "@";
 		}
-		std::string all = msg.substr(it->first.size() - 1, std::string::npos);
+		std::string all = msg.substr(it->first.size(), std::string::npos);
 		while(msgback.find("@all@") != std::string::npos)
 		{
 			msgback.replace(msgback.find("@all@"), 5, all);
@@ -1387,15 +1462,12 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		while((pos = msgback.find("@ifrnd@")) != std::string::npos)
 		{
 			msgback.erase(pos, 7);
-			//std::cout << "msgback: " << "\"" << msgback << "\"" << std::endl;
-			//std::cout << "pos: " << msgback.at(pos) << std::endl;
 			if(msgback.at(pos) == '<')
 			{
 				msgback.erase(pos, 1);
 				size_t hash = msgback.find('#', pos);
 				std::string number = msgback.substr(pos, hash-pos);
 				int num = std::atoi(number.c_str());
-				//std::cout << "substr: " << msgback.substr(pos, hash-pos) << std::endl;
 				msgback.erase(pos, hash-pos);
 				if(rnd < num)
 				{
@@ -1458,7 +1530,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		{
 			msgback.replace(msgback.find("@time@"), 6, timenow());
 		}
-		std::cout << "aftersend" << std::endl;
+		
 		if(it->second.who == "all")
 		{
 			if(it->second.action == "say")
@@ -1478,11 +1550,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 				}
 				else if (it->second.action == "repeat" && user == "hemirt")
 				{
-					while(msgback.find("\u00A1") != std::string::npos)
-					{
-						msgback.replace(msgback.find("\u00A1"), strlen("\u00A1"), "!");
-					}
-					std::cout << "msgb: " << msgback << std::endl;
+					std::cout << "\"" << msgback << "\"" << std::endl;
 					std::string delimiter = " ";
 					msgback.erase(0, 1);
 					size_t pos = 0;
@@ -1492,6 +1560,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 						rp = std::atoi(msgback.substr(0, pos).c_str());
 						msgback.erase(0, pos + delimiter.length());
 					}
+					std::cout << "rp: " << rp << std::endl;
 					for(int y = 0; y < rp; y++)
 					{
 						this->sendMsg(channel, msgback);
