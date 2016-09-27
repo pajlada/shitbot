@@ -159,8 +159,8 @@ public:
 	ItemIncrements itemincr;
 	int buyItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
 	int sellItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
-	int buyItem(const std::string& channel, const std::string& username, std::string& what);
-	int sellItem(const std::string& channel, const std::string& username, std::string& what);
+	//int buyItem(const std::string& channel, const std::string& username, std::string& what);
+	//int sellItem(const std::string& channel, const std::string& username, std::string& what);
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -181,7 +181,6 @@ private:
 
 int IrcConnection::buyItem(const std::string& channel, const std::string& user, std::string& what, unsigned long long howmuch)
 {
-	std::unique_lock<std::mutex> lk;
 	auto it = this->itemincr.allItems.find(what);
 	if(it == this->itemincr.allItems.end()) 
 	{
@@ -193,7 +192,7 @@ int IrcConnection::buyItem(const std::string& channel, const std::string& user, 
 	std::pair<bool, unsigned long long> pair;
 	try
 	{
-		lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
+		std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
 		pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
 	}
 	catch(std::exception &e)
@@ -212,6 +211,7 @@ int IrcConnection::buyItem(const std::string& channel, const std::string& user, 
 	}
 	try
 	{
+		std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
 		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
 	}
 	catch(std::exception &e)
@@ -229,11 +229,12 @@ int IrcConnection::buyItem(const std::string& channel, const std::string& user, 
 		newval = pair.second;
 	}
 	newval += howmuch;
+	std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
 	this->channels.channelsItemsMap.at(channel).insert(user, what, newval);
 	this->channels.channelsItemsMap.at(channel).insert(user, "coin", coincount - (howmuch * it->second));
 	return 1;
 }
-
+/*
 int IrcConnection::buyItem(const std::string& channel, const std::string& user, std::string& what)
 {
 	std::unique_lock<std::mutex> lk;
@@ -284,11 +285,10 @@ int IrcConnection::buyItem(const std::string& channel, const std::string& user, 
 	this->channels.channelsItemsMap.at(channel).insert(user, what, newval);
 	this->channels.channelsItemsMap.at(channel).insert(user, "coin", coincount - (howmuch * it->second));
 	return 1;
-}
+}*/
 
 int IrcConnection::sellItem(const std::string& channel, const std::string& user, std::string& what, unsigned long long howmuch)
 {
-	std::unique_lock<std::mutex> lk;
 	auto it = this->itemincr.allItems.find(what);
 	if(it == this->itemincr.allItems.end()) 
 	{
@@ -300,7 +300,7 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	std::pair<bool, unsigned long long> pair;
 	try
 	{
-		lk = std::unique_lock<std::mutex>(*(this->channels.channelsItemsMap.at(channel).mtx));
+		std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
 		pair = this->channels.channelsItemsMap.at(channel).get(user, what);
 	}
 	catch(std::exception &e)
@@ -319,6 +319,7 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	}
 	try
 	{
+		std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
 		pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
 	}
 	catch(std::exception &e)
@@ -345,11 +346,12 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	{
 		newval += diff;
 	}
+	std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
 	this->channels.channelsItemsMap.at(channel).insert(user, what, itemcount - howmuch);
 	this->channels.channelsItemsMap.at(channel).insert(user, "coin", newval);
 	return 1;
 }
-
+/*
 int IrcConnection::sellItem(const std::string& channel, const std::string& user, std::string& what)
 {
 	std::unique_lock<std::mutex> lk;
@@ -408,7 +410,7 @@ int IrcConnection::sellItem(const std::string& channel, const std::string& user,
 	this->channels.channelsItemsMap.at(channel).insert(user, what, 0);
 	this->channels.channelsItemsMap.at(channel).insert(user, "coin", newval);
 	return 1;
-}
+}*/
 
 size_t writeFn(void *contents, size_t size, size_t nmemb, void *userp)
 {
@@ -782,7 +784,13 @@ void IrcConnection::leaveChannel(const std::string& chn)
 		return;
 	std::string part = "PART #" + chn + "\r\n";
 	this->channelSockets[chn]->send(asio::buffer(part));
-	this->channelSockets[chn]->close();
+	
+	if(this->channelSockets[chn]->is_open())
+	{
+		this->channelSockets[chn]->shutdown(asio::ip::tcp::socket::shutdown_both);
+		this->channelSockets[chn]->close();
+	}
+	
 	
 	//std::cout << "closedd" <<std::endl;
 	//std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -820,8 +828,8 @@ void IrcConnection::stop()
 		this->channelTimes.clear();
 		this->pingMap.clear();
 	}
-	this->quit_cv.notify_all();
 	this->eventQueue.notify();
+	this->quit_cv.notify_all();
 }
 
 void handler(const asio::error_code& error,std::size_t bytes_transferred)
@@ -918,11 +926,11 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 		
 		std::cout << "Sending msg okay\n";
 		std::string sendirc = "PRIVMSG #" + channel + " :";
-		if(msg[0] == '/')
+		/*if(msg[0] == '/')
 		{
 			sendirc += '\\' + msg.substr(1, std::string::npos);
 		}
-		else sendirc += msg;
+		else*/ sendirc += msg;
 		if(sendirc.length() > 387)
 			sendirc = sendirc.substr(0, 387) + " \r\n";
 		else sendirc += " \r\n";
@@ -1106,7 +1114,34 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		int rc = 0;
 		if(vek[1] == "all") 
-			rc = this->buyItem(channel, user, vek[2]);
+		{
+			auto it = this->itemincr.allItems.find(vek[2]);
+			if(it == this->itemincr.allItems.end()) 
+			{
+				vek[2].pop_back();
+				it = this->itemincr.allItems.find(vek[2]);
+				if(it == this->itemincr.allItems.end()) return;
+			}
+			if(it->second == 0) return;
+			std::pair<bool, unsigned long long> pair;
+			try
+			{
+				std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
+				pair = this->channels.channelsItemsMap.at(channel).get(user, "coin");
+			}
+			catch(std::exception &e)
+			{
+				std::cout << "exception get buy: " << e.what() << std::endl;
+				return;
+			}
+			unsigned long long newval;
+			if(pair.first == false) 
+			{
+				return;
+			}
+			vek[1] = std::to_string(pair.second/it->second);
+			rc = this->buyItem(channel, user, vek[2], pair.second/it->second);
+		}
 		else
 			rc = this->buyItem(channel, user, vek[2], stoull(vek[1], nullptr, 10));
 		if(rc == -1)
@@ -1146,8 +1181,27 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			this->sendMsg(channel, msgback);
 		}
 		int rc = 0;
-		if(vek[1] == "all") 
-			rc = this->sellItem(channel, user, vek[2]);
+		if(vek[1] == "all")
+		{
+			std::pair<bool, unsigned long long> pair;
+			try
+			{
+				std::lock_guard<std::mutex> lk(*(this->channels.channelsItemsMap.at(channel).mtx));
+				pair = this->channels.channelsItemsMap.at(channel).get(user, vek[2]);
+			}
+			catch(std::exception &e)
+			{
+				return;
+			}
+			if(pair.first == false) 
+			{
+				std::string msgback = user + ", you don't have enough " + vek[2] + "s.";
+				this->sendMsg(channel, msgback);
+				return;
+			}
+			vek[1] = std::to_string(pair.second);
+			rc = this->sellItem(channel, user, vek[2], pair.second);
+		}
 		else 
 			rc = this->sellItem(channel, user, vek[2], stoull(vek[1], nullptr, 10));
 		if(rc == -1)
@@ -1630,9 +1684,12 @@ void IrcConnection::processEventQueue()
 				}
 				else if(oneline.find("PING") != std::string::npos)
 				{
-					std::cout << "PONGING" << chn << std::endl;
-					std::string pong = "PONG :tmi.twitch.tv\r\n";
-					this->channelSockets[chn]->async_send(asio::buffer(pong), handler);
+					if(this->channelSockets.count(chn) == 1)
+					{
+						std::cout << "PONGING" << chn << std::endl;
+						std::string pong = "PONG :tmi.twitch.tv\r\n";
+						this->channelSockets[chn]->async_send(asio::buffer(pong), handler);
+					}
 				}
 				else if(oneline.find("PONG") != std::string::npos)
 				{
