@@ -161,6 +161,8 @@ public:
 	int sellItem(const std::string& channel, const std::string& username, std::string& what, unsigned long long howmuch);
 	//int buyItem(const std::string& channel, const std::string& username, std::string& what);
 	//int sellItem(const std::string& channel, const std::string& username, std::string& what);
+	int writeCommandsToFile();
+	int deleteCmd(const std::string& cmd, const std::string& who);
 private:
 	std::unique_ptr<asio::io_service::work> wrk;
 	void run();
@@ -521,11 +523,19 @@ void IrcConnection::IncrementLoop()
 							if(multiplier > 0)
 							{
 								adding = multiplier * pair.second;
+								if(adding / multiplier != pair.second)
+								{
+									adding = mymax;
+								}
 								increases[i.what].incr += adding;
 							}
 							else if(multiplier < 0)
 							{
 								adding = (-1 * multiplier) * pair.second;
+								if(adding / (-1 * multiplier) != pair.second)
+								{
+									adding = mymax;
+								}
 								increases[i.what].decr += adding;
 							}
 							else if(multiplier == 0) continue;
@@ -733,11 +743,69 @@ void IrcConnection::addCmd(const std::string& cmd, std::string message)
 				return;
 			}
 		}
+		/*
 		this->commands.insert(std::pair<std::string, Command>(cmd, cmds));
 		this->commandsFile.seekp(0, std::ios::end);
 		this->commandsFile << cmd << "#" << cmds.who << "#" << cmds.action << "#" << cmds.data << std::endl;
+		*/
+		changeToLower(cmds.who);
+		this->commands.insert(std::pair<std::string, Command>(cmd, cmds));
+		writeCommandsToFile();
 	}
 
+}
+
+int IrcConnection::deleteCmd(const std::string& cmd, const std::string& who)
+{
+	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range(cmd);
+	if(ret.first == ret.second) 
+	{
+		return 1; //cmd not found
+	}
+	if(who == "0")
+	{
+		this->commands.erase(ret.first, ret.second);
+		std::cout << "deleted commands with trigger " << cmd << std::endl;
+		return writeCommandsToFile();
+	}
+	auto it = ret.first;
+	while(it != ret.second)
+	{
+		if(it->second.who == who)
+		{
+			std::cout << "deleting " << it->first << " for " << it->second.who << std::endl; 
+			it = this->commands.erase(it);
+		}
+		else ++it;
+	}
+	return writeCommandsToFile();
+}
+
+int IrcConnection::writeCommandsToFile()
+{
+	std::fstream newCommandsFile;
+	newCommandsFile.open("newCommandsFile.txt", std::ios::out | std::ios::trunc);
+	if(!newCommandsFile) return 1;
+	for(const auto& i : this->commands)
+	{
+		newCommandsFile << i.first << "#" << i.second.who << "#" << i.second.action << "#" << i.second.data << std::endl;
+	}
+	if(!newCommandsFile)
+	{
+		return 1;
+	}
+	else
+	{
+		std::cout << "newCommandsFile okay" << std::endl;
+		int rc = std::rename("newCommandsFile.txt", "commands.txt");
+		if(rc) 
+		{
+			std::perror("Error renaming");
+			return 1;
+		}
+		std::cout << "newCommandsFile rename okay" << std::endl;
+	}
+	return 0;
 }
 
 void IrcConnection::joinChannel(const std::string& chn)
@@ -921,6 +989,7 @@ void IrcConnection::msgCount()
 
 bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 {
+	std::lock_guard<std::mutex> lk(irc_m);
 	if(this->channelMsgs[channel] < 19 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - this->channelTimes[channel]).count() > 1500)
 	{
 		
@@ -950,6 +1019,58 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
 	try{
+	if(msg.compare(0, strlen("!deletecmd"), "!deletecmd") == 0 && isAdmin(user))
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		if(vek.size() == 2)
+			this->deleteCmd(vek[1], "all");
+		else if(vek.size() == 3)
+			this->deleteCmd(vek[1], vek[2]);
+		std::cout << "deleted " << msg << std::endl;
+		std::string mg(user + " deleted cmd " + vek[1]);
+		this->sendMsg(channel, mg);
+		return;
+	}
+	if(msg.compare(0, strlen("!editcmd"), "!editcmd") == 0 && isAdmin(user))
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		int i = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos && i < 4)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+			++i;
+		}
+		vek.push_back(msg);
+		std::cout << "veksize: " << vek.size() << std::endl;
+		for(auto i : vek)
+		{
+			std::cout << i << std::endl;
+		}
+		if(vek.size() == 5)
+		{
+			changeToLower(vek[2]);
+			changeToLower(vek[3]);
+			this->deleteCmd(vek[1], vek[2]);
+			std::string cmd = vek[2] + "#" + vek[3] + "#" + vek[4];
+			std::cout << "adding: " << vek[1] << "#" << cmd << std::endl;
+			this->addCmd(vek[1], cmd);
+		}
+		std::cout << "EDITED " << vek[1] << std::endl;
+		std::string mg(user + " edited cmd " + vek[1]);
+		this->sendMsg(channel, mg);
+		return;
+	}
 	//std::cout << "HANDLING COMMAND\n";
 
 	//tolower the user name
@@ -1456,31 +1577,62 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		return; //cmd not found
 	}
 	//LUL i dont remember why i did this LUL, i think it was because i wanted to iterate backwards but LUL its a multimap, its somehow sorted ... i think... so i think it doesnt matter LUL
-	--ret.first;
-	--ret.second;
 	std::multimap<std::string, Command>::const_iterator it;
 	bool found = false;
 	std::string users[3] = {user, "admin", "all"};
 	int i = 0;
 	while(!found && i < 3)
 	{
-		it = ret.second;
-		while(it != ret.first)
+		it = ret.first;
+		while(it != ret.second)
 		{
+			std::cout << "who: " << it->second.who <<std::endl;
+			std::cout << "user: " << user << std::endl;
 			if(it->second.who == users[i])
 			{
 				if(i == 1 && this->isAdmin(user) == false)
 				{
-					--it;
+					++it;
 					continue; //found admin cmd, but user isnt an admin
 				}
 				found = true; //found command
 				break;
 			}
-			--it;
+			++it;
 		}
 		if(!found) ++i;
 	}
+	/*
+	it = ret.second;
+	while(found == false && it != ret.first)
+	{
+		if(it->second.who == user)
+		{
+			found = true;
+			break;
+		}
+		--it;
+	}
+	it = ret.second;
+	while(found == false && this->isAdmin(user) && it != ret.first)
+	{
+		if(it->second.who == "admin")
+		{
+			found = true;
+			break;
+		}
+		--it;
+	}
+	it = ret.second;
+	while(found == false && it != ret.first)
+	{
+		if(it->second.who == "all")
+		{
+			found = true;
+			break;
+		}
+		--it;
+	}*/
 	
 	if(found)
 	{
@@ -1585,7 +1737,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msgback.replace(msgback.find("@time@"), 6, timenow());
 		}
 		
-		if(it->second.who == "all")
+		if(it->second.who == user)
 		{
 			if(it->second.action == "say")
 			{
@@ -1623,7 +1775,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 				}
 			}
 		}
-		else if(it->second.who == user)
+		else if(it->second.who == "all")
 		{
 			if(it->second.action == "say")
 			{

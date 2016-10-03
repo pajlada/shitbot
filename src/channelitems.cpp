@@ -38,7 +38,8 @@ std::pair<bool, unsigned long long> ChannelItems::get(const std::string& usernam
 int ChannelItems::writeFile()
 {
 	std::fstream userItemsFile;
-	userItemsFile.open(m_channel, std::ios::binary | std::ios::out | std::ios::trunc);
+	std::string tmp(m_channel + ".tmp");
+	userItemsFile.open(tmp, std::ios::binary | std::ios::out | std::ios::trunc);
 	if(!userItemsFile) 
 	{
 		return 1;
@@ -62,6 +63,21 @@ int ChannelItems::writeFile()
 		}
 	}
 	userItemsFile.close();
+	if(!userItemsFile)
+	{
+		return 1;
+	}
+	else
+	{
+		std::cout << tmp << " okay" << std::endl;
+		int rc = std::rename(tmp.c_str(), m_channel.c_str());
+		if(rc) 
+		{
+			std::perror("Error renaming");
+			return 1;
+		}
+		std::cout << tmp << " rename okay" << std::endl;
+	}
 	return 0;
 }
 
