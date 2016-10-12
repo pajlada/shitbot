@@ -848,6 +848,8 @@ void IrcConnection::joinChannel(const std::string& chn)
 
 void IrcConnection::leaveChannel(const std::string& chn)
 {
+	try
+	{
 	if(this->channelSockets.count(chn) == 0)
 		return;
 	std::string part = "PART #" + chn + "\r\n";
@@ -858,7 +860,11 @@ void IrcConnection::leaveChannel(const std::string& chn)
 		this->channelSockets[chn]->shutdown(asio::ip::tcp::socket::shutdown_both);
 		this->channelSockets[chn]->close();
 	}
-	
+	}
+	catch(std::exception& e)
+	{
+		std::cout << "leavechannel exc: " << e.what();
+	}
 	
 	//std::cout << "closedd" <<std::endl;
 	//std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -935,11 +941,15 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 				lock.unlock();
 				for(const auto& i : this->channelSockets)
 				{
+					try
+					{
 					std::string sendirc = "PING :tmi.twitch.tv\r\n";
 					
 					this->channelSockets[i.first]->send(asio::buffer(sendirc));
 					std::cout << "pinging" << i.first << std::endl;
-					std::unique_lock<std::mutex> lk(this->pingMap[i.first]->mtx);
+					if(this->pingMap.count(i.first) == 0) continue;
+					std::unique_lock<std::mutex> lk(this->pingMap.at(i.first)->mtx);
+					std::cout << "found mtx" << std::endl;
 					if(this->pingMap[i.first]->cv.wait_for(lk, std::chrono::seconds(3), [this, &i](){return this->pingMap[i.first]->pinged;}))
 					{
 						std::cout << "received the ping back " << i.first << std::endl;
@@ -949,8 +959,14 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					{
 						std::cout << "didnt receive ping back " << i.first << std::endl;
 						this->leaveChannel(i.first);
+						std::cout << "pinging: left channel << " << i.first << std::endl;
 						this->channelBools.insert({i.first, true});
 						std::cout << "didnt receive, rejoined " << i.first << std::endl;
+					}
+					}
+					catch(std::exception &e)
+					{
+						std::cout << "caught exception at pinging: " << i.first << " " << e.what() << std::endl;
 					}
 				}
 			}

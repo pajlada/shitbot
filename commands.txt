@@ -43,6 +43,8 @@
 !enceladus#all#say#Enceladus is the sixth-largest moon of Saturn. It is approximately 500 kilometers in diameter, about a tenth of that of Saturn's largest moon, Titan. Enceladus is mostly covered by fresh, clean ice, reflecting almost all the sunlight that strikes it, making its surface temperature at noon reach only −198 °C.
 !eris#all#say#Eris (minor-planet designation 136199 Eris) is the most massive and second-largest dwarf planet known in the Solar System. It is also the ninth-most-massive known body directly orbiting the Sun, and the largest known body in the Solar System not visited by a spacecraft.
 !europa#all#say#Europa (Jupiter II), is the sixth-closest moon of Jupiter, and the smallest of its four Galilean satellites, and the sixth-largest moon in the Solar System. Europa was discovered in 1610 by Galileo Galilei and was named after Europa, mother of King Minos of Crete, who became one of Zeus' lovers.
+!eval#admin#say#Evaluated @all@ and everything SeemsGood
+!eval#all#say#Evaluated @all@ and everything SeemsGood
 !f#all#say#Press f to pay respects. f
 !fab#all#say#OpieOP
 !fabulouspotato69#all#say#OpieOP
@@ -111,7 +113,7 @@
 !rhea#all#say#Rhea is the second-largest moon of Saturn and the ninth-largest moon in the Solar System. It is the second smallest body in the Solar System, after the asteroid and dwarf planet Ceres, for which precise measurements have confirmed a shape consistent with hydrostatic equilibrium. It was discovered in 1672 by Giovanni Domenico Cassini.
 !rip#all#say#rip bindik LUL
 !rps#admin#repeat#@all@
-!rules#all#say#!testman123 @me@ Kepp
+!rules#all#say#who cares 4HEad
 !salacia#all#say#120347 Salacia is a large planetoid in the Kuiper belt. It was discovered on 22 September 2004 by Henry G. Roe, Michael E. Brown and Kristina M. Barkume at the Palomar Observatory. It is almost certainly a dwarf planet. Salacia's diameter is estimated to be about 850 kilometres due to a low albedo.
 !saturn#all#say#Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius about nine times that of Earth. Although only one-eighth the average density of Earth, with its larger volume Saturn is just over 95 times more massive.
 !sedna#all#say#90377 Sedna is a large minor planet in the outer reaches of the Solar System that was, as of 2015, at a distance of about 86 AU from the Sun, about three times as far as Neptune. Spectroscopy has revealed that Sedna's surface composition is similar to that of some other trans-Neptunian objects.
