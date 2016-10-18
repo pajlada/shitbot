@@ -540,7 +540,7 @@ void IrcConnection::IncrementLoop()
 							}
 							else if(multiplier == 0) continue;
 							
-							if(name == "hemirt") std::cout << "start\n" << i.what << "\n" << i.per << "\n" << multiplier << "\n" << pair.second << "\n" << adding << "\nend" << std::endl;
+							//if(name == "hemirt") std::cout << "start\n" << i.what << "\n" << i.per << "\n" << multiplier << "\n" << pair.second << "\n" << adding << "\nend" << std::endl;
 						}
 					}
 					/* for signed long long
@@ -749,6 +749,7 @@ void IrcConnection::addCmd(const std::string& cmd, std::string message)
 		this->commandsFile << cmd << "#" << cmds.who << "#" << cmds.action << "#" << cmds.data << std::endl;
 		*/
 		changeToLower(cmds.who);
+		std::cout << "\n1: " << cmds.who << "\n2: " << cmds.action << "\n3: " <<cmds.data << "\n4: " << cmd <<std::endl;
 		this->commands.insert(std::pair<std::string, Command>(cmd, cmds));
 		writeCommandsToFile();
 	}
@@ -760,6 +761,8 @@ int IrcConnection::deleteCmd(const std::string& cmd, const std::string& who)
 	std::pair<std::multimap<std::string, Command>::const_iterator, std::multimap<std::string, Command>::const_iterator> ret = this->commands.equal_range(cmd);
 	if(ret.first == ret.second) 
 	{
+		std::cout << "wutwut " << ret.first->first << std::endl;
+		std::cout << "cmd " << cmd << " who " << who << " not found" << std::endl;
 		return 1; //cmd not found
 	}
 	if(who == "0")
@@ -851,14 +854,27 @@ void IrcConnection::leaveChannel(const std::string& chn)
 	try
 	{
 	if(this->channelSockets.count(chn) == 0)
+	{
+		std::cout << "leavechannel " << chn << " count = 0" << std::endl;
 		return;
-	std::string part = "PART #" + chn + "\r\n";
-	this->channelSockets[chn]->send(asio::buffer(part));
+	}
+
 	
 	if(this->channelSockets[chn]->is_open())
 	{
-		this->channelSockets[chn]->shutdown(asio::ip::tcp::socket::shutdown_both);
+		std::string part = "PART #" + chn + "\r\n";
+		std::cout << "isopen: " << chn << std::endl;
+		this->channelSockets[chn]->send(asio::buffer(part));
+		std::cout << "sent part cmd" << std::endl;
+		asio::error_code ec;
+		this->channelSockets[chn]->shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+		std::cout << "shutdown" << std::endl;
+		if(ec)
+		{
+			std::cout << "error: " << ec << std::endl;
+		}
 		this->channelSockets[chn]->close();
+		std::cout << "close" << std::endl;
 	}
 	}
 	catch(std::exception& e)
@@ -957,10 +973,24 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					}
 					else // didnt get back;
 					{
-						std::cout << "didnt receive ping back " << i.first << std::endl;
-						this->leaveChannel(i.first);
-						std::cout << "pinging: left channel << " << i.first << std::endl;
-						this->channelBools.insert({i.first, true});
+						try
+						{
+							std::cout << "didnt receive ping back " << i.first << std::endl;
+							this->leaveChannel(i.first);
+						}
+						catch(std::exception &e)
+						{
+							std::cout << "ping leave channel exc " << i.first << " e: " << e.what() << std::endl;
+						}
+						try
+						{
+							std::cout << "pinging: left channel << " << i.first << std::endl;
+							this->channelBools.insert({i.first, true});
+						}
+						catch(std::exception &e)
+						{
+							std::cout << "ping leave channel exc " << i.first << " e: " << e.what() << std::endl;
+						}
 						std::cout << "didnt receive, rejoined " << i.first << std::endl;
 					}
 					}
@@ -1035,6 +1065,23 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
 	try{
+		changeToLower(user);
+	if(msg.compare(0, strlen("!addadmin"), "!addadmin") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		changeToLower(vek[2]);
+		if(vek.size() == 2)
+			this->addAdmin(vek[1]);
+		return;
+	}
 	if(msg.compare(0, strlen("!deletecmd"), "!deletecmd") == 0 && isAdmin(user))
 	{
 		std::string delimiter = " ";
@@ -1046,6 +1093,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
+		changeToLower(vek[1]);
 		if(vek.size() == 2)
 			this->deleteCmd(vek[1], "all");
 		else if(vek.size() == 3)
@@ -1075,6 +1123,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		if(vek.size() == 5)
 		{
+			changeToLower(vek[1]);
 			changeToLower(vek[2]);
 			changeToLower(vek[3]);
 			this->deleteCmd(vek[1], vek[2]);
@@ -1654,6 +1703,10 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	{
 		//i should probably rework this LUL
 		std::string msgback = it->second.data;
+		//for(auto &i : vekmsg)
+		{
+			
+		}
 		while(msgback.find("@me@") != std::string::npos)
 		{
 			msgback.replace(msgback.find("@me@"), 4, user);
@@ -1845,7 +1898,7 @@ void IrcConnection::processEventQueue()
 					std::string msg = oneline.substr(oneline.find(":", oneline.find(ht_chn)) + 1, std::string::npos);
 					std::string user = oneline.substr(oneline.find(":") + 1, oneline.find("!") - oneline.find(":") - 1);
 
-					if(msg[0] == '!')
+					//if(msg[0] == '!')
 					{
 						this->handleCommands(user, channel, msg);
 					}

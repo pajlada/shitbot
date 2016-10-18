@@ -142,9 +142,13 @@
 !varuna#all#say#20000 Varuna is a large classical Kuiper belt object. It is probably a dwarf planet. It rotates rapidly and hence its shape is probably very elongated. Varuna is named after a Hindu deity. Varuna was one of the most important deities of the ancient Indians, and he presided over the waters of the heaven and of the ocean and was the guardian of immortality.
 !venus#all#say#Venus is the second planet from the Sun, orbiting it every 224.7 Earth days. It has the longest rotation period (243 days) of any planet in the Solar System and rotates in the opposite direction to most other planets. It has no natural satellite. It is named after the Roman goddess of love and beauty.
 !vesta#all#say#Vesta, minor-planet designation 4 Vesta, is one of the largest objects in the asteroid belt, with a mean diameter of 525 kilometres. It was discovered by the German astronomer Heinrich Wilhelm Olbers on 29 March 1807 and is named after Vesta, the virgin goddess of home and hearth from Roman mythology.
+!weebs#all#say#VoHiYo WEEBS-MASTER-RACE VoHiYo
 !weneedmoreautisticbots#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
 !weywot#all#say#Weywot, officially (50000) Quaoar I Weywot, is the only known moon of the trans-Neptunian object Quaoar. Its discovery by Michael E. Brown was reported in IAUC 8812 on 22 February 2007, based on imagery taken on 14 February 2006.
 !xd#all#say#xdHead
 !zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
 !čas#all#say#Právě je @time@.
 !češi#all#say#ČEŠI V CHATE FailFish
+f#all#say#Press f to pay respects. f
+trieasy#all#say#TriEasy
+trihard#all#say#TriHard
