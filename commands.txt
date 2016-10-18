@@ -145,7 +145,7 @@
 !weebs#all#say#VoHiYo WEEBS-MASTER-RACE VoHiYo
 !weneedmoreautisticbots#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
 !weywot#all#say#Weywot, officially (50000) Quaoar I Weywot, is the only known moon of the trans-Neptunian object Quaoar. Its discovery by Michael E. Brown was reported in IAUC 8812 on 22 February 2007, based on imagery taken on 14 February 2006.
-!xd#all#say#xdHead
+!xd#all#say#DxD VoHiYo
 !zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
 !čas#all#say#Právě je @time@.
 !češi#all#say#ČEŠI V CHATE FailFish

@@ -1662,8 +1662,8 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		it = ret.first;
 		while(it != ret.second)
 		{
-			std::cout << "who: " << it->second.who <<std::endl;
-			std::cout << "user: " << user << std::endl;
+			//std::cout << "who: " << it->second.who <<std::endl;
+			//std::cout << "user: " << user << std::endl;
 			if(it->second.who == users[i])
 			{
 				if(i == 1 && this->isAdmin(user) == false)
