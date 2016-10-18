@@ -1623,6 +1623,17 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 //	}
 
 	std::string msgcopy = msg;
+	
+	try
+	{
+	if(msg.find("@me@") != std::string::npos) return;
+	if(msg.find("@all@") != std::string::npos) return;
+	if(msg.find("@irnd@") != std::string::npos) return;
+	if(msg.find("@ifrnd@") != std::string::npos) return;
+	if(msg.find("@time@") != std::string::npos) return;
+	if(msg.find("@id") != std::string::npos && msg.find("@", msg.find("@id")+3) != std::string::npos) return;
+	}
+	catch(...){}
 	std::string delimiter = " ";
 	std::vector<std::string> vekmsg;
 	size_t pos = 0;
@@ -1703,10 +1714,6 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 	{
 		//i should probably rework this LUL
 		std::string msgback = it->second.data;
-		//for(auto &i : vekmsg)
-		{
-			
-		}
 		while(msgback.find("@me@") != std::string::npos)
 		{
 			msgback.replace(msgback.find("@me@"), 4, user);

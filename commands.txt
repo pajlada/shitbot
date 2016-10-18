@@ -150,5 +150,6 @@
 !čas#all#say#Právě je @time@.
 !češi#all#say#ČEŠI V CHATE FailFish
 f#all#say#Press f to pay respects. f
+memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
 trieasy#all#say#TriEasy
 trihard#all#say#TriHard
