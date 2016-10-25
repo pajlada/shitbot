@@ -29,6 +29,7 @@
 !damocloids#all#say#Damocloids are minor planets such as 5335 Damocles and 1996 PW that have Halley-family or long-period highly eccentric orbits typical of periodic comets such as Halley's Comet, but without showing a cometary coma or tail. David Jewitt defines a damocloid as an object with a Tisserand's parameter relative to Jupiter TJ ≤ 2.
 !danknation#all#say#~- pajaDank ~-
 !deathstar#all#say#The Death Star is a fictional moon-sized space station and superweapon appearing in the Star Wars universe.
+!debug#all#say#Bot is debugged Kappa
 !deimos#all#say#Deimos (systematic designation: Mars II) is the smaller and outer of the two natural satellites of the planet Mars, the other being Phobos. Deimos has a mean radius of 6.2 km and takes 30.3 hours to orbit Mars.  In Greek mythology, Deimos was the twin brother of Phobos and personified terror. Deimos is 23,460 km from Mars, much further than Mars's other moon, Phobos.
 !deletecmd#all#say#Deleted @id1@ cmd Kappa
 !ding#all#say#dong
@@ -78,7 +79,7 @@
 !jupiter#all#say#Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a giant planet with a mass one-thousandth that of the Sun, but two and a half times that of all the other planets in the Solar System combined. Jupiter is a gas giant, along with Saturn, with the other two giant planets, Uranus and Neptune, being ice giants.
 !kanaattori#all#say#http://i.imgur.com/pvkawvq.png
 !kappa#all#say#http://i.imgur.com/93WvHrc.jpg Kappa
-!keepo#all#say#http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
+!keepo#all#say#http://i.imgur.com/4fCSmGM.jpg Keepo http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
 !lilguy#all#say#https://clyp.it/gx3ez4te
 !ltdmonster2#all#say#STEFAAAAANN! FeelsAmazingMan 📣
 !lul#all#say#@me@, LUL
@@ -95,6 +96,7 @@
 !nogger#all#say#TriHard
 !oberon#all#say#Oberon, also designated Uranus IV, is the outermost major moon of the planet Uranus. It is the second-largest and second most massive of the Uranian moons, and the ninth most massive moon in the Solar System. Discovered by William Herschel in 1787. Its orbit lies partially outside Uranus's magnetosphere.
 !orcus#all#say#90482 Orcus is a Kuiper belt object with a large moon, Vanth. It was discovered on February 17, 2004 by Michael Brown of Caltech, Chad Trujillo of the Gemini Observatory, and David Rabinowitz of Yale University. Precovery images as early as November 8, 1951 were later identified. It is probably a dwarf planet.
+!oyasumi#all#say#Oyasumi @id1@-chan, mata ashita ne VoHiYo
 !pallas#all#say#Pallas, minor-planet designation 2 Pallas, is the second asteroid to have been discovered (after Ceres), and it is one of the largest asteroids in the Solar System. With an estimated 7% of the mass of the asteroid belt, it is the third-most-massive asteroid, being 10–30% less massive than Vesta. It is 512 kilometers in diameter, somewhat smaller than Vesta.
 !party#all#say#@me@ is organizing a gay party gachiGASM and is inviting @all@ gachiGASM
 !peng#all#say#weneedmoreautisticbots has been running for 134 years 243 days 9 hours 14 minutes 5 seconds 110 milliseconds 0 microseconds and 954 nanoseconds pajaDank
@@ -113,7 +115,7 @@
 !rhea#all#say#Rhea is the second-largest moon of Saturn and the ninth-largest moon in the Solar System. It is the second smallest body in the Solar System, after the asteroid and dwarf planet Ceres, for which precise measurements have confirmed a shape consistent with hydrostatic equilibrium. It was discovered in 1672 by Giovanni Domenico Cassini.
 !rip#all#say#rip bindik LUL
 !rps#admin#repeat#@all@
-!rules#all#say#who cares 4HEad
+!rules#all#say#@me@, who cares 4HEad
 !salacia#all#say#120347 Salacia is a large planetoid in the Kuiper belt. It was discovered on 22 September 2004 by Henry G. Roe, Michael E. Brown and Kristina M. Barkume at the Palomar Observatory. It is almost certainly a dwarf planet. Salacia's diameter is estimated to be about 850 kilometres due to a low albedo.
 !saturn#all#say#Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius about nine times that of Earth. Although only one-eighth the average density of Earth, with its larger volume Saturn is just over 95 times more massive.
 !sedna#all#say#90377 Sedna is a large minor planet in the outer reaches of the Solar System that was, as of 2015, at a distance of about 86 AU from the Sun, about three times as far as Neptune. Spectroscopy has revealed that Sedna's surface composition is similar to that of some other trans-Neptunian objects.
@@ -149,7 +151,7 @@
 !zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
 !čas#all#say#Právě je @time@.
 !češi#all#say#ČEŠI V CHATE FailFish
+all#say#bot#is debugged Kappa
 f#all#say#Press f to pay respects. f
 memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
-trieasy#all#say#TriEasy
-trihard#all#say#TriHard
+trihardlookingoutofhisdankmemewindow#all#say#TriHardLookingOutOfHisDankMemeWindow

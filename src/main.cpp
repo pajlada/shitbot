@@ -873,8 +873,12 @@ void IrcConnection::leaveChannel(const std::string& chn)
 		{
 			std::cout << "error: " << ec << std::endl;
 		}
-		this->channelSockets[chn]->close();
+		this->channelSockets[chn]->close(ec);
 		std::cout << "close" << std::endl;
+		if(ec)
+		{
+			std::cout << "error: " << ec << std::endl;
+		}
 	}
 	}
 	catch(std::exception& e)
@@ -1948,15 +1952,24 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 				}
 				else
 				{
+					std::cout << "x1\n";
 					this->channelSockets.erase(chn);
+					std::cout << "x2\n";
 					this->channelMsgs.erase(chn);
+					std::cout << "x3\n";
 					this->channelTimes.erase(chn);
+					std::cout << "x4\n";
 					this->pingMap.erase(chn);
+					std::cout << "x5\n";
 					if(this->channelBools.count(chn) == 1)
 					{
+						std::cout << "x6\n";
 						this->channelBools.erase(chn);
+						std::cout << "x7\n";
 						this->joinChannel(chn);
+						std::cout << "x8\n";
 					}
+					std::cout << "x9\n";
 					/*std::cout << "error: " << chn << " ecx: " << ec << std::endl;
 					std::cout << "err leaving " << chn << std::endl;
 					
