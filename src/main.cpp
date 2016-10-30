@@ -1064,7 +1064,7 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 			sendirc += '\\' + msg.substr(1, std::string::npos);
 		}
 		else*/
-		std::string mymsg = msg;
+		/*std::string mymsg = msg;
 		std::string delimiter = " ";
 		std::vector<std::string> vek;
 		size_t pos = 0;
@@ -1091,7 +1091,8 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 		for(const auto & i : vek)
 		{
 			sendirc += i + ' ';
-		}
+		}*/
+		sendirc += msg + ' ';
 		if(sendirc.length() > 387)
 			sendirc = sendirc.substr(0, 387) + "\r\n";
 		else sendirc += " \r\n";
@@ -1796,6 +1797,22 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		int i = 1;
 		std::stringstream ss;
 		ss << "@id" << i << "@";
+		
+		for(const auto &i : blacklistset)
+		{
+			for(int p = 0; p < vekmsg.size(); ++p)
+			{
+				std::string s = vekmsg[p];
+				changeToLower(s);
+				size_t pos = 0;
+				while((pos = s.find(i)) != std::string::npos)
+				{
+					vekmsg[p].replace(pos, i.size(), "***");
+					s.replace(pos, i.size(), "***");
+				}
+			}
+		}
+		
 		while(msgback.find(ss.str()) != std::string::npos && i < vekmsg.size())
 		{
 			msgback.replace(msgback.find(ss.str()), ss.str().size(), vekmsg[i]);
@@ -1803,10 +1820,41 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			ss.str("");
 			ss << "@id" << i << "@";
 		}
-		std::string all = msg.substr(it->first.size(), std::string::npos);
+		
+		std::string mymsg = msg.substr(it->first.size(), std::string::npos);
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = mymsg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(mymsg.substr(0, pos));
+			mymsg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(mymsg);
+		for(const auto &i : blacklistset)
+		{
+			for(int p = 0; p < vek.size(); ++p)
+			{
+				std::string s = vek[p];
+				changeToLower(s);
+				size_t pos = 0;
+				while((pos = s.find(i)) != std::string::npos)
+				{
+					vek[p].replace(pos, i.size(), "***");
+					s.replace(pos, i.size(), "***");
+				}
+			}
+		}
+		
 		while(msgback.find("@all@") != std::string::npos)
 		{
-			msgback.replace(msgback.find("@all@"), 5, all);
+			std::string s = "";
+			for(const auto &i : vek)
+			{
+				s += i + ' ';
+			}
+			s.pop_back();
+			msgback.replace(msgback.find("@all@"), 5, s);
 		}
 		
 		int rnd = this->dice();
@@ -1815,7 +1863,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msgback.replace(msgback.find("@irnd@"), 6, std::to_string(rnd));
 		}
 		
-		size_t pos = 0;
+		pos = 0;
 		while((pos = msgback.find("@ifrnd@")) != std::string::npos)
 		{
 			msgback.erase(pos, 7);
