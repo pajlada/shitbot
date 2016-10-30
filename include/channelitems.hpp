@@ -13,6 +13,7 @@ class ChannelItems
 {
 public:
 	ChannelItems(const std::string& channel);
+	~ChannelItems();
 	void insert(const std::string& username);
 	void insert(const std::string& username, const std::string& key, unsigned long long value);
 	std::pair<bool, unsigned long long> get(const std::string& username, const std::string& key);
@@ -20,10 +21,10 @@ public:
 	int readFile();
 	int writeFile();
 	void readAll();
-	std::mutex* mtx;
+	std::mutex* mtx = nullptr;
+	std::string m_channel;
 private:
 	std::unordered_map<std::string, std::map<std::string, unsigned long long>> usersMap;
-	std::string m_channel;
 };
 
 #endif

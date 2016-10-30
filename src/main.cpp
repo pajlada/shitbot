@@ -123,6 +123,7 @@ public:
 	void addAdmin(const std::string& admin);
 	void addCmd(const std::string& cmd, std::string msg);
 	std::multimap<std::string, Command> commands;
+	std::set<std::string> blacklistset;
 	int dice()
 	{
 		return this->dist(this->mt);
@@ -170,6 +171,7 @@ private:
 	void processEventQueue();
 	std::fstream commandsFile;
 	std::fstream adminsFile;
+	std::fstream blacklist;
 	std::set<std::string> admins;
 	std::random_device rd;
 	std::mt19937 mt{this->rd()};
@@ -631,6 +633,8 @@ void IrcConnection::IncrementLoop()
 				auto end = std::chrono::high_resolution_clock::now();
 				std::cout << nm.first << " took: " << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() << " ns" << std::endl;
 			}
+			curl_slist_free_all(chunk);
+			curl_easy_cleanup(curl);
 		}
 	}
 }
@@ -690,12 +694,22 @@ IrcConnection::IrcConnection()
 		this->commandsFile.open("commands.txt", std::ios::out | std::ios::app);
 	}
 
+	blacklist.open("blacklist.txt", std::ios::in);
+	std::string line;
+	while(std::getline(blacklist, line))
+	{
+		blacklistset.insert(line);
+	}
+	blacklist.close();
+	blacklist.open("blacklist.txt", std::ios::out | std::ios::app);
+
 	std::cout << "lulopxened\n";
 }
 IrcConnection::~IrcConnection()
 {
 	this->adminsFile.close();
 	this->commandsFile.close();
+	blacklist.close();
 }
 
 bool IrcConnection::isAdmin(const std::string& user)
@@ -1049,9 +1063,37 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 		{
 			sendirc += '\\' + msg.substr(1, std::string::npos);
 		}
-		else*/ sendirc += msg;
+		else*/
+		std::string mymsg = msg;
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = mymsg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(mymsg.substr(0, pos));
+			mymsg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(mymsg);
+		for(const auto &i : blacklistset)
+		{
+			for(int p = 0; p < vek.size(); ++p)
+			{
+				std::string s = vek[p];
+				changeToLower(s);
+				size_t pos = 0;
+				while((pos = s.find(i)) != std::string::npos)
+				{
+					vek[p].replace(pos, i.size(), "***");
+					s.replace(pos, i.size(), "***");
+				}
+			}
+		}
+		for(const auto & i : vek)
+		{
+			sendirc += i + ' ';
+		}
 		if(sendirc.length() > 387)
-			sendirc = sendirc.substr(0, 387) + " \r\n";
+			sendirc = sendirc.substr(0, 387) + "\r\n";
 		else sendirc += " \r\n";
 		std::cout << "sendirc: " << sendirc << std::endl;
 		this->channelSockets[channel]->async_send(asio::buffer(sendirc), handler);
@@ -1069,7 +1111,33 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
 	try{
-		changeToLower(user);
+		
+	changeToLower(user);
+	if(msg.compare(0, strlen("!blacklist"), "!blacklist") == 0 && user == "hemirt")
+	{
+		std::string delimiter = " ";
+		std::vector<std::string> vek;
+		size_t pos = 0;
+		while((pos = msg.find(delimiter)) != std::string::npos)
+		{
+			vek.push_back(msg.substr(0, pos));
+			msg.erase(0, pos + delimiter.length());
+		}
+		vek.push_back(msg);
+		changeToLower(vek[1]);
+		if(vek.size() == 2)
+		{
+			auto y = blacklistset.insert(vek[1]);
+			if(y.second == false) return;
+			if(blacklist.is_open() == false)
+			{
+				std::cout << "erroblckr" << std::endl;
+				return;
+			}
+			blacklist << vek[1] << std::endl;
+		}
+		return;
+	}
 	if(msg.compare(0, strlen("!addadmin"), "!addadmin") == 0 && user == "hemirt")
 	{
 		std::string delimiter = " ";
@@ -1081,7 +1149,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			msg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(msg);
-		changeToLower(vek[2]);
+		changeToLower(vek[1]);
 		if(vek.size() == 2)
 			this->addAdmin(vek[1]);
 		return;
@@ -1170,7 +1238,10 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		vek.push_back(msg);
 		if(vek.size() == 2)
+		{
+			if(this->channelSockets.count(vek[1]) == 1) return;
 			this->joinChannel(vek[1]);
+		}
 		return;
 	}
 	
@@ -2017,11 +2088,11 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
-	
+
 	myIrc.channels.addChannel("hemirt");
 	myIrc.channels.addChannel("forsenlol");
 	myIrc.channels.addChannel("pajlada");
-	
+	std::cout << "added all" << std::endl;
 	myIrc.waitEnd();
 	return 0;
 }

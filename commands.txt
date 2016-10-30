@@ -13,7 +13,8 @@
 !bing#all#say#Have you heard of google? EleGiggle
 !boson#all#say#https://upload.wikimedia.org/wikipedia/commons/7/79/Candidate_Higgs_Events_in_ATLAS_and_CMS.png PogChamp
 !botroulete#all#say#!roulete all
-!breading#all#say#The Gentleman's sport of breading one another was a game originally divised by FabulousPotato69 and pajlada. The rules of this game is to ping your target and then bread them using 🍞. The target can counter the breading by typing 🍞 counter. If the target does not counter quick enough the point goes to the breader after they have shouted “YOU GOT BREADED :tf: ”
+!botroulette#all#say#!roulette all
+!breading#all#say#Breading is dead, don't do it anymore OMGScoits
 !buy#all#say#@me@ bought @id1@ but on his way home a TriHard mugged him and stole it
 !c++#all#say#I run on C++ FeelsGoodMan
 !callisto#all#say#Callisto (Jupiter IV) is the second-largest moon of Jupiter. It is the third-largest moon in the Solar System and the largest object in the Solar System not to be properly differentiated. Callisto was discovered in 1610 by Galileo Galilei. At 4821 km in diameter, Callisto has about 99% the diameter of the planet Mercury but only about a third of its mass.
@@ -25,6 +26,7 @@
 !chromosome#all#say#A chromosome is a strand of DNA that is encoded with genes. In most cells, humans have 22 pairs of these chromosomes plus the two sex chromosomes (XX in females and XY in males) for a total of 46.
 !chromosomes#all#say#@me@ has @irnd@ chromosomes MingLee @ifrnd@=47#Klinefelter syndrome #@ifrnd@=48#XXYY syndrome #@ifrnd@=49#XXXXY syndrome #@ifrnd@=45#Turner syndrome #@ifrnd@=46#a healthy human PogChamp #@ifrnd@=21#Down Syndrome #@ifrnd@>49#not a human in 2016 LUL #@ifrnd@<23#not a human in 2016 LUL #@ifrnd@=69#gachiGASM #
 !code#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
+!cpr#all#say#@me@ performed CPR on @id1@ PagChomp
 !damocloid#all#say#Damocloids are minor planets such as 5335 Damocles and 1996 PW that have Halley-family or long-period highly eccentric orbits typical of periodic comets such as Halley's Comet, but without showing a cometary coma or tail. David Jewitt defines a damocloid as an object with a Tisserand's parameter relative to Jupiter TJ ≤ 2.
 !damocloids#all#say#Damocloids are minor planets such as 5335 Damocles and 1996 PW that have Halley-family or long-period highly eccentric orbits typical of periodic comets such as Halley's Comet, but without showing a cometary coma or tail. David Jewitt defines a damocloid as an object with a Tisserand's parameter relative to Jupiter TJ ≤ 2.
 !danknation#all#say#~- pajaDank ~-
@@ -94,6 +96,7 @@
 !nereid#all#say#Nereid is the third-largest moon of Neptune. It has a highly eccentric orbit. It was the second moon of Neptune to be discovered, by Gerard Kuiper in 1949. The unusual orbit suggests that it may be either a captured asteroid or Kuiper belt object, or that it was an inner moon in the past and was perturbed during the capture of Neptune's largest moon Triton
 !nice#all#say#NICE BOT EleGiggle
 !nogger#all#say#TriHard
+!nuuls#all#say#To get nuuls' attention, you just have to say nuuls. If that doesn't work say nuuls twenty more times, he loves getting pinged. :)
 !oberon#all#say#Oberon, also designated Uranus IV, is the outermost major moon of the planet Uranus. It is the second-largest and second most massive of the Uranian moons, and the ninth most massive moon in the Solar System. Discovered by William Herschel in 1787. Its orbit lies partially outside Uranus's magnetosphere.
 !orcus#all#say#90482 Orcus is a Kuiper belt object with a large moon, Vanth. It was discovered on February 17, 2004 by Michael Brown of Caltech, Chad Trujillo of the Gemini Observatory, and David Rabinowitz of Yale University. Precovery images as early as November 8, 1951 were later identified. It is probably a dwarf planet.
 !oyasumi#all#say#Oyasumi @id1@-chan, mata ashita ne VoHiYo
@@ -144,14 +147,18 @@
 !varuna#all#say#20000 Varuna is a large classical Kuiper belt object. It is probably a dwarf planet. It rotates rapidly and hence its shape is probably very elongated. Varuna is named after a Hindu deity. Varuna was one of the most important deities of the ancient Indians, and he presided over the waters of the heaven and of the ocean and was the guardian of immortality.
 !venus#all#say#Venus is the second planet from the Sun, orbiting it every 224.7 Earth days. It has the longest rotation period (243 days) of any planet in the Solar System and rotates in the opposite direction to most other planets. It has no natural satellite. It is named after the Roman goddess of love and beauty.
 !vesta#all#say#Vesta, minor-planet designation 4 Vesta, is one of the largest objects in the asteroid belt, with a mean diameter of 525 kilometres. It was discovered by the German astronomer Heinrich Wilhelm Olbers on 29 March 1807 and is named after Vesta, the virgin goddess of home and hearth from Roman mythology.
+!weeb#all#say#VoHiYo WEEBS-MASTER-RACE VoHiYo
 !weebs#all#say#VoHiYo WEEBS-MASTER-RACE VoHiYo
 !weneedmoreautisticbots#all#say#weneedmoreautisticbots source code https://github.com/hemirt/shitbot 4Head
 !weywot#all#say#Weywot, officially (50000) Quaoar I Weywot, is the only known moon of the trans-Neptunian object Quaoar. Its discovery by Michael E. Brown was reported in IAUC 8812 on 22 February 2007, based on imagery taken on 14 February 2006.
-!xd#all#say#DxD VoHiYo
+!xd#all#say#xD
 !zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
 !čas#all#say#Právě je @time@.
 !češi#all#say#ČEŠI V CHATE FailFish
 all#say#bot#is debugged Kappa
 f#all#say#Press f to pay respects. f
 memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
+nyanpls#all#say#nyanPls @all@
+pong#lobbytf#say#@me@, icdb47 OMEGALUL
+shutthefuckupweebs#all#say#nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls
 trihardlookingoutofhisdankmemewindow#all#say#TriHardLookingOutOfHisDankMemeWindow

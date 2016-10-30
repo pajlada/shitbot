@@ -7,6 +7,7 @@
 #include <fstream>
 #include <memory>
 #include <set>
+#include <vector>
 
 class Channels
 {

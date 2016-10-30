@@ -31,7 +31,7 @@ std::pair<bool, unsigned long long> ChannelItems::get(const std::string& usernam
 	}
 	else
 	{
-		return {false, it->second};
+		return {false, 0};
 	}
 }
 
@@ -93,36 +93,25 @@ int ChannelItems::readFile()
 	usersMap.clear();
 	while(true)
 	{
-		//read name length or break on end of file (or some error)
 		size_t name_size;
 		if(!(userItemsFile.read(reinterpret_cast<char *>(&name_size), sizeof(size_t)))) break;
-		//read name to char array
 		char * name = new char[name_size];
 		userItemsFile.read(name, name_size);
-		//make string from name, making it here, cause when i made it near the std::string it in the for loop i got some runtime errors(not sure why LUL)
 		std::string nm(name, name_size);
-		//read how many items does the user have
-		unsigned int itemscount;
+		size_t itemscount;
 		userItemsFile.read(reinterpret_cast<char *>(&itemscount), sizeof(size_t));
-		//read each item
 		for(int i = 0; i < itemscount; ++i)
 		{
-			//read length of the item name
 			size_t itemsize;
 			userItemsFile.read(reinterpret_cast<char *>(&itemsize), sizeof(size_t));
-			//read the item name
 			char * itemname = new char[itemsize];
 			userItemsFile.read(itemname, itemsize);
-			//read how many 'itemname' does the user has
 			unsigned long long itemnumber;
 			userItemsFile.read(reinterpret_cast<char *>(&itemnumber), sizeof(unsigned long long));
-			//create a string and insert it to the usersMap
 			std::string it(itemname, itemsize);
 			usersMap[nm][it] = itemnumber;
-			//cleanup
 			delete[] itemname;
 		}
-		//cleanup
 		delete[] name;
 	}
 	userItemsFile.close();
@@ -143,4 +132,14 @@ void ChannelItems::readAll()
 size_t ChannelItems::size()
 {
 	return usersMap.size();
+}
+
+ChannelItems::~ChannelItems()
+{
+	if(mtx != nullptr)
+	{
+		printf("%s dele %p ting %p\n", m_channel.c_str(), this, mtx);
+		delete mtx;
+		mtx = nullptr;
+	}
 }
