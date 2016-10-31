@@ -1275,7 +1275,11 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		}
 		vek.push_back(msg);
 		if(vek.size() == 2)
+		{
+			this->channelBools.erase(vek[1]);
 			this->leaveChannel(vek[1]);
+			
+		}
 		return;
 	}
 	

@@ -157,6 +157,7 @@
 !češi#all#say#ČEŠI V CHATE FailFish
 all#say#bot#is debugged Kappa
 f#all#say#Press f to pay respects. f
+lul#all#say#LUL
 memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
 nyanpls#all#say#nyanPls @all@
 pong#lobbytf#say#@me@, icdb47 OMEGALUL
