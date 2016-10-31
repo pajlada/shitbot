@@ -827,6 +827,9 @@ int IrcConnection::writeCommandsToFile()
 
 void IrcConnection::joinChannel(const std::string& chn)
 {
+	try
+	{
+	this->channelBools.insert({chn, true});
 	if(this->channelSockets.count(chn) == 1)
 	{
 		this->leaveChannel(chn);
@@ -860,7 +863,11 @@ void IrcConnection::joinChannel(const std::string& chn)
 	this->pingMap.insert(std::pair<std::string, std::unique_ptr<Pings>>(chn, std::move(ptr)));
 	this->threads.push_back(std::thread(&IrcConnection::listenAndHandle, this, chn));
 	std::cout << "started thread: " << chn << std::endl;
-	
+	}
+	catch(std::exception& e)
+	{
+		std::cout << "joinchn " << chn << " exc: " << e.what() << std::endl;
+	}
 }
 
 void IrcConnection::leaveChannel(const std::string& chn)
@@ -1003,7 +1010,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 						try
 						{
 							std::cout << "pinging: left channel << " << i.first << std::endl;
-							this->channelBools.insert({i.first, true}); // idk what im doing here 4HEad
+							this->joinChannel(i.first);// idk what im doing here 4HEad
 						}
 						catch(std::exception &e)
 						{
@@ -1015,6 +1022,16 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 					catch(std::exception &e)
 					{
 						std::cout << "caught exception at pinging: " << i.first << " " << e.what() << std::endl;
+						try
+						{
+							this->leaveChannel(i.first);
+						}
+						catch(...){}
+						try
+						{
+							this->joinChannel(i.first);
+						}
+						catch(...){}
 					}
 				}
 			}
