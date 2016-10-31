@@ -50,7 +50,7 @@ std::string timenow()
 	return ss.str();
 }
 
-//provided by old_forsen
+//provided by old_forsen //thanks
 template <typename T>
 class EventQueue {
     std::list<T> _queue;
@@ -830,7 +830,7 @@ void IrcConnection::joinChannel(const std::string& chn)
 	if(this->channelSockets.count(chn) == 1)
 	{
 		this->leaveChannel(chn);
-		this->channelBools.erase(chn); //should already be deleted tho
+		//this->channelBools.erase(chn); //should already be deleted tho, idk LUL
 	}
 	std::shared_ptr<asio::ip::tcp::socket> sock(new asio::ip::tcp::socket(this->m_io_service));
 	this->channelSockets.insert(std::pair<std::string, std::shared_ptr<asio::ip::tcp::socket>>(chn, sock));
@@ -1003,7 +1003,7 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 						try
 						{
 							std::cout << "pinging: left channel << " << i.first << std::endl;
-							this->channelBools.insert({i.first, true});
+							this->channelBools.insert({i.first, true}); // idk what im doing here 4HEad
 						}
 						catch(std::exception &e)
 						{
@@ -2083,7 +2083,7 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 					if(this->channelBools.count(chn) == 1)
 					{
 						std::cout << "x6\n";
-						this->channelBools.erase(chn);
+						//this->channelBools.erase(chn); idk LUL
 						std::cout << "x7\n";
 						this->joinChannel(chn);
 						std::cout << "x8\n";
@@ -2117,7 +2117,7 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 			this->pingMap.erase(chn);
 			if(this->channelBools.count(chn) == 1)
 			{
-				this->channelBools.erase(chn);
+				//this->channelBools.erase(chn); idk LUL
 				this->joinChannel(chn);
 			}
 			

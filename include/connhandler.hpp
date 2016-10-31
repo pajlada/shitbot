@@ -5,21 +5,29 @@
 #include <memory>
 #include <map>
 #include <string>
+#include "channel.hpp"
+#include <iostream>
+#include "eventqueue.hpp"
 
 class ConnHandler
 {
 public:
-	ConnHandler();
+	ConnHandler(const std::string &pass, const std::string &nick);
 	~ConnHandler();
-	std::shared_ptr<socket> spawnSocket();
+	void spawnSocket(std::string chn);
 	std::map<std::string, Channel> channelSockets;
 	void joinChannel(const std::string&);
 	void leaveChannel(const std::string&);
 	void run();
-	void stop();
+	bool quit();
+	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 private:
-	io_service io_s;
+	asio::io_service io_s;
+	asio::ip::tcp::resolver::iterator twitch_it;
 	std::unique_ptr<asio::io_service::work> dummywork;
+	std::string pass;
+	std::string nick;
 };
+
 
 #endif
