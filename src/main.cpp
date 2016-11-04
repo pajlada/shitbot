@@ -114,7 +114,7 @@ public:
 	asio::io_service m_io_service;
 	std::map<std::string, std::shared_ptr<asio::ip::tcp::socket>> channelSockets;
 	void stop();
-	void start(const std::string& pass, const std::string& nick);
+	bool start(const std::string& pass, const std::string& nick);
 	std::map<std::string, std::chrono::high_resolution_clock::time_point> channelTimes;
 	void joinChannel(const std::string&);
 	void leaveChannel(const std::string&);
@@ -952,8 +952,10 @@ void handler(const asio::error_code& error,std::size_t bytes_transferred)
 	std::cout << "sent msg: " << bytes_transferred << std::endl;
 }
 
-void IrcConnection::start(const std::string& pass, const std::string& nick)
+bool IrcConnection::start(const std::string& pass, const std::string& nick)
 {
+	try
+	{
 	std::lock_guard<std::mutex> lck(irc_m);
 	this->quit_m = false;
 	this->pass = pass;
@@ -1040,6 +1042,13 @@ void IrcConnection::start(const std::string& pass, const std::string& nick)
 	
 	this->threads.push_back(std::thread(lambda));
 	this->threads.push_back(std::thread(&IrcConnection::IncrementLoop, this));
+	return true;
+	}
+	catch(std::exception &e)
+	{
+		std::cout << "start exception: " << e.what() << std::endl;
+		return false;
+	}
 }
 
 
@@ -1071,6 +1080,7 @@ void IrcConnection::msgCount()
 bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 {
 	std::lock_guard<std::mutex> lk(irc_m);
+	if(this->channelSockets.count(channel) == 0) return false;
 	if(this->channelMsgs[channel] < 19 && std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - this->channelTimes[channel]).count() > 1500)
 	{
 		
@@ -1819,17 +1829,20 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 		std::stringstream ss;
 		ss << "@id" << i << "@";
 		
-		for(const auto &i : blacklistset)
+		if(user != "hemirt")
 		{
-			for(int p = 0; p < vekmsg.size(); ++p)
+			for(const auto &i : blacklistset)
 			{
-				std::string s = vekmsg[p];
-				changeToLower(s);
-				size_t pos = 0;
-				while((pos = s.find(i)) != std::string::npos)
+				for(int p = 0; p < vekmsg.size(); ++p)
 				{
-					vekmsg[p].replace(pos, i.size(), "***");
-					s.replace(pos, i.size(), "***");
+					std::string s = vekmsg[p];
+					changeToLower(s);
+					size_t pos = 0;
+					while((pos = s.find(i)) != std::string::npos)
+					{
+						vekmsg[p].replace(pos, i.size(), "***");
+						s.replace(pos, i.size(), "***");
+					}
 				}
 			}
 		}
@@ -1852,21 +1865,23 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 			mymsg.erase(0, pos + delimiter.length());
 		}
 		vek.push_back(mymsg);
-		for(const auto &i : blacklistset)
+		if(user != "hemirt")
 		{
-			for(int p = 0; p < vek.size(); ++p)
+			for(const auto &i : blacklistset)
 			{
-				std::string s = vek[p];
-				changeToLower(s);
-				size_t pos = 0;
-				while((pos = s.find(i)) != std::string::npos)
+				for(int p = 0; p < vek.size(); ++p)
 				{
-					vek[p].replace(pos, i.size(), "***");
-					s.replace(pos, i.size(), "***");
+					std::string s = vek[p];
+					changeToLower(s);
+					size_t pos = 0;
+					while((pos = s.find(i)) != std::string::npos)
+					{
+						vek[p].replace(pos, i.size(), "***");
+						s.replace(pos, i.size(), "***");
+					}
 				}
 			}
 		}
-		
 		while(msgback.find("@all@") != std::string::npos)
 		{
 			std::string s = "";
@@ -1974,7 +1989,7 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 					this->sendMsg(channel, msgback);
 					return;
 				}
-				else if (it->second.action == "repeat" && user == "hemirt")
+				else if (it->second.action == "repeat" && (user == "hemirt" || user == "weneedmoreautisticbots"))
 				{
 					std::cout << "\"" << msgback << "\"" << std::endl;
 					std::string delimiter = " ";
@@ -1987,11 +2002,16 @@ void IrcConnection::handleCommands(std::string& user, const std::string& channel
 						msgback.erase(0, pos + delimiter.length());
 					}
 					std::cout << "rp: " << rp << std::endl;
-					for(int y = 0; y < rp; y++)
+					
+					auto lambda = [this, rp, channel, msgback{std::move(msgback)}]()
 					{
-						this->sendMsg(channel, msgback);
-						std::this_thread::sleep_for(std::chrono::milliseconds(1501));
-					}
+						for(int y = 0; y < rp && !(this->quit()); y++)
+						{
+							this->sendMsg(channel, msgback);
+							std::this_thread::sleep_for(std::chrono::milliseconds(1501));
+						}
+					};
+					this->threads.push_back(std::thread(lambda));
 				}
 			}
 		}
@@ -2152,7 +2172,10 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 int main(int argc, char *argv[])
 {
 	IrcConnection myIrc;
-	myIrc.start(argv[1], argv[2]);
+	while(!myIrc.start(argv[1], argv[2]))
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(60));
+	}
 	
 	myIrc.joinChannel("pajlada");
 	myIrc.joinChannel("hemirt");
