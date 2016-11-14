@@ -435,6 +435,7 @@ void IrcConnection::IncrementLoop()
 		}
 		else // 1 minute passed
 		{	
+			std::cout << "increment loop" << std::endl;
 			++current;
 			CURL *curl;
 			CURLcode res;
@@ -894,7 +895,7 @@ void IrcConnection::leaveChannel(const std::string& chn)
 		{
 			std::cout << "error: " << ec << std::endl;
 		}
-		this->channelSockets[chn]->close(ec);
+		this->channelSockets.at(chn)->close(ec);
 		std::cout << "close" << std::endl;
 		if(ec)
 		{
@@ -911,6 +912,7 @@ void IrcConnection::leaveChannel(const std::string& chn)
 	//std::this_thread::sleep_for(std::chrono::seconds(5));
 	//std::cout << "slept" <<std::endl;
 	
+	this->channelSockets.erase(chn);
 	/*
 	this->channelSockets.erase(chn);
 	this->channelMsgs.erase(chn);
@@ -982,8 +984,10 @@ bool IrcConnection::start(const std::string& pass, const std::string& nick)
 			else // 15 seconds passed
 			{	
 				lock.unlock();
+				std::cout << "lambda pingmap: \n";
 				for(const auto& i : this->channelSockets)
 				{
+					std::cout << "lambda: " << i.first << std::endl;
 					try
 					{
 					std::string sendirc = "PING :tmi.twitch.tv\r\n";
@@ -1036,6 +1040,7 @@ bool IrcConnection::start(const std::string& pass, const std::string& nick)
 						catch(...){}
 					}
 				}
+				std::cout << "lambda pingmap end" << std::endl;
 			}
 		}
 	};
@@ -1121,7 +1126,7 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 		}*/
 		sendirc += msg + ' ';
 		if(sendirc.length() > 387)
-			sendirc = sendirc.substr(0, 387) + "\r\n";
+			sendirc = sendirc.substr(0, 387) + " \r\n";
 		else sendirc += " \r\n";
 		std::cout << "sendirc: " << sendirc << std::endl;
 		this->channelSockets[channel]->async_send(asio::buffer(sendirc), handler);
@@ -2086,7 +2091,7 @@ void IrcConnection::processEventQueue()
 				else if(oneline.find("PONG") != std::string::npos)
 				{
 					{
-						std::cout << "got ping " << chn << std::endl;
+						std::cout << timenow() << " got ping " << chn << std::endl;
 						std::lock_guard<std::mutex> lk(this->pingMap[chn]->mtx);
 						this->pingMap[chn]->pinged = true;
 					}
@@ -2112,6 +2117,7 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 				}
 				else
 				{
+					std::lock_guard<std::mutex> lock(irc_m);
 					std::cout << "x1\n";
 					this->channelSockets.erase(chn);
 					std::cout << "x2\n";
@@ -2181,9 +2187,9 @@ int main(int argc, char *argv[])
 	myIrc.joinChannel("hemirt");
 	myIrc.joinChannel("forsenlol");
 
-	myIrc.channels.addChannel("hemirt");
-	myIrc.channels.addChannel("forsenlol");
-	myIrc.channels.addChannel("pajlada");
+	//myIrc.channels.addChannel("hemirt");
+	//myIrc.channels.addChannel("forsenlol");
+	//myIrc.channels.addChannel("pajlada");
 	std::cout << "added all" << std::endl;
 	myIrc.waitEnd();
 	return 0;

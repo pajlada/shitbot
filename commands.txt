@@ -3,7 +3,7 @@
 !3>#all#say#3> between @id1@ and @id2@ is @irnd@% <3
 !4dd#all#say#alldd
 !4dd#hemirt#say#4HEad
-!9/11#all#say#ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌!ddos#all#say#DDOSing @id1@ Keepo
+!9/11#all#say#ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌ ANELE ✈ ▌ ▌
 !<3#all#say#<3 between @me@ and @all@ is @irnd@% @ifrnd@<30#FeelsBadMan#@ifrnd@>70#FeelsGoodMan#@ifrnd@=69#gachiGASM#
 !alarm#all#say#http://vocaroo.com/i/s0jVUBTqHcUx
 !amalthea#all#say#Amalthea (/æməlˈθiːə/ am-əl-thee-ə; Greek: Ἀμάλθεια) is the third moon of Jupiter in order of distance from the planet. It was discovered on 9 September 1892, by Edward Emerson Barnard and named after Amalthea, a nymph in Greek mythology.[7] It is also known as Jupiter V.
@@ -13,8 +13,10 @@
 !billy#all#say#http://i.imgur.com/dSsFPTd.png gachiGASM
 !bing#all#say#Have you heard of google? EleGiggle
 !boson#all#say#https://upload.wikimedia.org/wikipedia/commons/7/79/Candidate_Higgs_Events_in_ATLAS_and_CMS.png PogChamp
+!bot#all#say#wENeEdmOREautiSTiCbOtS is a bod made by Hemirt pajaDank
 !botroulete#all#say#!roulete all
 !botroulette#all#say#!roulette all
+!botuptime#all#say#Bot uptime: (3yrs, 43 wks, 5 days, 9 hrs, 28 mins, 9 secs)
 !breading#all#say#Breading is dead, don't do it anymore OMGScoits
 !buy#all#say#@me@ bought @all@ but on his way home a TriEasy mugged him and stole his everything
 !c++#all#say#I run on C++ FeelsGoodMan
@@ -82,14 +84,15 @@
 !istrue#all#say#@all@ is @irnd@% true Keepo
 !isweeb#all#say#@all@ is @irnd@% weeb DansGame
 !java#all#say#java in 2016 EleGiggle
-!join#all#say#!join Kepp
+!join#admin#say#!join Kepp
 !jupiter#all#say#Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a giant planet with a mass one-thousandth that of the Sun, but two and a half times that of all the other planets in the Solar System combined. Jupiter is a gas giant, along with Saturn, with the other two giant planets, Uranus and Neptune, being ice giants.
 !kanaattori#all#say#http://i.imgur.com/pvkawvq.png
 !kappa#all#say#http://i.imgur.com/93WvHrc.jpg Kappa
-!keepo#all#say#http://i.imgur.com/4fCSmGM.jpg Keepo http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
+!keepo#all#say#http://imgur.com/a/OmwlX Keepo http://i.imgur.com/4fCSmGM.jpg Keepo http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
 !lilguy#all#say#https://clyp.it/gx3ez4te
 !ltdmonster2#all#say#STEFAAAAANN! FeelsAmazingMan 📣
 !lul#all#say#@me@, LUL
+!lul#lul_lul_lul#say#!testman123 LUL_LUL_LUL
 !makemake#all#say#Makemake (136472 Makemake) is a dwarf planet and perhaps the largest Kuiper belt object (KBO) in the classical population, with a diameter approximately two thirds that of Pluto. Makemake has one known satellite. Makemake’s extremely low average temperature, about −243.2 °C, means its surface is covered with methane, ethane, and possibly nitrogen ices.
 !mars#all#say#Mars is the fourth planet from the Sun and the second-smallest planet in the Solar System, after Mercury. Named after the Roman god of war, it is often referred to as the "Red Planet" because the iron oxide prevalent on its surface gives it a reddish appearance.
 !mercury#all#say#Mercury is the smallest and innermost planet in the Solar System. Its orbital period (about 88 Earth days) is less than any other planet in the Solar System. Seen from Earth, it appears to move around its orbit in about 116 days. It has no known natural satellites. It is named after the Roman deity Mercury, the messenger to the gods.
@@ -146,6 +149,7 @@
 !tree#all#say#http://i.imgur.com/6Suh5lk.jpg happy little tree KappaRoss
 !trihard#all#say#lilguy066 STOLE MY POINTS TriHard
 !triton#all#say#Triton is the largest natural satellite of the planet Neptune. It was discovered on October 10, 1846, by English astronomer William Lassell. It is the only large moon in the Solar System with a retrograde orbit, an orbit in the opposite direction to its planet's rotation. At 2,700 kilometres in diameter, it is the seventh-largest moon in the Solar System.
+!trump#all#say#Donald Trump's Final Rally https://www.youtube.com/watch?v=pLERzuzgOaY 🇺🇸
 !umbriel#all#say#Umbriel is a moon of Uranus discovered on October 24, 1851, by William Lassell. It was discovered at the same time as Ariel and named after a character in Alexander Pope's poem The Rape of the Lock. Umbriel consists mainly of ice with a substantial fraction of rock, and may be differentiated into a rocky core and an icy mantle.
 !uranus#all#say#Uranus is the seventh planet from the Sun. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System. Uranus is similar in composition to Neptune, and both have different bulk chemical composition from that of the larger gas giants Jupiter and Saturn.
 !vanth#all#say#Vanth, officially (90482) Orcus I Vanth, is the single known natural satellite of the plutino and likely dwarf planet Orcus. It was discovered by Mike Brown and T.-A. Suer using discovery images taken by the Hubble Space Telescope on November 13, 2005. The discovery was announced on 22 February 2007 in IAUC 8812.
@@ -160,11 +164,15 @@
 !zzz#all#say#ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper ResidentSleeper
 !čas#all#say#Právě je @time@.
 !češi#all#say#ČEŠI V CHATE FailFish
+@weneedmoreautisticbots#all#say#@me@, 👋 MrDestructoid
+@weneedmoreautisticbots,#all#say#@me@, 👋 MrDestructoid
 all#say#bot#is debugged Kappa
 f#all#say#Press f to pay respects. f
-lul#all#say#LUL
 memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
 nyanpls#all#say#nyanPls @all@
-pong#lobbytf#say#@me@, icdb47 OMEGALUL
+pajaw#talaendril#say#PajaWLookingOutOfHisMemePortal
+pong#lobbytf#say#fourtfbot, STOP OPPRESSING ME HotPokket , also lobbytf icdb47 OMEGALUL
 shutthefuckupweebs#all#say#nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls
 trihardlookingoutofhisdankmemewindow#all#say#TriHardLookingOutOfHisDankMemeWindow
+weneedmoreautisticbots#all#say#@me@, 👋 MrDestructoid
+weneedmoreautisticbots,#all#say#@me@, 👋 MrDestructoid
