@@ -66,6 +66,7 @@ public:
 	}
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
 	void handleCommands(std::string&, const std::string&, std::string&);
+	void handleCommands2(std::string&, const std::string&, std::string&);
 	//Channels channels;
 	struct Pings
 	{

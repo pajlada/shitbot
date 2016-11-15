@@ -603,6 +603,24 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 	}
 }
 
+void IrcConnection::handleCommands2(std::string& user, const std::string& channel, std::string& msg)
+{ try {
+	changeToLower(user);
+	std::vector<std::string> msgvec = splitMsg(msg);
+	
+	
+	
+
+} catch(std::exception &e)
+{
+	std::cout << "handleCommands2 caught exception " << e.what() << std::endl;
+} catch(...)
+{
+	std::cout << "handleCommands2 caught weird exception" << std::endl;
+}
+
+}
+
 void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
 	try{

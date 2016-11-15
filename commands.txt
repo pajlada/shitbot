@@ -9,6 +9,7 @@
 !amalthea#all#say#Amalthea (/æməlˈθiːə/ am-əl-thee-ə; Greek: Ἀμάλθεια) is the third moon of Jupiter in order of distance from the planet. It was discovered on 9 September 1892, by Edward Emerson Barnard and named after Amalthea, a nymph in Greek mythology.[7] It is also known as Jupiter V.
 !ariel#all#say#Ariel is the fourth-largest of the 27 known moons of Uranus. Ariel orbits and rotates in the equatorial plane of Uranus, which is almost perpendicular to the orbit of Uranus, and so has an extreme seasonal cycle. It was discovered in October 1851 by William Lassell, and named for a character in two different pieces of literature.
 !asay#admin#say#@all@
+!autistic#all#say#/me im an autistic bot that copies commands MrDestructoid
 !azuredrake#all#say#http://i.imgur.com/pKaymba.png LUL
 !billy#all#say#http://i.imgur.com/dSsFPTd.png gachiGASM
 !bing#all#say#Have you heard of google? EleGiggle
@@ -18,7 +19,7 @@
 !botroulette#all#say#!roulette all
 !botuptime#all#say#Bot uptime: (3yrs, 43 wks, 5 days, 9 hrs, 28 mins, 9 secs)
 !breading#all#say#Breading is dead, don't do it anymore OMGScoits
-!buy#all#say#@me@ bought @all@ but on his way home a TriEasy mugged him and stole his everything
+!buy#all#say#@me@ bought @all@ but on his way home a TriEasy mugged him and stole everything he had
 !c++#all#say#I run on C++ FeelsGoodMan
 !callisto#all#say#Callisto (Jupiter IV) is the second-largest moon of Jupiter. It is the third-largest moon in the Solar System and the largest object in the Solar System not to be properly differentiated. Callisto was discovered in 1610 by Galileo Galilei. At 4821 km in diameter, Callisto has about 99% the diameter of the planet Mercury but only about a third of its mass.
 !cas#all#say#Právě je @time@.
@@ -131,6 +132,7 @@
 !salacia#all#say#120347 Salacia is a large planetoid in the Kuiper belt. It was discovered on 22 September 2004 by Henry G. Roe, Michael E. Brown and Kristina M. Barkume at the Palomar Observatory. It is almost certainly a dwarf planet. Salacia's diameter is estimated to be about 850 kilometres due to a low albedo.
 !saturn#all#say#Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius about nine times that of Earth. Although only one-eighth the average density of Earth, with its larger volume Saturn is just over 95 times more massive.
 !sedna#all#say#90377 Sedna is a large minor planet in the outer reaches of the Solar System that was, as of 2015, at a distance of about 86 AU from the Sun, about three times as far as Neptune. Spectroscopy has revealed that Sedna's surface composition is similar to that of some other trans-Neptunian objects.
+!shitbot#all#say#wENeEdmOREautiSTiCbOtS source code https://github.com/hemirt/shitbot 4HEad
 !simultaneity#all#say#In physics, the relativity of simultaneity is the concept that distant simultaneity – whether two spatially separated events occur at the same time – is not absolute, but depends on the observer's reference frame.
 !sketch#all#say#Just a quick sketch http://i.imgur.com/0d75Nqq.png KKaper
 !slotmachine pull#swordakimbo#say#LUL @me@ LUL
@@ -170,8 +172,9 @@
 all#say#bot#is debugged Kappa
 elelul#all#say#čhehad 
 f#all#say#Press f to pay respects. f
-kkaper#all#say#KKaper 
-kkaper#lobbytf#say#anti-lobbytf-spam KKaper 
+kkaper#all#say#KKaper
+kkaper#lobbytf#say#anti lobbytf KKaper spam
+kkaper#knetbot#say#anti knetbot KKaper spam
 memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
 nyanpls#all#say#nyanPls @all@
 pajaw#talaendril#say#PajaWLookingOutOfHisMemePortal
