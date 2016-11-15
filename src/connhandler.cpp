@@ -14,13 +14,13 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{
 			if(i.second.messageCount > 0)
 				--i.second.messageCount;
 		}
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::seconds(2));
 	};
 	auto thread = std::thread(lambda);
 	thread.detach();
 }
 	
-void ConnHandler::spawnSocket(std::string chn)
+void ConnHandler::joinChannel(const std::string &chn)
 {
 	if(channelSockets.count(chn) == 1) return;
 	

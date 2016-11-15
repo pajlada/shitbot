@@ -161,37 +161,14 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 				else
 				{
 					std::lock_guard<std::mutex> lock(irc_m);
-					std::cout << "x1\n";
 					this->channelSockets.erase(chn);
-					std::cout << "x2\n";
 					this->channelMsgs.erase(chn);
-					std::cout << "x3\n";
 					this->channelTimes.erase(chn);
-					std::cout << "x4\n";
 					this->pingMap.erase(chn);
-					std::cout << "x5\n";
 					if(this->channelBools.count(chn) == 1)
 					{
-						std::cout << "x6\n";
-						//this->channelBools.erase(chn); idk LUL
-						std::cout << "x7\n";
 						this->joinChannel(chn);
-						std::cout << "x8\n";
 					}
-					std::cout << "x9\n";
-					/*std::cout << "error: " << chn << " ecx: " << ec << std::endl;
-					std::cout << "err leaving " << chn << std::endl;
-					
-					if(this->channelSockets.count(chn) == 1)
-						this->leaveChannel(chn);
-					if(this->channelBools.count(chn) == 0)
-					{
-						std::cout << "err reconnecting " << chn << std::endl;
-						this->joinChannel(chn);
-						std::cout << "err reconnected " << chn << std::endl;
-						return;
-					}
-					this->channelBools.erase(chn);*/
 					return;
 				}
 			}
@@ -207,12 +184,8 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 			this->pingMap.erase(chn);
 			if(this->channelBools.count(chn) == 1)
 			{
-				//this->channelBools.erase(chn); idk LUL
 				this->joinChannel(chn);
 			}
-			
-			//this->leaveChannel(chn);
-			//this->joinChannel(chn);
 			return;
 		}
 	}

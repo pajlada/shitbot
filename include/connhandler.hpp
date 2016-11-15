@@ -14,7 +14,6 @@ class ConnHandler
 public:
 	ConnHandler(const std::string &pass, const std::string &nick);
 	~ConnHandler();
-	void spawnSocket(std::string chn);
 	std::map<std::string, Channel> channelSockets;
 	void joinChannel(const std::string&);
 	void leaveChannel(const std::string&);

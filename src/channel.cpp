@@ -1,5 +1,15 @@
 #include "channel.hpp"
 
+void handler(const asio::error_code& error,std::size_t bytes_transferred){}
+
+Channel::Channel(const std::string &chn, std::shared_ptr<asio::ip::tcp::socket> sock, EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &evq)
+	: 	sock{sock},
+		chn{chn},
+		eventQueue{evq}
+{
+	
+}
+
 bool Channel::sendMsg(const std::string &msg)
 {
 	auto timeNow = std::chrono::high_resolution_clock::now();
@@ -10,7 +20,7 @@ bool Channel::sendMsg(const std::string &msg)
 		if(sendirc.length() > 387)
 			sendirc = sendirc.substr(0, 387) + "\r\n";
 		else sendirc += "\r\n";
-		//sock->async_send(asio::buffer(sendirc), handler); // define handler
+		sock->async_send(asio::buffer(sendirc), handler); // define handler
 		messageCount++;
 		lastMessageTime = timeNow;
 		return true;
@@ -21,21 +31,22 @@ bool Channel::sendMsg(const std::string &msg)
 	}
 }
 
-void Channel::run()
+void Channel::read()
 {
 	try
 	{
-		while(!(this->quit()))
+		while(!(this->quit))
 		{	
 			std::unique_ptr<asio::streambuf> b(new asio::streambuf);
 			asio::error_code ec;
 			asio::read_until(*(sock), *b, "\r\n", ec);				
-			if(!(ec && !(this->quit())))
+			if(!(ec && !(this->quit)))
 			{
 				eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), chn));
 			}
 			else
 			{
+				//else reconnect
 				/*
 				if(this->channelBools.count(chn) == 1)
 				{

@@ -8,20 +8,23 @@
 #include <chrono>
 #include "eventqueue.hpp"
 #include <iostream>
+#include <atomic>
 
 class Channel
 {
 public:
-	Channel(const std::string &chn, std::shared_ptr<asio::ip::tcp::socket> sock, EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &evq) : sock{sock}, chn{chn}, eventQueue{evq}{}; //eShrug
+	Channel(const std::string &chn, std::shared_ptr<asio::ip::tcp::socket> sock, EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &evq); //eShrug
 	std::string chn;
 	std::shared_ptr<asio::ip::tcp::socket> sock;
 	unsigned int messageCount = 0;
-	void run();
-	bool quit();
+	void read();
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &eventQueue;
-private:
-	std::chrono::high_resolution_clock::time_point lastMessageTime;
+	std::atomic<bool> quit(false);
 	bool sendMsg(const std::string &msg);
+	void ping();
+private:
+	std::atomic<bool> pingReplied(false);
+	std::chrono::high_resolution_clock::time_point lastMessageTime;
 };
 
 #endif
