@@ -1,6 +1,6 @@
 #include "connhandler.hpp"
 
-ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{pss}, nick{nck}
+ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{pss}, nick{nck}, quit_m(false)
 {
 	asio::ip::tcp::resolver resolver(io_s);
 	asio::ip::tcp::resolver::query query("irc.chat.twitch.tv", "6667");
@@ -11,21 +11,27 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{
 		if(!(this->quit())) return;
 		for(auto &i : channelSockets)
 		{
-			if(i.second.messageCount > 0)
-				--i.second.messageCount;
+			if(i.second->messageCount > 0)
+				--i.second->messageCount;
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 	};
 	auto thread = std::thread(lambda);
 	thread.detach();
 }
+
+ConnHandler::~ConnHandler()
+{
+	quit_m = true;
+}
 	
 void ConnHandler::joinChannel(const std::string &chn)
 {
+	std::lock_guard<std::mutex> lk(mtx);
 	if(channelSockets.count(chn) == 1) return;
 	
 	std::shared_ptr<asio::ip::tcp::socket> sock(new asio::ip::tcp::socket(io_s));
-	channelSockets.emplace(chn, Channel(chn, sock, eventQueue));
+	channelSockets.emplace(chn, std::make_unique<Channel>(chn, sock, eventQueue));
 	asio::connect(*sock, twitch_it);
 	
 	std::string passx = "PASS " + pass + "\r\n";
@@ -44,8 +50,33 @@ void ConnHandler::joinChannel(const std::string &chn)
 	
 	//std::unique_ptr<Pings> ptr(new Pings);
 	//this->pingMap.insert(std::pair<std::string, std::unique_ptr<Pings>>(chn, std::move(ptr)));
-	//this->threads.push_back(std::thread(&IrcConnection::listenAndHandle, this, chn)); //start listening on socket
+	auto t = std::thread([this, chn]()
+	{
+		channelSockets[chn]->read();
+	}); //start listening on socket
 	//std::cout << "started thread: " << chn << std::endl;
+	t.detach();
+}
+
+void ConnHandler::leaveChannel(const std::string &chn)
+{
+	std::lock_guard<std::mutex> lk(mtx);
+	if(channelSockets.count(chn) != 1) return;
+	asio::error_code ec;
+	channelSockets[chn]->quit = true;
+	channelSockets[chn]->sock->shutdown(asio::ip::tcp::socket::shutdown_both, ec);
+	if(ec)
+	{
+		std::cout << "error: " << ec << std::endl;
+	}
+	channelSockets[chn]->sock->close(ec);
+	std::cout << "close" << std::endl;
+	if(ec)
+	{
+		std::cout << "error: " << ec << std::endl;
+	}
+	channelSockets[chn]->sock.reset();	
+	channelSockets.erase(chn);
 }
 
 void ConnHandler::run()
@@ -84,10 +115,8 @@ void ConnHandler::run()
 					std::string ht_chn = "#" + channel;
 					std::string msg = oneline.substr(oneline.find(":", oneline.find(ht_chn)) + 1, std::string::npos);
 					std::string user = oneline.substr(oneline.find(":") + 1, oneline.find("!") - oneline.find(":") - 1);
-
-					//if(msg[0] == '!')
 					{
-						//this->handleCommands(user, channel, msg);
+						handleCommands(user, channel, msg);
 					}
 				}
 				else if(oneline.find("PING") != std::string::npos)
@@ -112,4 +141,17 @@ void ConnHandler::run()
 			}			
 		}
 	}
+}
+
+void ConnHandler::sendMsg(const std::string& channel, const std::string& message)
+{
+	std::lock_guard<std::mutex> lk(mtx);
+	if(channelSockets.count(channel) != 1) return;
+	channelSockets[channel]->sendMsg(message);
+}
+
+void ConnHandler::handleCommands(std::string& user, const std::string& channel, std::string& msg)
+{
+	if(user == "hemirt")
+	sendMsg(channel, "elegiggle");
 }

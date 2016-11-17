@@ -19,11 +19,11 @@ public:
 	unsigned int messageCount = 0;
 	void read();
 	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &eventQueue;
-	std::atomic<bool> quit(false);
+	std::atomic<bool> quit;
 	bool sendMsg(const std::string &msg);
 	void ping();
 private:
-	std::atomic<bool> pingReplied(false);
+	std::atomic<bool> pingReplied;
 	std::chrono::high_resolution_clock::time_point lastMessageTime;
 };
 

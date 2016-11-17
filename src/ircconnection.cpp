@@ -575,7 +575,7 @@ bool IrcConnection::sendMsg(const std::string& channel, const std::string& msg)
 		return false;
 	}
 }
-
+/*
 void IrcConnection::handleCommands2(std::string& user, const std::string& channel, std::string& msg)
 { try {
 	changeToLower(user);
@@ -592,7 +592,7 @@ void IrcConnection::handleCommands2(std::string& user, const std::string& channe
 	std::cout << "handleCommands2 caught weird exception" << std::endl;
 }
 
-}
+}*/
 
 void IrcConnection::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {

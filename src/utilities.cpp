@@ -25,7 +25,7 @@ std::string timenow()
 	return ss.str();
 }
 
-std::vector<std::string> splitMsg(std::string &msg, const std::string &delimiter = " ")
+std::vector<std::string> splitMsg(std::string &msg, const std::string &delimiter)
 {
 	std::vector<std::string> vec;
 	size_t pos = 0;

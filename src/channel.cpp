@@ -5,7 +5,9 @@ void handler(const asio::error_code& error,std::size_t bytes_transferred){}
 Channel::Channel(const std::string &chn, std::shared_ptr<asio::ip::tcp::socket> sock, EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &evq)
 	: 	sock{sock},
 		chn{chn},
-		eventQueue{evq}
+		eventQueue{evq},
+		pingReplied(false),
+		quit(false)
 {
 	
 }

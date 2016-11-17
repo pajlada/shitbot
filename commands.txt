@@ -18,6 +18,7 @@
 !botroulete#all#say#!roulete all
 !botroulette#all#say#!roulette all
 !botuptime#all#say#Bot uptime: (3yrs, 43 wks, 5 days, 9 hrs, 28 mins, 9 secs)
+!botvanish#hemirt#say#tinyurl.com bitly.com tr.im bit.ly t.co bc.vc goo.gl ow.ly www.com puu.sh pr0gramm.com TriEasy
 !breading#all#say#Breading is dead, don't do it anymore OMGScoits
 !buy#all#say#@me@ bought @all@ but on his way home a TriEasy mugged him and stole everything he had
 !c++#all#say#I run on C++ FeelsGoodMan
