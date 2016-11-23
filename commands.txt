@@ -14,9 +14,9 @@
 !billy#all#say#http://i.imgur.com/dSsFPTd.png gachiGASM
 !bing#all#say#Have you heard of google? EleGiggle
 !boson#all#say#https://upload.wikimedia.org/wikipedia/commons/7/79/Candidate_Higgs_Events_in_ATLAS_and_CMS.png PogChamp
-!bot#all#say#wENeEdmOREautiSTiCbOtS is a bod made by Hemirt pajaDank
+!bot#all#say#wENeEdmOREautiSTiCbOtS is a bad made by Hemirt pajaDank
 !botroulete#all#say#!roulete all
-!botroulette#all#say#!roulette all
+!botroulette#hemirt#say#!roulette @id1@
 !botuptime#all#say#Bot uptime: (3yrs, 43 wks, 5 days, 9 hrs, 28 mins, 9 secs)
 !botvanish#hemirt#say#tinyurl.com bitly.com tr.im bit.ly t.co bc.vc goo.gl ow.ly www.com puu.sh pr0gramm.com TriEasy
 !breading#all#say#Breading is dead, don't do it anymore OMGScoits
@@ -60,6 +60,7 @@
 !fab#all#say#OpieOP
 !fabulouspotato69#all#say#OpieOP
 !fag#all#say#DansGame
+!fourtf#hemirt#say#fourtf https://nlguillemot.wordpress.com/2016/11/18/opengl-renderer-design/ SeemsGood
 !ganymede#all#say#Ganymede (Jupiter III) is the largest moon of Jupiter and in the Solar System, and the only moon known to have a magnetic field. It is the seventh satellite outward from Jupiter and third of the Galilean moons. Ganymede orbits Jupiter in roughly seven days and is in a 1:2:4 orbital resonance with the moons Europa and Io.
 !gekota#all#say#http://i.imgur.com/PznxJl2.png FeelsGoodMan
 !gnome#all#say#http://i.imgur.com/89HlXNX.png pajaDank
@@ -106,6 +107,7 @@
 !neptune#all#say#Neptune is the eighth and farthest known planet from the Sun in the Solar System. In the Solar System, it is the fourth-largest planet by diameter, the third-most-massive planet and the densest giant planet. Neptune is 17 times the mass of Earth and is slightly more massive than its near-twin Uranus which is 15 times the mass of Earth and slightly larger than Neptune
 !nereid#all#say#Nereid is the third-largest moon of Neptune. It has a highly eccentric orbit. It was the second moon of Neptune to be discovered, by Gerard Kuiper in 1949. The unusual orbit suggests that it may be either a captured asteroid or Kuiper belt object, or that it was an inner moon in the past and was perturbed during the capture of Neptune's largest moon Triton
 !nice#all#say#NICE BOT EleGiggle
+!nicememe#all#say#nͫiͤcͫeͤ
 !nogger#all#say#TriHard
 !nuuls#all#say#To get nuuls' attention, you just have to say nuuls. If that doesn't work say nuuls twenty more times, he loves getting pinged. :)
 !oberon#all#say#Oberon, also designated Uranus IV, is the outermost major moon of the planet Uranus. It is the second-largest and second most massive of the Uranian moons, and the ninth most massive moon in the Solar System. Discovered by William Herschel in 1787. Its orbit lies partially outside Uranus's magnetosphere.
@@ -130,6 +132,7 @@
 !rip#all#say#rip bindik LUL
 !rps#admin#repeat#@all@
 !rules#all#say#@me@, who cares 4HEad
+!rules#karl_kons#say#!vanish Kepp
 !salacia#all#say#120347 Salacia is a large planetoid in the Kuiper belt. It was discovered on 22 September 2004 by Henry G. Roe, Michael E. Brown and Kristina M. Barkume at the Palomar Observatory. It is almost certainly a dwarf planet. Salacia's diameter is estimated to be about 850 kilometres due to a low albedo.
 !saturn#all#say#Saturn is the sixth planet from the Sun and the second-largest in the Solar System, after Jupiter. It is a gas giant with an average radius about nine times that of Earth. Although only one-eighth the average density of Earth, with its larger volume Saturn is just over 95 times more massive.
 !sedna#all#say#90377 Sedna is a large minor planet in the outer reaches of the Solar System that was, as of 2015, at a distance of about 86 AU from the Sun, about three times as far as Neptune. Spectroscopy has revealed that Sedna's surface composition is similar to that of some other trans-Neptunian objects.
@@ -173,14 +176,9 @@
 all#say#bot#is debugged Kappa
 elelul#all#say#čhehad 
 f#all#say#Press f to pay respects. f
-kkaper#all#say#KKaper
-kkaper#lobbytf#say#anti lobbytf KKaper spam
-kkaper#knetbot#say#anti knetbot KKaper spam
-memeportal#all#say#MemePortal "<- Here we can see a picture of my dad" - TriHard
-nyanpls#all#say#nyanPls @all@
+kkaper#nuulsbot#say#KKaper
 pajaw#talaendril#say#PajaWLookingOutOfHisMemePortal
 pong#lobbytf#say#fourtfbot, STOP OPPRESSING ME HotPokket , also lobbytf icdb47 OMEGALUL
 shutthefuckupweebs#all#say#nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls
-trihardlookingoutofhisdankmemewindow#all#say#TriHardLookingOutOfHisDankMemeWindow
 weneedmoreautisticbots#all#say#@me@, 👋 MrDestructoid
 weneedmoreautisticbots,#all#say#@me@, 👋 MrDestructoid

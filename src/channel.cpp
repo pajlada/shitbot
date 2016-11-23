@@ -2,9 +2,9 @@
 
 void handler(const asio::error_code& error,std::size_t bytes_transferred){}
 
-Channel::Channel(const std::string &chn, std::shared_ptr<asio::ip::tcp::socket> sock, EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> &evq)
+Channel::Channel(const std::string &_channelName, std::shared_ptr<asio::ip::tcp::socket> sock, BotEventQueue &evq)
 	: 	sock{sock},
-		chn{chn},
+		channelName{_channelName},
 		eventQueue{evq},
 		pingReplied(false),
 		quit(false)
@@ -17,7 +17,7 @@ bool Channel::sendMsg(const std::string &msg)
 	auto timeNow = std::chrono::high_resolution_clock::now();
 	if(messageCount < 19 && std::chrono::duration_cast<std::chrono::milliseconds>(timeNow - lastMessageTime).count() > 1500)
 	{
-		std::string sendirc = "PRIVMSG #" + chn + " :";
+		std::string sendirc = "PRIVMSG #" + channelName + " :";
 		sendirc += msg + ' ';
 		if(sendirc.length() > 387)
 			sendirc = sendirc.substr(0, 387) + "\r\n";
@@ -44,15 +44,15 @@ void Channel::read()
 			asio::read_until(*(sock), *b, "\r\n", ec);				
 			if(!(ec && !(this->quit)))
 			{
-				eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), chn));
+				eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), channelName));
 			}
 			else
 			{
 				//else reconnect
 				/*
-				if(this->channelBools.count(chn) == 1)
+				if(this->channelBools.count(channelName) == 1)
 				{
-					this->joinChannel(chn);
+					this->joinChannel(channelName);
 				}
 				return;
 				*/
@@ -61,7 +61,7 @@ void Channel::read()
 	}
 	catch (std::exception& e)
 	{
-		std::cout << "exception running Channel" << chn << " " << e.what() << std::endl;
+		std::cout << "exception running Channel" << channelName << " " << e.what() << std::endl;
 	}
 }
 
