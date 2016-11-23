@@ -16,10 +16,6 @@
 #include <memory>
 #include <string>
 
-// Create a fucking typedef for this shit so you don't have to type your million templates everywhere
-// rename it from BotEventQueue if you need to. also the typedef should probably be at the bottom of eventqueue.hpp
-typedef EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> BotEventQueue;
-
 class Channel
 {
 public:

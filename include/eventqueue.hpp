@@ -63,4 +63,6 @@ public:
     }
 };
 
+typedef EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> BotEventQueue;
+
 #endif

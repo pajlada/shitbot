@@ -1,37 +1,67 @@
 #ifndef CONNHANDLER_HPP
 #define CONNHANDLER_HPP
 
-#include "asio.hpp"
-#include <memory>
-#include <map>
-#include <string>
 #include "channel.hpp"
-#include <iostream>
 #include "eventqueue.hpp"
 #include "utilities.hpp"
+
+#include "asio.hpp"
+
+#include <iostream>
+#include <map>
+#include <memory>
 #include <set>
+#include <string>
 
 class ConnHandler
 {
 public:
-	ConnHandler(const std::string &pass, const std::string &nick);
-	~ConnHandler();
-	std::map<std::string, std::unique_ptr<Channel>> channelSockets;
-	void joinChannel(const std::string&);
-	void leaveChannel(const std::string&);
-	void run();
-	bool quit(){return quit_m;};
-	EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> eventQueue;
-	void handleCommands(std::string& user, const std::string& channel, std::string& msg);
-	void sendMsg(const std::string& channel, const std::string& message);
+    ConnHandler(const std::string &pass, const std::string &nick);
+    ~ConnHandler();
+
+    void joinChannel(const std::string&);
+    void leaveChannel(const std::string&);
+    void run();
+
+    // ????? forsenE
+    // why do you have a getter for quit_m (which is atomic) when this returns a normal bool
+    // :thinking: forsenE
+    bool quit(){return quit_m;};
+
+    // user should be a const string reference
+    void handleCommands(std::string& user, const std::string& channel, std::string& msg);
+
+    // Send message to channel
+    void sendMsg(const std::string& channel, const std::string& message);
+
+    // It's not a map of channel sockets, it's a map of channels.
+    // I would just rename this to channels
+    std::map<std::string, std::unique_ptr<Channel>> channelSockets;
+
+    BotEventQueue eventQueue;
+
 private:
-	std::mutex mtx;
-	std::atomic<bool> quit_m;
-	asio::io_service io_s;
-	asio::ip::tcp::resolver::iterator twitch_it;
-	std::unique_ptr<asio::io_service::work> dummywork;
-	std::string pass;
-	std::string nick;
+    // What does this mutex do?
+    // Naming it "mtx" tells me nothing, other than that it's a mutex
+    // But I already know that because of its type
+    std::mutex mtx;
+    
+    // What does this variable do?
+    std::atomic<bool> quit_m;
+
+    // Why do you shorten this?
+    // TODO: rename to ioService
+    asio::io_service io_s;
+
+    // Iterator for twitch chat server endpoints
+    asio::ip::tcp::resolver::iterator twitch_it;
+
+    // Dummy work that we can start/stop at will to control the ioService
+    std::unique_ptr<asio::io_service::work> dummywork;
+
+    // Login details
+    std::string pass;
+    std::string nick;
 };
 
 
