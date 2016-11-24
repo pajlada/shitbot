@@ -16,6 +16,8 @@
 #include <memory>
 #include <string>
 
+typedef EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> BotEventQueue;
+
 class Channel
 {
 public:
@@ -36,16 +38,18 @@ public:
     // Set to true if the channel should stop reading new messages
     std::atomic<bool> quit;
 
-private:
+    //right now public, connhandler is using it
+    unsigned int messageCount = 0;
     // Pointer to socket so we can send messages
     std::shared_ptr<asio::ip::tcp::socket> sock;
-
+    
+private:
     // XXX: This doesn't even seem to be used
     std::atomic<bool> pingReplied;
 
     // Used in anti-spam measure so we don't get globally banned
     std::chrono::high_resolution_clock::time_point lastMessageTime;
-    unsigned int messageCount = 0;
+
 };
 
 #endif
