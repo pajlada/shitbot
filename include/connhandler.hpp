@@ -46,7 +46,7 @@ private:
     // But I already know that because of its type
     std::mutex mtx;
     
-    // What does this variable do?
+    // A bool for quit? checking
     std::atomic<bool> quit_m;
 
     // Why do you shorten this?
