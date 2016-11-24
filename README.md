@@ -15,7 +15,7 @@
 3. cmake .. -G "Visual Studio 14 2015 Win64" -T v140_clang_c2
 4. open WNMAbot.sln
 5. open WNMAbot properties (in solution explorer)
-6. choose C/C++ / Preprocessor / Preprocessor Definitions and add ASIO_STANDALONE
+6. choose C/C++ / Preprocessor / Preprocessor Definitions and add <b>ASIO_STANDALONE</b>
 (you can optionally add
                 _CRT_SECURE_NO_WARNINGS
                 _WIN32_WINNT = 0x0501
