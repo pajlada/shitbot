@@ -160,6 +160,9 @@ void IrcConnection::listenAndHandle(const std::string& chn)
 				}
 				else
 				{
+                    std::cout << "listenandhandle " << chn << " error: " << ec << std::endl << ec.message() << std::endl;
+                    if(ec == asio::error::eof) continue;
+                    std::cout << "after listen continue" << std::endl;
 					std::lock_guard<std::mutex> lock(irc_m);
 					this->channelSockets.erase(chn);
 					this->channelMsgs.erase(chn);

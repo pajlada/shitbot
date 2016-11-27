@@ -51,6 +51,7 @@
 !dione#all#say#Dione (/daɪˈoʊni/; Greek: Διώνη) is a moon of Saturn. It was discovered by Italian astronomer Giovanni Domenico Cassini in 1684. It is named after the Titaness Dione of Greek mythology. It is also designated Saturn IV.
 !dysnomia#all#say#Dysnomia officially (136199) Eris I Dysnomia is the only known moon of the dwarf planet Eris. It was discovered in 2005 by Mike Brown and the laser guide star adaptive optics team at the W. M. Keck Observatory, and carried the provisional designation of S/2005 (2003 UB313) 1 until officially named Dysnomia after the daughter of the Greek goddess Eris.
 !earth#all#say#Earth (otherwise known as the world, in Greek: Γαῖα Gaia, or in Latin: Terra) is the third planet from the Sun, the densest planet in the Solar System, the largest of the Solar System's four terrestrial planets, and the only astronomical object known to harbor life.
+!ele#all#say#ele
 !enation#all#say#/me WEEB NATION 👌 VoHiYo
 !enceladus#all#say#Enceladus is the sixth-largest moon of Saturn. It is approximately 500 kilometers in diameter, about a tenth of that of Saturn's largest moon, Titan. Enceladus is mostly covered by fresh, clean ice, reflecting almost all the sunlight that strikes it, making its surface temperature at noon reach only −198 °C.
 !eris#all#say#Eris (minor-planet designation 136199 Eris) is the most massive and second-largest dwarf planet known in the Solar System. It is also the ninth-most-massive known body directly orbiting the Sun, and the largest known body in the Solar System not visited by a spacecraft.
@@ -110,7 +111,7 @@
 !nice#all#say#NICE BOT EleGiggle
 !nicememe#all#say#nͫiͤcͫeͤ
 !nogger#all#say#TriHard
-!nuuls#all#say#To get nuuls' attention, you just have to say nuuls. If that doesn't work say nuuls twenty more times, he loves getting pinged. :)
+!nuuls#all#say#FeelsBirthdayMan
 !oberon#all#say#Oberon, also designated Uranus IV, is the outermost major moon of the planet Uranus. It is the second-largest and second most massive of the Uranian moons, and the ninth most massive moon in the Solar System. Discovered by William Herschel in 1787. Its orbit lies partially outside Uranus's magnetosphere.
 !orcus#all#say#90482 Orcus is a Kuiper belt object with a large moon, Vanth. It was discovered on February 17, 2004 by Michael Brown of Caltech, Chad Trujillo of the Gemini Observatory, and David Rabinowitz of Yale University. Precovery images as early as November 8, 1951 were later identified. It is probably a dwarf planet.
 !oyasumi#all#say#Oyasumi @id1@-chan, mata ashita ne VoHiYo
