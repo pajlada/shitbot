@@ -9,10 +9,10 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{
 	auto lambda = [this]
 	{
 		if(!(this->quit())) return;
-		for(auto &i : channelSockets)
+		for(auto &i : currentChannels)
 		{
-			if(i.second->messageCount > 0)
-				--i.second->messageCount;
+			if(i.second.messageCount > 0)
+				--i.second.messageCount;
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 	};
@@ -27,56 +27,17 @@ ConnHandler::~ConnHandler()
 	
 void ConnHandler::joinChannel(const std::string &chn)
 {
-	std::lock_guard<std::mutex> lk(mtx);
-	if(channelSockets.count(chn) == 1) return;
-	
-	std::shared_ptr<asio::ip::tcp::socket> sock(new asio::ip::tcp::socket(io_s));
-	channelSockets.emplace(chn, std::make_unique<Channel>(chn, sock, eventQueue));
-	asio::connect(*sock, twitch_it);
-	
-	std::string passx = "PASS " + pass + "\r\n";
-	std::string nickx = "NICK " + nick + "\r\n";
-	std::string cmds = "CAP REQ :twitch.tv/commands\r\n";
-	std::string join = "JOIN #" + chn + "\r\n";
-	
-	sock->send(asio::buffer(passx));
-	sock->send(asio::buffer(nickx));
-	sock->send(asio::buffer(cmds));	
-	sock->send(asio::buffer(join));
-	
-	//this->channelTimes.insert(std::pair<std::string, std::chrono::high_resolution_clock::time_point>(chn, std::chrono::high_resolution_clock::now()));
-	//this->channelMsgs.insert(std::pair<std::string, unsigned>(chn, 0));
-	std::cout << "joined" << chn << std::endl;
-	
-	//std::unique_ptr<Pings> ptr(new Pings);
-	//this->pingMap.insert(std::pair<std::string, std::unique_ptr<Pings>>(chn, std::move(ptr)));
-	auto t = std::thread([this, chn]()
-	{
-		channelSockets[chn]->read();
-	}); //start listening on socket
-	//std::cout << "started thread: " << chn << std::endl;
-	t.detach();
+    std::lock_guard<std::mutex> lk(mtx);
+    
+    if(currentChannels.count(chn) == 1) return;
+    currentChannels.emplace(std::piecewise_construct, std::forward_as_tuple(chn), std::forward_as_tuple(chn, eventQueue, io_s, this));
 }
 
 void ConnHandler::leaveChannel(const std::string &chn)
 {
 	std::lock_guard<std::mutex> lk(mtx);
-	if(channelSockets.count(chn) != 1) return;
-	asio::error_code ec;
-	channelSockets[chn]->quit = true;
-	channelSockets[chn]->sock->shutdown(asio::ip::tcp::socket::shutdown_both, ec);
-	if(ec)
-	{
-		std::cout << "error: " << ec << std::endl;
-	}
-	channelSockets[chn]->sock->close(ec);
-	std::cout << "close" << std::endl;
-	if(ec)
-	{
-		std::cout << "error: " << ec << std::endl;
-	}
-	channelSockets[chn]->sock.reset();	
-	channelSockets.erase(chn);
+    if(currentChannels.count(chn) == 0) return;
+    currentChannels.erase(chn);
 }
 
 void ConnHandler::run()
@@ -121,7 +82,7 @@ void ConnHandler::run()
 				}
 				else if(oneline.find("PING") != std::string::npos)
 				{
-					if(this->channelSockets.count(chn) == 1)
+					if(this->currentChannels.count(chn) == 1)
 					{
 						std::cout << "PONGING" << chn << std::endl;
 						std::string pong = "PONG :tmi.twitch.tv\r\n";
@@ -146,8 +107,8 @@ void ConnHandler::run()
 void ConnHandler::sendMsg(const std::string& channel, const std::string& message)
 {
 	std::lock_guard<std::mutex> lk(mtx);
-	if(channelSockets.count(channel) != 1) return;
-	channelSockets[channel]->sendMsg(message);
+	if(currentChannels.count(channel) != 1) return;
+	currentChannels[channel].sendMsg(message);
 }
 
 void ConnHandler::handleCommands(std::string& user, const std::string& channel, std::string& msg)

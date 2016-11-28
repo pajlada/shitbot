@@ -94,7 +94,8 @@
 !jupiter#all#say#Jupiter is the fifth planet from the Sun and the largest in the Solar System. It is a giant planet with a mass one-thousandth that of the Sun, but two and a half times that of all the other planets in the Solar System combined. Jupiter is a gas giant, along with Saturn, with the other two giant planets, Uranus and Neptune, being ice giants.
 !kanaattori#all#say#http://i.imgur.com/pvkawvq.png
 !kappa#all#say#http://i.imgur.com/93WvHrc.jpg Kappa
-!keepo#all#say#http://imgur.com/a/OmwlX Keepo http://i.imgur.com/4fCSmGM.jpg Keepo http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
+!keepo#all#say#http://imgur.com/a/TNEvC Keepo http://imgur.com/a/OmwlX Keepo http://i.imgur.com/4fCSmGM.jpg Keepo http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
+!kys#all#say#@me@ told @id1@ to keep themself safe FeelsGoodMan
 !lilguy#all#say#https://clyp.it/gx3ez4te
 !ltdmonster2#all#say#STEFAAAAANN! FeelsAmazingMan 📣
 !lul#all#say#@me@, LUL
@@ -175,7 +176,7 @@
 !češi#all#say#ČEŠI V CHATE FailFish
 @weneedmoreautisticbots#all#say#@me@, 👋 MrDestructoid
 @weneedmoreautisticbots,#all#say#@me@, 👋 MrDestructoid
-all#say#bot#is debugged Kappa
+all#say#@me@#told @id1@ to keep themselves safe FeelsGoodMan
 elelul#all#say#čhehad 
 f#all#say#Press f to pay respects. f
 kkaper#nuulsbot#say#KKaper

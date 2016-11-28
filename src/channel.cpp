@@ -2,14 +2,41 @@
 
 void handler(const asio::error_code& error,std::size_t bytes_transferred){}
 
-Channel::Channel(const std::string &_channelName, std::shared_ptr<asio::ip::tcp::socket> sock, BotEventQueue &evq)
-	: 	sock{sock},
-		channelName{_channelName},
+Channel::Channel(const std::string &_channelName, BotEventQueue &evq, const asio::io_service &io_s, ConnHandler *_owner)
+	:	channelName{_channelName},
 		eventQueue{evq},
 		pingReplied(false),
-		quit(false)
+		quit(false),
+        sock(io_s),
+        owner(_owner),
+        readThread(std::thread([this](){this->read();}))
 {
+    asio::connect(*sock, owner->twitch_it);
 	
+	std::string passx = "PASS " + owner->pass + "\r\n";
+	std::string nickx = "NICK " + owner->nick + "\r\n";
+	std::string cmds = "CAP REQ :twitch.tv/commands\r\n";
+	std::string join = "JOIN #" + channelName + "\r\n";
+	
+	sock.send(asio::buffer(passx));
+	sock.send(asio::buffer(nickx));
+	sock.send(asio::buffer(cmds));	
+	sock.send(asio::buffer(join));
+    
+    //thread reading the socket
+    //readThread = std::thread([this]()
+	//{
+	//	this->read();
+	//});
+    //readThread.detach();
+}
+
+Channel::~Channel()
+{
+    quit = true;    
+    sock.shutdown(asio::ip::tcp::socket::shutdown_both);
+    sock.close();
+    readThread.join();
 }
 
 bool Channel::sendMsg(const std::string &msg)

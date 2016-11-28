@@ -36,7 +36,7 @@ public:
 
     // It's not a map of channel sockets, it's a map of channels.
     // I would just rename this to channels
-    std::map<std::string, std::unique_ptr<Channel>> channelSockets;
+    std::map<std::string, Channel> currentChannels;
 
     BotEventQueue eventQueue;
 
