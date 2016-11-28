@@ -1,12 +1,13 @@
 #ifndef EVENTQUEUE_HPP
 #define EVENTQUEUE_HPP
 
+#include "asio.hpp"
+
 #include <list>
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-
 
 template <typename T>
 class EventQueue {
@@ -62,5 +63,7 @@ public:
         return s;
     }
 };
+
+typedef EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> BotEventQueue;
 
 #endif

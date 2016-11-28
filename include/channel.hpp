@@ -17,7 +17,6 @@
 #include <memory>
 #include <string>
 
-typedef EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>> BotEventQueue;
 class ConnHandler;
 
 class Channel
@@ -25,7 +24,7 @@ class Channel
 public:
     Channel(const std::string &_channelName,
             BotEventQueue &evq,
-            const asio::io_service &io_s,
+            asio::io_service &io_s,
             ConnHandler *_owner);
     ~Channel();
             

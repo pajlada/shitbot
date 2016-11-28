@@ -2,16 +2,16 @@
 
 void handler(const asio::error_code& error,std::size_t bytes_transferred){}
 
-Channel::Channel(const std::string &_channelName, BotEventQueue &evq, const asio::io_service &io_s, ConnHandler *_owner)
+Channel::Channel(const std::string &_channelName, BotEventQueue &evq, asio::io_service &io_s, ConnHandler *_owner)
 	:	channelName{_channelName},
 		eventQueue{evq},
 		pingReplied(false),
 		quit(false),
         sock(io_s),
         owner(_owner),
-        readThread(std::thread([this](){this->read();}))
+        readThread(&Channel::read, this)
 {
-    asio::connect(*sock, owner->twitch_it);
+    asio::connect(sock, owner->twitch_it);
 	
 	std::string passx = "PASS " + owner->pass + "\r\n";
 	std::string nickx = "NICK " + owner->nick + "\r\n";
@@ -49,7 +49,7 @@ bool Channel::sendMsg(const std::string &msg)
 		if(sendirc.length() > 387)
 			sendirc = sendirc.substr(0, 387) + "\r\n";
 		else sendirc += "\r\n";
-		sock->async_send(asio::buffer(sendirc), handler); // define handler
+		sock.async_send(asio::buffer(sendirc), handler); // define handler
 		messageCount++;
 		lastMessageTime = timeNow;
 		return true;
@@ -68,7 +68,7 @@ void Channel::read()
 		{	
 			std::unique_ptr<asio::streambuf> b(new asio::streambuf);
 			asio::error_code ec;
-			asio::read_until(*(sock), *b, "\r\n", ec);				
+			asio::read_until(sock, *b, "\r\n", ec);				
 			if(!(ec && !(this->quit)))
 			{
 				eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), channelName));

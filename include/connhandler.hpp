@@ -13,6 +13,8 @@
 #include <set>
 #include <string>
 
+class Channel;
+
 class ConnHandler
 {
 public:
@@ -36,10 +38,16 @@ public:
 
     // It's not a map of channel sockets, it's a map of channels.
     // I would just rename this to channels
-    std::map<std::string, Channel> currentChannels;
+    std::map<std::string, std::unique_ptr<Channel>> currentChannels;
 
     BotEventQueue eventQueue;
 
+    // Iterator for twitch chat server endpoints
+    asio::ip::tcp::resolver::iterator twitch_it;
+    
+    // Login details
+    std::string pass;
+    std::string nick;
 private:
     // What does this mutex do?
     // Naming it "mtx" tells me nothing, other than that it's a mutex
@@ -53,15 +61,9 @@ private:
     // TODO: rename to ioService
     asio::io_service io_s;
 
-    // Iterator for twitch chat server endpoints
-    asio::ip::tcp::resolver::iterator twitch_it;
 
     // Dummy work that we can start/stop at will to control the ioService
     std::unique_ptr<asio::io_service::work> dummywork;
-
-    // Login details
-    std::string pass;
-    std::string nick;
 };
 
 

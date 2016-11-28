@@ -11,8 +11,8 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{
 		if(!(this->quit())) return;
 		for(auto &i : currentChannels)
 		{
-			if(i.second.messageCount > 0)
-				--i.second.messageCount;
+			if(i.second->messageCount > 0)
+				--i.second->messageCount;
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 	};
@@ -30,7 +30,7 @@ void ConnHandler::joinChannel(const std::string &chn)
     std::lock_guard<std::mutex> lk(mtx);
     
     if(currentChannels.count(chn) == 1) return;
-    currentChannels.emplace(std::piecewise_construct, std::forward_as_tuple(chn), std::forward_as_tuple(chn, eventQueue, io_s, this));
+    currentChannels.emplace(chn, std::make_unique<Channel>(chn, eventQueue, io_s, this));
 }
 
 void ConnHandler::leaveChannel(const std::string &chn)
@@ -108,7 +108,7 @@ void ConnHandler::sendMsg(const std::string& channel, const std::string& message
 {
 	std::lock_guard<std::mutex> lk(mtx);
 	if(currentChannels.count(channel) != 1) return;
-	currentChannels[channel].sendMsg(message);
+	currentChannels[channel]->sendMsg(message);
 }
 
 void ConnHandler::handleCommands(std::string& user, const std::string& channel, std::string& msg)
