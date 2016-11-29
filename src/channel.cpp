@@ -62,6 +62,7 @@ bool Channel::sendMsg(const std::string &msg)
 
 void Channel::read()
 {
+    std::cout << "started reading: " << channelName << std::endl;
 	try
 	{
 		while(!(this->quit))

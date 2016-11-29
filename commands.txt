@@ -95,6 +95,7 @@
 !kanaattori#all#say#http://i.imgur.com/pvkawvq.png
 !kappa#all#say#http://i.imgur.com/93WvHrc.jpg Kappa
 !keepo#all#say#http://imgur.com/a/TNEvC Keepo http://imgur.com/a/OmwlX Keepo http://i.imgur.com/4fCSmGM.jpg Keepo http://i.imgur.com/NFLbyZR.jpg Keepo http://i.imgur.com/SisrrZF.jpg Keepo
+!kms#all#say#@me@ killed themself monkaS
 !kys#all#say#@me@ told @id1@ to keep themself safe FeelsGoodMan
 !lilguy#all#say#https://clyp.it/gx3ez4te
 !ltdmonster2#all#say#STEFAAAAANN! FeelsAmazingMan 📣
@@ -112,7 +113,6 @@
 !nice#all#say#NICE BOT EleGiggle
 !nicememe#all#say#nͫiͤcͫeͤ
 !nogger#all#say#TriHard
-!nuuls#all#say#FeelsBirthdayMan
 !oberon#all#say#Oberon, also designated Uranus IV, is the outermost major moon of the planet Uranus. It is the second-largest and second most massive of the Uranian moons, and the ninth most massive moon in the Solar System. Discovered by William Herschel in 1787. Its orbit lies partially outside Uranus's magnetosphere.
 !orcus#all#say#90482 Orcus is a Kuiper belt object with a large moon, Vanth. It was discovered on February 17, 2004 by Michael Brown of Caltech, Chad Trujillo of the Gemini Observatory, and David Rabinowitz of Yale University. Precovery images as early as November 8, 1951 were later identified. It is probably a dwarf planet.
 !oyasumi#all#say#Oyasumi @id1@-chan, mata ashita ne VoHiYo

@@ -25,11 +25,6 @@ public:
     void leaveChannel(const std::string&);
     void run();
 
-    // ????? forsenE
-    // why do you have a getter for quit_m (which is atomic) when this returns a normal bool
-    // :thinking: forsenE
-    bool quit(){return quit_m;};
-
     // user should be a const string reference
     void handleCommands(std::string& user, const std::string& channel, std::string& msg);
 
@@ -55,7 +50,7 @@ private:
     std::mutex mtx;
     
     // A bool for quit? checking
-    std::atomic<bool> quit_m;
+    std::atomic<bool> quit;
 
     // Why do you shorten this?
     // TODO: rename to ioService
@@ -64,6 +59,9 @@ private:
 
     // Dummy work that we can start/stop at will to control the ioService
     std::unique_ptr<asio::io_service::work> dummywork;
+    
+    //Thread which decreases the messageCount on all Channels
+    std::thread msgDecreaser;
 };
 
 

@@ -11,5 +11,8 @@ int main(int argc, char *argv[])
 
 	std::cout << "added all" << std::endl;
 	irc.run();
+    std::cout << "ended running" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::cout <<"zulul" <<std::endl;
 	return 0;
 }

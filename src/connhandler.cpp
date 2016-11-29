@@ -1,6 +1,6 @@
 #include "connhandler.hpp"
 
-ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{pss}, nick{nck}, quit_m(false)
+ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{pss}, nick{nck}, quit(false)
 {
 	asio::ip::tcp::resolver resolver(io_s);
 	asio::ip::tcp::resolver::query query("irc.chat.twitch.tv", "6667");
@@ -8,7 +8,7 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{
 	
 	auto lambda = [this]
 	{
-		if(!(this->quit())) return;
+		if(!(this->quit)) return;
 		for(auto &i : currentChannels)
 		{
 			if(i.second->messageCount > 0)
@@ -16,13 +16,17 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck) : pass{
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 	};
-	auto thread = std::thread(lambda);
-	thread.detach();
+    
+	msgDecreaser = std::thread(lambda);
 }
 
 ConnHandler::~ConnHandler()
 {
-	quit_m = true;
+    std::cout << "destructing" << std::endl;
+	msgDecreaser.join();
+    std::cout << "joined" << std::endl;
+    currentChannels.clear();
+    std::cout << "cleared end destr" << std::endl;
 }
 	
 void ConnHandler::joinChannel(const std::string &chn)
@@ -42,10 +46,10 @@ void ConnHandler::leaveChannel(const std::string &chn)
 
 void ConnHandler::run()
 {
-	while(!(this->quit()))
+	while(!(this->quit))
 	{
 		this->eventQueue.wait();
-		while(!(this->eventQueue.empty()) && !(this->quit()))
+		while(!(this->eventQueue.empty()) && !(this->quit))
 		{
 			//std::cout << "event" << std::endl;
 			auto pair = this->eventQueue.pop();
@@ -77,6 +81,11 @@ void ConnHandler::run()
 					std::string msg = oneline.substr(oneline.find(":", oneline.find(ht_chn)) + 1, std::string::npos);
 					std::string user = oneline.substr(oneline.find(":") + 1, oneline.find("!") - oneline.find(":") - 1);
 					{
+                        if(user == "hemirt" && msg == "!quit") 
+                        {
+                            std::cout << "quiting irc" << std::endl;
+                            this->quit = true;
+                        }
 						handleCommands(user, channel, msg);
 					}
 				}
