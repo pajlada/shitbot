@@ -74,23 +74,19 @@ void Channel::read()
 			{
 				eventQueue.push(std::pair<std::unique_ptr<asio::streambuf>, std::string>(std::move(b), channelName));
 			}
-			else
-			{
-				//else reconnect
-				/*
-				if(this->channelBools.count(channelName) == 1)
-				{
-					this->joinChannel(channelName);
-				}
-				return;
-				*/
-			}
+            else break;
 		}
 	}
 	catch (std::exception& e)
 	{
 		std::cout << "exception running Channel" << channelName << " " << e.what() << std::endl;
 	}
+          
+    if(!(this->quit))
+    {
+        this->readThread.detach();
+        this->readThread = std::thread(&Channel::read, this);        
+    }
 }
 
 
