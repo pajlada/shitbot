@@ -84,8 +84,12 @@ void Channel::read()
           
     if(!(this->quit))
     {
-        this->readThread.detach();
-        this->readThread = std::thread(&Channel::read, this);        
+        //this restarted reading, but tbh its quite pointless because it stops reading only 
+        //when quiting(destroying this) or when the socket is in a wrong state, 
+        //therefore we need to recreate this object
+        
+        //this->readThread.detach();
+        //this->readThread = std::thread(&Channel::read, this);        
     }
 }
 
