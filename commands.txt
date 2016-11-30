@@ -160,6 +160,8 @@
 !trihard#all#say#lilguy066 STOLE MY POINTS TriHard
 !triton#all#say#Triton is the largest natural satellite of the planet Neptune. It was discovered on October 10, 1846, by English astronomer William Lassell. It is the only large moon in the Solar System with a retrograde orbit, an orbit in the opposite direction to its planet's rotation. At 2,700 kilometres in diameter, it is the seventh-largest moon in the Solar System.
 !trump#all#say#Donald Trump's Final Rally https://www.youtube.com/watch?v=pLERzuzgOaY 🇺🇸
+!tweet#hemirt#say#PogChamp new tweet from hemirt (@hemirt): @all@
+!tweet#all#say#PogChamp new tweet from @me@ (@@me@): @all@
 !umbriel#all#say#Umbriel is a moon of Uranus discovered on October 24, 1851, by William Lassell. It was discovered at the same time as Ariel and named after a character in Alexander Pope's poem The Rape of the Lock. Umbriel consists mainly of ice with a substantial fraction of rock, and may be differentiated into a rocky core and an icy mantle.
 !uranus#all#say#Uranus is the seventh planet from the Sun. It has the third-largest planetary radius and fourth-largest planetary mass in the Solar System. Uranus is similar in composition to Neptune, and both have different bulk chemical composition from that of the larger gas giants Jupiter and Saturn.
 !vanth#all#say#Vanth, officially (90482) Orcus I Vanth, is the single known natural satellite of the plutino and likely dwarf planet Orcus. It was discovered by Mike Brown and T.-A. Suer using discovery images taken by the Hubble Space Telescope on November 13, 2005. The discovery was announced on 22 February 2007 in IAUC 8812.
@@ -181,6 +183,7 @@ elelul#all#say#čhehad
 f#all#say#Press f to pay respects. f
 kkaper#nuulsbot#say#KKaper
 pajaw#talaendril#say#PajaWLookingOutOfHisMemePortal
+php#all#say#p 4HEad h 4HEad p
 pong#lobbytf#say#fourtfbot, STOP OPPRESSING ME HotPokket , also lobbytf icdb47 OMEGALUL
 shutthefuckupweebs#all#say#nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls nyanPls
 weneedmoreautisticbots#all#say#@me@, 👋 MrDestructoid

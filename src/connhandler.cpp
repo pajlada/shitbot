@@ -123,5 +123,7 @@ void ConnHandler::sendMsg(const std::string& channel, const std::string& message
 void ConnHandler::handleCommands(std::string& user, const std::string& channel, std::string& msg)
 {
 	if(user == "hemirt")
-	sendMsg(channel, "elegiggle");
+	sendMsg(channel, "EleGiggle");
+    if(user == "hemirt" && msg == "!dung") quit = true;
+    if(user == "hemirt" && msg == "!deng") leaveChannel(channel);
 }
