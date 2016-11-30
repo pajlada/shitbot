@@ -37,7 +37,7 @@ Channel::~Channel()
     sock.shutdown(asio::ip::tcp::socket::shutdown_both);
     sock.close();
     std::cout << "channel " << channelName << " before join" << std::endl;
-    std::cout << "threadjoinable: " << readThread.joinable() << std::endl;
+    //std::cout << "threadjoinable: " << readThread.joinable() << std::endl;
     readThread.join();
     std::cout << "channel " << channelName << " destructed" << std::endl;
 }
@@ -66,14 +66,14 @@ bool Channel::sendMsg(const std::string &msg)
 void Channel::read()
 {
     std::cout << "started reading: " << channelName << std::endl;
-    int i = 0;
+    //int i = 0;
     try
     {
         while(!(this->quit))
         {    
-            i++;
-            std::cout << i << channelName << std::endl;
-            if(i > 7) this->quit = true;
+            //i++;
+            //std::cout << i << channelName << std::endl;
+            //if(i > 7) this->quit = true;
             std::unique_ptr<asio::streambuf> b(new asio::streambuf);
             asio::error_code ec;
             asio::read_until(sock, *b, "\r\n", ec);        
@@ -97,7 +97,8 @@ void Channel::read()
         
         //this->readThread.detach();
         //this->readThread = std::thread(&Channel::read, this);     
-
+           
+        //cant do this, cause it results in a deadlock (this function will wait for this function to end)
         //owner->leaveChannel(channelName);
     }
 }
