@@ -3,7 +3,7 @@
 void handler(const asio::error_code& error,std::size_t bytes_transferred){}
 
 Channel::Channel(const std::string &_channelName, BotEventQueue &evq, asio::io_service &io_s, ConnHandler *_owner)
-    :    channelName{_channelName},
+    :   channelName{_channelName},
         eventQueue{evq},
         pingReplied(false),
         quit(false),
