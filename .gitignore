@@ -4,3 +4,6 @@ a.out
 admins.txt
 items.db
 build/
+
+# Ignore clang format files
+*.gch
