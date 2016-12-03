@@ -1,22 +1,19 @@
-#include "ircconnection.hpp"
-
-#include <chrono>
-#include <thread>
+#include "connhandler.hpp"
 
 int
 main(int argc, char *argv[])
 {
-    IrcConnection myIrc;
+    ConnHandler irc(argv[1], argv[2]);
 
-    while (!myIrc.start(argv[1], argv[2])) {
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-    }
-
-    myIrc.joinChannel("pajlada");
-    myIrc.joinChannel("hemirt");
-    myIrc.joinChannel("forsenlol");
+    irc.joinChannel("pajlada");
+    irc.joinChannel("hemirt");
+    irc.joinChannel("forsenlol");
 
     std::cout << "added all" << std::endl;
-    myIrc.waitEnd();
+    irc.run();
+    std::cout << "ended running" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::cout << "zulul" << std::endl;
+
     return 0;
 }
