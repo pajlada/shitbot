@@ -5,7 +5,7 @@
 #include "eventqueue.hpp"
 #include "utilities.hpp"
 
-#include "asio.hpp"
+#include <boost/asio.hpp>
 
 #include <iostream>
 #include <map>
@@ -39,7 +39,7 @@ public:
     BotEventQueue eventQueue;
 
     // Iterator for twitch chat server endpoints
-    asio::ip::tcp::resolver::iterator twitch_it;
+    boost::asio::ip::tcp::resolver::iterator twitch_it;
 
     // Login details
     std::string pass;
@@ -56,10 +56,10 @@ private:
 
     // Why do you shorten this?
     // TODO: rename to ioService
-    asio::io_service io_s;
+    boost::asio::io_service io_s;
 
     // Dummy work that we can start/stop at will to control the ioService
-    std::unique_ptr<asio::io_service::work> dummywork;
+    std::unique_ptr<boost::asio::io_service::work> dummywork;
 
     // Thread which decreases the messageCount on all Channels
     std::thread msgDecreaser;

@@ -3,12 +3,12 @@
 #include <string>
 
 void
-handler(const asio::error_code &error, std::size_t bytes_transferred)
+handler(const boost::system::error_code &error, std::size_t bytes_transferred)
 {
 }
 
 Channel::Channel(const std::string &_channelName, BotEventQueue &evq,
-                 asio::io_service &io_s, ConnHandler *_owner)
+                 boost::asio::io_service &io_s, ConnHandler *_owner)
     : channelName{_channelName}
     , eventQueue{evq}
     , pingReplied(false)
@@ -17,17 +17,17 @@ Channel::Channel(const std::string &_channelName, BotEventQueue &evq,
     , owner(_owner)
     , readThread(&Channel::read, this)
 {
-    asio::connect(sock, owner->twitch_it);
+    boost::asio::connect(sock, owner->twitch_it);
 
     std::string passx = "PASS " + owner->pass + "\r\n";
     std::string nickx = "NICK " + owner->nick + "\r\n";
     std::string cmds = "CAP REQ :twitch.tv/commands\r\n";
     std::string join = "JOIN #" + channelName + "\r\n";
 
-    sock.send(asio::buffer(passx));
-    sock.send(asio::buffer(nickx));
-    sock.send(asio::buffer(cmds));
-    sock.send(asio::buffer(join));
+    sock.send(boost::asio::buffer(passx));
+    sock.send(boost::asio::buffer(nickx));
+    sock.send(boost::asio::buffer(cmds));
+    sock.send(boost::asio::buffer(join));
 
     // thread reading the socket
     // readThread = std::thread([this]()
@@ -40,7 +40,7 @@ Channel::Channel(const std::string &_channelName, BotEventQueue &evq,
 Channel::~Channel()
 {
     quit = true;
-    sock.shutdown(asio::ip::tcp::socket::shutdown_both);
+    sock.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     sock.close();
     std::cout << "channel " << channelName << " before join" << std::endl;
     // std::cout << "threadjoinable: " << readThread.joinable() << std::endl;
@@ -62,7 +62,8 @@ Channel::sendMsg(const std::string &msg)
             sendirc = sendirc.substr(0, 387) + "\r\n";
         else
             sendirc += "\r\n";
-        sock.async_send(asio::buffer(sendirc), handler);  // define handler
+        sock.async_send(boost::asio::buffer(sendirc),
+                        handler);  // define handler
         messageCount++;
         lastMessageTime = timeNow;
         return true;
@@ -81,13 +82,14 @@ Channel::read()
             // i++;
             // std::cout << i << channelName << std::endl;
             // if(i > 7) this->quit = true;
-            std::unique_ptr<asio::streambuf> b(new asio::streambuf);
-            asio::error_code ec;
-            asio::read_until(sock, *b, "\r\n", ec);
+            std::unique_ptr<boost::asio::streambuf> b(
+                new boost::asio::streambuf);
+            boost::system::error_code ec;
+            boost::asio::read_until(sock, *b, "\r\n", ec);
             if (!(ec && !(this->quit))) {
                 eventQueue.push(
-                    std::pair<std::unique_ptr<asio::streambuf>, std::string>(
-                        std::move(b), channelName));
+                    std::pair<std::unique_ptr<boost::asio::streambuf>,
+                              std::string>(std::move(b), channelName));
             } else
                 break;
         }

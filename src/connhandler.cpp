@@ -5,8 +5,8 @@ ConnHandler::ConnHandler(const std::string &pss, const std::string &nck)
     , nick(nck)
     , quit(false)
 {
-    asio::ip::tcp::resolver resolver(io_s);
-    asio::ip::tcp::resolver::query query("irc.chat.twitch.tv", "6667");
+    boost::asio::ip::tcp::resolver resolver(io_s);
+    boost::asio::ip::tcp::resolver::query query("irc.chat.twitch.tv", "6667");
     twitch_it = resolver.resolve(query);
 
     auto lambda = [this] {
@@ -59,7 +59,7 @@ ConnHandler::run()
         while (!(this->eventQueue.empty()) && !(this->quit)) {
             // std::cout << "event" << std::endl;
             auto pair = this->eventQueue.pop();
-            std::unique_ptr<asio::streambuf> b(std::move(pair.first));
+            std::unique_ptr<boost::asio::streambuf> b(std::move(pair.first));
             std::string chn = pair.second;
 
             std::istream is(&(*b));
@@ -100,7 +100,7 @@ ConnHandler::run()
                     if (this->currentChannels.count(chn) == 1) {
                         std::cout << "PONGING" << chn << std::endl;
                         std::string pong = "PONG :tmi.twitch.tv\r\n";
-                        // this->channelSockets[chn].sock->async_send(asio::buffer(pong),
+                        // this->channelSockets[chn].sock->async_send(boost::asio::buffer(pong),
                         // handler); //define hnadler
                     }
                 }
