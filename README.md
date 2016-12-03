@@ -1,15 +1,16 @@
 # shitbot
 
 # installation instructions
-<h3> linux </h3>
-1. clone
-2. mkdir build
-3. cmake ..
-4. make
-5. start with  "./WNMAbot oauth username"
-   for example "./WNMAbot oauth:adojsiodhsa myname"
+<h3> Linux </h3>
+1. clone this repo `git clone git@github.com:hemirt/shitbot.git`
+2. cd into the repo directory `cd shitbot`
+3. Create the build directory `mkdir build`
+4. cd into the build directory `cd build`
+5. Run cmake `cmake ..`
+6. Compile the bot `make`
+7. Start the bot with `./WNMAbot oauth username`
    
-<h3> windows </h3>
+<h3> Windows </h3>
 1. clone
 2. mkdir build
 3. cmake .. -G "Visual Studio 14 2015 Win64" -T v140_clang_c2
