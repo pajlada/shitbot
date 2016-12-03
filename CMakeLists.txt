@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.0)
+cmake_minimum_required(VERSION 3.5.0)
 project(WNMAbot CXX)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
