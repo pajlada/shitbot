@@ -4,7 +4,7 @@
 #include "connhandler.hpp"
 #include "eventqueue.hpp"
 
-#include "asio.hpp"
+#include <boost/asio.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -19,7 +19,7 @@ class Channel
 {
 public:
     Channel(const std::string &_channelName, BotEventQueue &evq,
-            asio::io_service &io_s, ConnHandler *_owner);
+            boost::asio::io_service &io_s, ConnHandler *_owner);
     ~Channel();
 
     void read();
@@ -38,7 +38,7 @@ public:
     // right now public, connhandler is using it
     unsigned int messageCount = 0;
     // Socket so we can send messages
-    asio::ip::tcp::socket sock;
+    boost::asio::ip::tcp::socket sock;
 
     const bool
     operator<(const Channel &r) const

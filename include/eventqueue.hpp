@@ -1,7 +1,7 @@
 #ifndef EVENTQUEUE_HPP
 #define EVENTQUEUE_HPP
 
-#include "asio.hpp"
+#include <boost/asio.hpp>
 
 #include <condition_variable>
 #include <list>
@@ -79,7 +79,8 @@ public:
     }
 };
 
-typedef EventQueue<std::pair<std::unique_ptr<asio::streambuf>, std::string>>
+typedef EventQueue<
+    std::pair<std::unique_ptr<boost::asio::streambuf>, std::string>>
     BotEventQueue;
 
 #endif
